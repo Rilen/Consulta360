@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Consulta360 – Salário por Colaborador</title>
+  <link rel="icon" href="data:," />
+  <meta name="description" content="Consulte salários de servidores e colaboradores do município de Rio das Ostras com filtros por nome e período." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --surface2: #21262d;
+      --border: #30363d;
+      --accent: #3b82f6;
+      --accent-glow: rgba(59,130,246,0.25);
+      --accent2: #8b5cf6;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --text: #e6edf3;
+      --text-muted: #8b949e;
+      --text-dim: #484f58;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .bg-orbs {
+      position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden;
+    }
+    .orb {
+      position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.15;
+      animation: pulse 8s ease-in-out infinite;
+    }
+    .orb1 { width: 500px; height: 500px; background: var(--accent); top: -150px; left: -150px; animation-delay: 0s; }
+    .orb2 { width: 400px; height: 400px; background: var(--accent2); bottom: -100px; right: -100px; animation-delay: 3s; }
+    .orb3 { width: 300px; height: 300px; background: var(--success); top: 50%; left: 50%; animation-delay: 6s; }
+    @keyframes pulse {
+      0%,100% { transform: scale(1); opacity: 0.12; }
+      50% { transform: scale(1.2); opacity: 0.2; }
+    }
+
+    .container {
+      position: relative; z-index: 1;
+      max-width: 1200px; margin: 0 auto; padding: 24px 20px;
+    }
+
+    header {
+      display: flex; align-items: center; gap: 16px;
+      padding: 20px 28px;
+      background: rgba(22,27,34,0.8);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .logo {
+      width: 40px; height: 40px; border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; flex-shrink: 0;
+    }
+    .header-text h1 { font-size: 18px; font-weight: 700; letter-spacing: -0.3px; }
+    .header-text p { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
+    .badge {
+      margin-left: auto;
+      padding: 4px 10px; border-radius: 20px;
+      font-size: 11px; font-weight: 600;
+      background: rgba(59,130,246,0.15);
+      color: var(--accent);
+      border: 1px solid rgba(59,130,246,0.3);
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+    }
+    .card-title {
+      font-size: 13px; font-weight: 600; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.8px;
+      margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
+    }
+    .card-title::before {
+      content: ''; display: block; width: 3px; height: 14px;
+      border-radius: 2px; background: var(--accent);
+    }
+
+    .filter-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px; margin-bottom: 20px;
+    }
+
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    label { font-size: 12px; font-weight: 500; color: var(--text-muted); }
+
+    input, select {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 14px;
+      padding: 10px 14px;
+      width: 100%;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    input:focus, select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+    input::placeholder { color: var(--text-dim); }
+    select option { background: var(--surface2); }
+
+    .btn-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 20px; border-radius: var(--radius-sm);
+      font-family: inherit; font-size: 14px; font-weight: 600;
+      cursor: pointer; border: none; transition: all 0.2s;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), #2563eb);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(59,130,246,0.3);
+    }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(59,130,246,0.45); }
+    .btn-primary:active { transform: translateY(0); }
+    .btn-secondary {
+      background: var(--surface2); color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover { background: var(--border); }
+    .btn-success {
+      background: linear-gradient(135deg, var(--success), #059669);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(16,185,129,0.3);
+    }
+    .btn-success:hover { transform: translateY(-1px); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+
+    .search-bar { position: relative; margin-bottom: 16px; }
+    .search-bar input { padding-left: 40px; }
+    .search-icon {
+      position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+      color: var(--text-dim); pointer-events: none;
+    }
+
+    .stats-row {
+      display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px;
+    }
+    .stat-card {
+      flex: 1; min-width: 140px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px 18px;
+    }
+    .stat-label { font-size: 11px; color: var(--text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+    .stat-value { font-size: 22px; font-weight: 700; margin-top: 4px; }
+    .stat-value.blue { color: var(--accent); }
+    .stat-value.green { color: var(--success); }
+    .stat-value.purple { color: var(--accent2); }
+    .stat-value.amber { color: var(--warning); }
+
+    .table-wrapper {
+      overflow-x: auto;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead tr {
+      background: var(--surface2);
+      border-bottom: 2px solid var(--border);
+    }
+    th {
+      padding: 12px 16px; text-align: left;
+      font-size: 11px; font-weight: 600;
+      color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px;
+      white-space: nowrap;
+      cursor: pointer; user-select: none;
+    }
+    th:hover { color: var(--accent); }
+    th .sort-icon { margin-left: 4px; opacity: 0.4; }
+    th.sorted { color: var(--accent); }
+    th.sorted .sort-icon { opacity: 1; }
+
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background 0.15s;
+    }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: rgba(59,130,246,0.05); }
+
+    td {
+      padding: 12px 16px; vertical-align: middle;
+      max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    td.numeric { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+    td.currency { color: var(--success); }
+    td.negative { color: var(--danger); }
+
+    .pagination {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-top: 16px; flex-wrap: wrap; gap: 12px;
+    }
+    .pag-info { font-size: 13px; color: var(--text-muted); }
+    .pag-btns { display: flex; gap: 8px; }
+    .pag-btn {
+      padding: 7px 14px; border-radius: var(--radius-sm);
+      background: var(--surface2); border: 1px solid var(--border);
+      color: var(--text); font-family: inherit; font-size: 13px; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .pag-btn:hover:not(:disabled) { background: var(--border); }
+    .pag-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .state-box {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; padding: 60px 20px; text-align: center;
+      color: var(--text-muted); gap: 12px;
+    }
+    .state-icon { font-size: 40px; opacity: 0.5; }
+    .state-title { font-size: 16px; font-weight: 600; color: var(--text); }
+    .state-desc { font-size: 13px; max-width: 360px; line-height: 1.6; }
+
+    .spinner {
+      width: 28px; height: 28px; border-radius: 50%;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .alert {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 14px 18px; border-radius: var(--radius-sm);
+      margin-bottom: 16px; font-size: 13px; line-height: 1.5;
+    }
+    .alert-error { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #fca5a5; }
+    .alert-warn { background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3); color: #fcd34d; }
+    .alert-icon { flex-shrink: 0; font-size: 16px; }
+
+    @media (max-width: 640px) {
+      header { padding: 14px 16px; }
+      .container { padding: 16px; }
+      .card { padding: 16px; }
+      .filter-grid { grid-template-columns: 1fr; }
+      td { max-width: 120px; }
+    }
+
+    .fade-in { animation: fadeIn 0.3s ease-out; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+<div class="bg-orbs">
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+</div>
+
+<header>
+  <div class="logo">&#128188;</div>
+  <div class="header-text">
+    <h1>Consulta360</h1>
+    <p>Portal de Transparência &middot; Rio das Ostras</p>
+  </div>
+  <span class="badge">Dados Abertos</span>
+</header>
+
+<div class="container">
+
+  <!-- Filtros -->
+  <div class="card fade-in" style="margin-bottom: 20px;">
+    <div class="card-title">Filtros de Consulta</div>
+
+    <div class="filter-grid">
+      <div class="field">
+        <label for="mesAno">Mês de Referência</label>
+        <input type="month" id="mesAno" />
+      </div>
+      <div class="field">
+        <label for="nomeBase">Entidade</label>
+        <select id="nomeBase">
+          <option value="PM RIO DAS OSTRAS - EFETIVOS E COMISSIONADOS">PMRO &ndash; Efetivos e Comissionados</option>
+          <option value="PM RIO DAS OSTRAS - CONTRATADOS">PMRO &ndash; Contratados</option>
+          <option value="SAAE - RIO DAS OSTRAS">SAAE &ndash; Serviço de Água e Esgoto</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="endpoint">Tipo de Consulta</label>
+        <select id="endpoint">
+          <option value="FolhaPagamento">Folha de Pagamento</option>
+          <option value="Servidor">Servidores</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="filtraNome">Nome do Colaborador</label>
+        <div class="search-bar" style="margin-bottom:0;">
+          <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input type="text" id="filtraNome" placeholder="Deixe vazio para buscar todos..." />
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btnBuscar" onclick="buscar()">
+        &#128269; Consultar
+      </button>
+      <button class="btn btn-secondary" onclick="limpar()">
+        &#10006; Limpar
+      </button>
+      <button class="btn btn-success" id="btnExportar" onclick="exportarCSV()" disabled>
+        &#8595; Exportar CSV
+      </button>
+    </div>
+  </div>
+
+  <!-- Alerta CORS -->
+  <div id="alertaCors" class="alert alert-warn" style="display:none;">
+    <span class="alert-icon">&#9888;&#65039;</span>
+    <span>A API pode ter restrições de CORS. Caso a consulta falhe, utilize a rede interna do município ou um proxy configurado.</span>
+  </div>
+
+  <!-- Alerta de erro -->
+  <div id="alertaErro" class="alert alert-error" style="display:none;">
+    <span class="alert-icon">&#10060;</span>
+    <span id="msgErro"></span>
+  </div>
+
+  <!-- Resultados -->
+  <div class="card fade-in" id="resultadosCard">
+
+    <div class="state-box" id="stateInicial">
+      <div class="state-icon">&#128202;</div>
+      <div class="state-title">Realize uma consulta</div>
+      <div class="state-desc">Selecione o período e a entidade nos filtros acima e clique em <strong>Consultar</strong> para visualizar os dados de salário.</div>
+    </div>
+
+    <div class="state-box" id="stateLoading" style="display:none;">
+      <div class="spinner"></div>
+      <div class="state-title">Buscando dados...</div>
+      <div class="state-desc" id="loadingMsg">Consultando a API. Isso pode levar alguns segundos.</div>
+    </div>
+
+    <div class="state-box" id="stateSemDados" style="display:none;">
+      <div class="state-icon">&#128451;</div>
+      <div class="state-title">Nenhum registro encontrado</div>
+      <div class="state-desc">Tente ajustar o período ou a entidade nos filtros.</div>
+    </div>
+
+    <div id="stateResultados" style="display:none;">
+
+      <div class="stats-row" id="statsRow"></div>
+
+      <div class="table-wrapper">
+        <table id="tabela">
+          <thead id="tabelaHead"></thead>
+          <tbody id="tabelaBody"></tbody>
+        </table>
+      </div>
+
+      <div class="pagination">
+        <div class="pag-info" id="pagInfo"></div>
+        <div class="pag-btns">
+          <button class="pag-btn" id="btnPagAnterior" onclick="mudarPaginaAPI(-1)" disabled>&#8592; Anterior</button>
+          <button class="pag-btn" id="btnPagProxima" onclick="mudarPaginaAPI(1)">Próxima &#8594;</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const API_BASE = 'https://webapp1-riodasostras.cidade360.cloud/dadosabertos';
+const POR_PAGINA_LOCAL = 20;
+
+let dadosBrutos = [];
+let dadosFiltrados = [];
+let paginaAtualAPI = 1;
+let paginaAtualLocal = 1;
+let sortCol = null;
+let sortAsc = true;
+let colunas = [];
+
+window.addEventListener('DOMContentLoaded', function() {
+  var hoje = new Date();
+  var ano = hoje.getFullYear();
+  var mes = String(hoje.getMonth() + 1).padStart(2, '0');
+  document.getElementById('mesAno').value = ano + '-' + mes;
+});
+
+function mesAnoParaDatas(mesAno) {
+  // mesAno formato: 'YYYY-MM'
+  var parts = mesAno.split('-');
+  var ano = parseInt(parts[0]);
+  var mes = parseInt(parts[1]);
+  var primeiroDia = new Date(ano, mes - 1, 1);
+  var ultimoDia = new Date(ano, mes, 0); // dia 0 do mês seguinte = último dia do mês atual
+  return {
+    dataInicial: toBRDate(toInputDate(primeiroDia)),
+    dataFinal: toBRDate(toInputDate(ultimoDia))
+  };
+}
+
+function toInputDate(d) {
+  return d.toISOString().split('T')[0];
+}
+function toBRDate(iso) {
+  var parts = iso.split('-');
+  return parts[2] + '/' + parts[1] + '/' + parts[0];
+}
+function formatCurrency(val) {
+  var n = parseFloat(String(val).replace(',', '.'));
+  if (isNaN(n)) return val !== undefined && val !== null ? val : '—';
+  return n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+function isCurrency(key) {
+  var k = key.toLowerCase();
+  return k.includes('salario') || k.includes('salário') || k.includes('vencimento') ||
+         k.includes('bruto') || k.includes('liquido') || k.includes('líquido') ||
+         k.includes('desconto') || k.includes('remuner') || k.includes('valor') ||
+         k.includes('provent') || k.includes('gratif') || k.includes('indeniz') ||
+         k.includes('total') || k.includes('benef');
+}
+function isNomeKey(key) {
+  var k = key.toLowerCase();
+  return k.includes('nome') || k.includes('servidor') || k.includes('colabor') || k.includes('funcionario');
+}
+function formatLabel(key) {
+  return key
+    .replace(/([A-Z])/g, ' $1')
+    .replace(/_/g, ' ')
+    .trim()
+    .split(' ')
+    .map(function(w) { return w.charAt(0).toUpperCase() + w.slice(1); })
+    .join(' ');
+}
+function escHtml(s) {
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+async function buscar(paginaAPI) {
+  // Determine if we need to fetch all pages (when a name filter is provided)
+  var termoBusca = document.getElementById('filtraNome').value.toLowerCase().trim();
+  var coletarTodas = termoBusca.length > 0;
+
+  paginaAPI = paginaAPI || 1;
+  paginaAtualAPI = paginaAPI;
+
+  var mesAno = document.getElementById('mesAno').value;
+  var nb = document.getElementById('nomeBase').value;
+  var ep = document.getElementById('endpoint').value;
+
+  if (!mesAno) { mostrarErro('Por favor, selecione o mês de referência.'); return; }
+
+  var datas = mesAnoParaDatas(mesAno);
+
+  esconderErro();
+  document.getElementById('alertaCors').style.display = 'none';
+  setState('loading');
+  document.getElementById('loadingMsg').textContent =
+    'Consultando ' + (ep === 'FolhaPagamento' ? 'Folha de Pagamento' : 'Servidores') + (coletarTodas ? ' — buscando todas as páginas...' : ' — página ' + paginaAPI + '...');
+  document.getElementById('btnBuscar').disabled = true;
+
+  // Base URL (sem paginação)
+  var baseUrl = API_BASE + '/' + ep +
+    '?dataInicial=' + datas.dataInicial +
+    '&dataFinal=' + datas.dataFinal +
+    '&nomeBase=' + encodeURIComponent(nb);
+
+  var dados = [];
+  var pagina = 1;
+  var maxPaginas = 50; // safety limit
+
+  try {
+    if (coletarTodas) {
+      // Fetch sequentially until no more records or limit reached
+      while (pagina <= maxPaginas) {
+        var url = baseUrl + '&numeroPagina=' + pagina;
+        var proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(url);
+        var resp = await fetch(proxyUrl, { headers: { 'Accept': 'application/json, text/plain, */*' } });
+        var text = await resp.text();
+        if (!text || text.trim() === '') break;
+        if (text.startsWith('Erro') || text.startsWith('erro') || text.toLowerCase().includes('index was out of range')) {
+          document.getElementById('alertaCors').style.display = 'flex';
+          mostrarErro('A API retornou um erro: ' + text.substring(0, 200));
+          setState('inicial');
+          return;
+        }
+        var paginaDados;
+        try { paginaDados = JSON.parse(text); } catch(e) { paginaDados = parsePlainText(text); }
+        if (!Array.isArray(paginaDados)) {
+          if (typeof paginaDados === 'object' && paginaDados !== null) {
+            var chaves = Object.keys(paginaDados);
+            var primeiraChave = chaves.find(function(k) { return Array.isArray(paginaDados[k]); });
+            paginaDados = primeiraChave ? paginaDados[primeiraChave] : [paginaDados];
+          } else { paginaDados = []; }
+        }
+        if (paginaDados.length === 0) break;
+        dados = dados.concat(paginaDados);
+        if (paginaDados.length < 200) break; // última página da API
+        pagina++;
+      }
+      paginaAtualAPI = 1; // aggregated results
+    } else {
+      // Single page fetch (original behaviour)
+      var url = baseUrl + '&numeroPagina=' + paginaAPI;
+      var proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(url);
+      var resp = await fetch(proxyUrl, { headers: { 'Accept': 'application/json, text/plain, */*' } });
+      var text = await resp.text();
+      if (!text || text.trim() === '') { setState('semDados'); document.getElementById('btnExportar').disabled = true; return; }
+      if (text.startsWith('Erro') || text.startsWith('erro') || text.toLowerCase().includes('index was out of range')) {
+        document.getElementById('alertaCors').style.display = 'flex';
+        mostrarErro('A API retornou um erro: ' + text.substring(0, 200));
+        setState('inicial');
+        return;
+      }
+      try { dados = JSON.parse(text); } catch(e) { dados = parsePlainText(text); }
+    }
+
+    if (!Array.isArray(dados)) {
+      if (typeof dados === 'object' && dados !== null) {
+        var chaves = Object.keys(dados);
+        var primeiraChave = chaves.find(function(k) { return Array.isArray(dados[k]); });
+        dados = primeiraChave ? dados[primeiraChave] : [dados];
+      } else { dados = []; }
+    }
+
+    if (dados.length === 0) { setState('semDados'); document.getElementById('btnExportar').disabled = true; return; }
+
+    // Apply name filter if still needed (covers both paths)
+    if (termoBusca) {
+      var colsNome = Object.keys(dados[0] || {}).filter(function(k) { return isNomeKey(k); });
+      dadosFiltrados = dados.filter(function(row) {
+        if (colsNome.length > 0) {
+          return colsNome.some(function(col) {
+            return String(row[col] !== undefined && row[col] !== null ? row[col] : '').toLowerCase().includes(termoBusca);
+          });
+        }
+        return Object.values(row).some(function(v) { return String(v).toLowerCase().includes(termoBusca); });
+      });
+    } else {
+      dadosFiltrados = dados.slice();
+    }
+
+    dadosBrutos = dados;
+    paginaAtualLocal = 1;
+    sortCol = null;
+    sortAsc = true;
+    renderizarTabela();
+    atualizarStats();
+    setState('resultados');
+    document.getElementById('btnExportar').disabled = false;
+    // Pagination controls
+    if (coletarTodas) {
+      document.getElementById('btnPagAnterior').disabled = true;
+      document.getElementById('btnPagProxima').disabled = true;
+    } else {
+      document.getElementById('btnPagAnterior').disabled = paginaAPI <= 1;
+      document.getElementById('btnPagProxima').disabled = dados.length < 200;
+    }
+  } catch(err) {
+    console.error(err);
+    document.getElementById('alertaCors').style.display = 'flex';
+    mostrarErro('Não foi possível conectar à API. Detalhes: ' + err.message);
+    setState('inicial');
+  } finally {
+    document.getElementById('btnBuscar').disabled = false;
+  }
+}
+
+function parsePlainText(text) {
+  var linhas = text.trim().split('\n').filter(function(l) { return l.trim(); });
+  if (linhas.length < 2) return [];
+  var headers = linhas[0].split(';').map(function(h) { return h.trim().replace(/"/g, ''); });
+  return linhas.slice(1).map(function(l) {
+    var vals = l.split(';').map(function(v) { return v.trim().replace(/"/g, ''); });
+    var obj = {};
+    headers.forEach(function(h, i) { obj[h] = vals[i] !== undefined ? vals[i] : ''; });
+    return obj;
+  });
+}
+
+function renderizarTabela() {
+  if (dadosFiltrados.length === 0) {
+    colunas = [];
+    document.getElementById('tabelaHead').innerHTML = '';
+    document.getElementById('tabelaBody').innerHTML =
+      '<tr><td colspan="20" style="text-align:center;padding:40px;color:var(--text-muted)">Nenhum resultado para o filtro informado.</td></tr>';
+    document.getElementById('pagInfo').textContent = '';
+    return;
+  }
+
+  var amostra = dadosFiltrados.slice(0, 10);
+  var todasChaves = [];
+  amostra.forEach(function(r) {
+    Object.keys(r).forEach(function(k) { if (!todasChaves.includes(k)) todasChaves.push(k); });
+  });
+  colunas = todasChaves;
+
+  var inicio = (paginaAtualLocal - 1) * POR_PAGINA_LOCAL;
+  var fim = inicio + POR_PAGINA_LOCAL;
+  var pagina = dadosFiltrados.slice(inicio, fim);
+
+  var theadHtml = '<tr>' + colunas.map(function(col, i) {
+    var cls = sortCol === i ? 'sorted' : '';
+    var arrow = sortCol === i ? (sortAsc ? '&uarr;' : '&darr;') : '&updownarrow;';
+    return '<th class="' + cls + '" onclick="ordenar(' + i + ')">' +
+      escHtml(formatLabel(col)) +
+      '<span class="sort-icon">' + arrow + '</span></th>';
+  }).join('') + '</tr>';
+  document.getElementById('tabelaHead').innerHTML = theadHtml;
+
+  var tbodyHtml = pagina.map(function(row) {
+    return '<tr>' + colunas.map(function(col) {
+      var val = row[col] !== undefined && row[col] !== null ? row[col] : '—';
+      var isCur = isCurrency(col);
+      var numVal = parseFloat(String(val).replace(',', '.'));
+      var isNeg = isCur && !isNaN(numVal) && numVal < 0;
+      var display = val;
+      if (isCur && val !== '—' && val !== '' && val !== null && !isNaN(numVal)) {
+        display = formatCurrency(val);
+      }
+      var cls = isCur ? ('numeric ' + (isNeg ? 'negative' : 'currency')) : '';
+      return '<td class="' + cls + '" title="' + escHtml(String(val)) + '">' + escHtml(String(display)) + '</td>';
+    }).join('') + '</tr>';
+  }).join('');
+  document.getElementById('tabelaBody').innerHTML = tbodyHtml;
+
+  document.getElementById('pagInfo').textContent =
+    'Exibindo ' + (inicio + 1) + '–' + Math.min(fim, dadosFiltrados.length) +
+    ' de ' + dadosFiltrados.length + ' registros (página API ' + paginaAtualAPI + ')';
+}
+
+function filtrarNome() {
+  // Mantido como utilitário interno (chamado por buscar)
+}
+
+function ordenar(idx) {
+  if (sortCol === idx) {
+    sortAsc = !sortAsc;
+  } else {
+    sortCol = idx;
+    sortAsc = true;
+  }
+  var col = colunas[idx];
+  dadosFiltrados.sort(function(a, b) {
+    var va = a[col] !== undefined ? a[col] : '';
+    var vb = b[col] !== undefined ? b[col] : '';
+    var na = parseFloat(String(va).replace(',', '.'));
+    var nb = parseFloat(String(vb).replace(',', '.'));
+    if (!isNaN(na) && !isNaN(nb)) return sortAsc ? na - nb : nb - na;
+    return sortAsc
+      ? String(va).localeCompare(String(vb), 'pt-BR')
+      : String(vb).localeCompare(String(va), 'pt-BR');
+  });
+  paginaAtualLocal = 1;
+  renderizarTabela();
+}
+
+function atualizarStats() {
+  var total = dadosFiltrados.length;
+  var colBruto = colunas.find(function(k) {
+    var kl = k.toLowerCase();
+    return kl.includes('bruto') || kl.includes('provent') || kl.includes('total');
+  });
+  var colLiquido = colunas.find(function(k) {
+    var kl = k.toLowerCase();
+    return kl.includes('liquido') || kl.includes('líquido');
+  });
+
+  var somaBruto = 0, somaLiquido = 0;
+  dadosFiltrados.forEach(function(r) {
+    if (colBruto) somaBruto += parseFloat(String(r[colBruto] || '0').replace(',', '.')) || 0;
+    if (colLiquido) somaLiquido += parseFloat(String(r[colLiquido] || '0').replace(',', '.')) || 0;
+  });
+
+  var rows = [];
+  rows.push('<div class="stat-card"><div class="stat-label">Colaboradores</div><div class="stat-value blue">' + total.toLocaleString('pt-BR') + '</div></div>');
+  rows.push('<div class="stat-card"><div class="stat-label">Pág. API</div><div class="stat-value purple">' + paginaAtualAPI + '</div></div>');
+  if (colBruto && somaBruto > 0) rows.push('<div class="stat-card"><div class="stat-label">Total ' + escHtml(formatLabel(colBruto)) + '</div><div class="stat-value green">' + formatCurrency(somaBruto) + '</div></div>');
+  if (colLiquido && somaLiquido > 0) rows.push('<div class="stat-card"><div class="stat-label">Total ' + escHtml(formatLabel(colLiquido)) + '</div><div class="stat-value amber">' + formatCurrency(somaLiquido) + '</div></div>');
+
+  document.getElementById('statsRow').innerHTML = rows.join('');
+}
+
+function mudarPaginaAPI(delta) {
+  var nova = paginaAtualAPI + delta;
+  if (nova < 1) return;
+  buscar(nova);
+}
+
+function exportarCSV() {
+  if (!dadosFiltrados.length) return;
+  var bom = '\uFEFF';
+  var header = colunas.join(';');
+  var linhas = dadosFiltrados.map(function(r) {
+    return colunas.map(function(c) {
+      return '"' + String(r[c] !== undefined ? r[c] : '').replace(/"/g, '""') + '"';
+    }).join(';');
+  });
+  var csv = bom + [header].concat(linhas).join('\n');
+  var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'consulta360_' + Date.now() + '.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function limpar() {
+  dadosBrutos = []; dadosFiltrados = []; colunas = [];
+  document.getElementById('filtraNome').value = '';
+  esconderErro();
+  document.getElementById('alertaCors').style.display = 'none';
+  document.getElementById('btnExportar').disabled = true;
+  setState('inicial');
+}
+
+function setState(s) {
+  document.getElementById('stateInicial').style.display    = s === 'inicial'    ? 'flex' : 'none';
+  document.getElementById('stateLoading').style.display   = s === 'loading'    ? 'flex' : 'none';
+  document.getElementById('stateSemDados').style.display  = s === 'semDados'   ? 'flex' : 'none';
+  document.getElementById('stateResultados').style.display = s === 'resultados' ? 'block' : 'none';
+}
+
+function mostrarErro(msg) {
+  document.getElementById('msgErro').textContent = msg;
+  document.getElementById('alertaErro').style.display = 'flex';
+}
+function esconderErro() {
+  document.getElementById('alertaErro').style.display = 'none';
+}
+</script>
+</body>
+</html>
