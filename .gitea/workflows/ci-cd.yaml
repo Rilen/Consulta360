@@ -1,135 +1,50 @@
-name: Deploy Consulta360
+name: Deploy Homologação Automático
 
-# Dispara a cada push na branch main
-on:
-  push:
-    branches: [ main ]
+on: [push]
 
 jobs:
-  # --------------------------------------------------------------
-  # 1️⃣ Build & Test – aqui só verificamos que o index.html existe
-  # --------------------------------------------------------------
-  build-and-test:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout do código
-        uses: actions/checkout@v4
-
-      - name: Verifica presença do index.html
-        run: |
-          if [ ! -f index.html ]; then
-            echo "❌  index.html não encontrado!"
-            exit 1
-          fi
-          echo "✅  index.html está presente."
-
-  # --------------------------------------------------------------
-  # 2️⃣ Deploy em Homologação (container Nginx)
-  # --------------------------------------------------------------
-  deploy-homolog:
-    needs: build-and-test
+  deploy-homologacao:
     runs-on: ubuntu-latest
     container:
-      image: node:20-alpine        # tem Docker + sh + curl
-      options: --network host      # permite acesso ao host Docker
+      image: node:20-alpine
+      networkMode: host
+    
     steps:
-      # ---- 2.1 ---- Checkout novamente (necessário em cada job)
-      - name: Checkout do código
-        uses: actions/checkout@v4
-
-      # ---- 2.2 ---- Instalação de ferramentas úteis
-      - name: Instalar Git, Docker‑CLI e curl
+      - name: Checkout do Código via Git Puro
+        shell: sh
         run: |
-          apk add --no-cache git docker-cli curl
-
-      # ---- 2.3 ---- Configura a URL da API (caso precise)
-      - name: Configurar API_BASE (opcional)
+          apk add --no-cache git ca-certificates
+          git clone http://x-access-token:${{ gitea.token }}@10.0.0.88:3001/${{ gitea.repository }}.git .
+          git checkout ${{ gitea.sha }}
+        
+      - name: Instalar Dependências e Cliente Docker
+        run: |
+          apk add --no-cache docker-cli
+          npm install
+          
+      - name: Compilar Produção Estática
+        # AQUI A MÁGICA DO NEXT_PUBLIC_ ACONTECE:
         env:
-          DEPLOY_HOST: ${{ vars.DEPLOY_HOST }}
-          BACKEND_PORT: ${{ vars.BACKEND_PORT }}
+          NEXT_PUBLIC_API_URL: http://10.0.0.88:3000 # <-- Ajuste a porta se o seu backend não for a 3000
         run: |
-          HOST="${DEPLOY_HOST:-10.0.0.88}"
-          PORT="${BACKEND_PORT:-8080}"
-          echo "🔧  Configurando API_BASE → http://${HOST}:${PORT}/api/v1"
-          # Substitui, caso exista, em arquivos .js que usem a constante API_BASE
-          find . -name "*.js" -exec \
-            sed -i "s|const API_BASE = \".*\";|const API_BASE = \"http://${HOST}:${PORT}/api/v1\";|g" {} \;
-
-      # ---- 2.4 ---- Garantir que o container Nginx exista e esteja vazio
-      - name: Garantir container Nginx limpo
-        env:
-          CONTAINER_NAME: ${{ vars.CONTAINER_NAME }}
-          FRONTEND_PORT: ${{ vars.FRONTEND_PORT }}
+          npm run build
+          
+      - name: Injetar Arquivos Direto no Nginx Central via Docker
         run: |
-          CONTAINER="${CONTAINER_NAME:-nginx-consulta360}"
-          PORT="${FRONTEND_PORT:-3000}"
-
-          # Remove container antigo, se existir
-          if docker ps -a --format '{{.Names}}' | grep -q "^${CONTAINER}$"; then
-            echo "🧹  Removendo container ${CONTAINER} antigo..."
-            docker rm -f "${CONTAINER}"
+          REPO_NAME=$(echo "${{ gitea.repository }}" | cut -d'/' -f2 | tr 'A-Z' 'a-z')
+          ORIGINAL_REPO_NAME=$(echo "${{ gitea.repository }}" | cut -d'/' -f2)
+          
+          echo "🐳 Injetando build estático dentro do container central nginx-homologacao..."
+          docker exec nginx-homologacao mkdir -p /usr/share/nginx/html/$REPO_NAME
+          docker exec nginx-homologacao sh -c "rm -rf /usr/share/nginx/html/$REPO_NAME/*"
+          docker cp out/. nginx-homologacao:/usr/share/nginx/html/$REPO_NAME/
+          
+          if [ "$ORIGINAL_REPO_NAME" != "$REPO_NAME" ]; then
+            echo "🔄 Criando página de redirecionamento para o caso original ($ORIGINAL_REPO_NAME -> $REPO_NAME)..."
+            mkdir -p redirect
+            echo "<html><head><meta http-equiv=\"refresh\" content=\"0;url=/${REPO_NAME}/\" /><script>window.location.replace(\"/${REPO_NAME}/\" + window.location.search + window.location.hash);</script></head><body>Redirecting to /${REPO_NAME}/...</body></html>" > redirect/index.html
+            docker exec nginx-homologacao mkdir -p /usr/share/nginx/html/$ORIGINAL_REPO_NAME
+            docker cp redirect/index.html nginx-homologacao:/usr/share/nginx/html/$ORIGINAL_REPO_NAME/index.html
           fi
-
-          # impede conflito de porta
-          OWNER=$(docker ps --format '{{.Names}} {{.Ports}}' | grep ":${PORT}->" | awk '{print $1}')
-          if [ -n "${OWNER}" ]; then
-            echo "⚠️  Porta ${PORT} já está em uso por ${OWNER}. Parando..."
-            docker stop "${OWNER}" && docker rm "${OWNER}" || true
-          fi
-
-          echo "🚀  Criando container Nginx ${CONTAINER} na porta ${PORT}..."
-          docker run -d \
-            --name "${CONTAINER}" \
-            --restart=unless-stopped \
-            -p "${PORT}:80" \
-            nginx:alpine
-
-      # ---- 2.5 ---- Copiar os arquivos estáticos para o container (atomically)
-      - name: Deploy de arquivos estáticos
-        env:
-          CONTAINER_NAME: ${{ vars.CONTAINER_NAME }}
-        run: |
-          CONTAINER="${CONTAINER_NAME:-nginx-consulta360}"
-
-          echo "🗂️  Copiando conteúdo para pasta temporária dentro do container..."
-          docker exec "${CONTAINER}" sh -c "rm -rf /usr/share/nginx/html-new && mkdir -p /usr/share/nginx/html-new"
-          docker cp . "${CONTAINER}:/usr/share/nginx/html-new/"
-
-          echo "🔄  Substituição atômica da pasta de web"
-          docker exec "${CONTAINER}" sh -c "
-            chmod -R 755 /usr/share/nginx/html-new &&
-            chown -R nginx:nginx /usr/share/nginx/html-new &&
-            rm -rf /usr/share/nginx/html.bak &&
-            mv /usr/share/nginx/html /usr/share/nginx/html.bak 2>/dev/null || true &&
-            mv /usr/share/nginx/html-new /usr/share/nginx/html &&
-            nginx -s reload
-          "
-          echo "✅  Deploy concluído!"
-
-      # ---- 2.6 ---- Health‑check rápido (curl interno + externo)
-      - name: Health Check
-        env:
-          DEPLOY_HOST: ${{ vars.DEPLOY_HOST }}
-          FRONTEND_PORT: ${{ vars.FRONTEND_PORT }}
-          CONTAINER_NAME: ${{ vars.CONTAINER_NAME }}
-        run: |
-          HOST="${DEPLOY_HOST:-10.0.0.88}"
-          PORT="${FRONTEND_PORT:-3000}"
-          CONTAINER="${CONTAINER_NAME:-nginx-consulta360}"
-          URL="http://${HOST}:${PORT}/"
-
-          echo "🔎  Teste interno (curl dentro do container)…"
-          INTERNAL=$(docker exec "${CONTAINER}" wget -qO- --server-response http://localhost/ 2>&1 | head -5 || echo "FALHOU")
-          echo "${INTERNAL}"
-
-          echo "🌐  Teste externo (${URL})…"
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "${URL}" || echo "000")
-          echo "Código HTTP externo: ${STATUS}"
-          if [ "${STATUS}" = "200" ]; then
-            echo "🎉  Deploy bem‑sucedido! Site disponível em ${URL}"
-          else
-            echo "❌  Health‑check falhou. Mostrando arquivos no container e logs."
-            docker exec "${CONTAINER}" ls -la /usr/share/nginx/html
-            docker logs --tail 30 "${CONTAINER}"
-            exit 1
-          fi
+          
+          echo "🚀 Sucesso Absoluto! Disponível em: http://10.0.0.88:3005/$REPO_NAME/ (ou http://10.0.0.88:3005/$ORIGINAL_REPO_NAME/)"
