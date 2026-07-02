@@ -221,6 +221,10 @@
 
   </main>
 
+  <!-- Scripts Modulares -->
+  <script src="./assets/js/db.js"></script>
+  <script src="./assets/js/api.js"></script>
+
   <script>
     lucide.createIcons();
     
@@ -231,12 +235,6 @@
       const mes = String(hoje.getMonth() + 1).padStart(2, '0');
       document.getElementById('mesAno').value = ano + '-' + mes;
     });
-
-  <!-- Scripts Modulares -->
-  <script src="./assets/js/db.js"></script>
-  <script src="./assets/js/api.js"></script>
-
-  <script>
     lucide.createIcons();
 
     document.getElementById('filter-form').addEventListener('submit', function(e) {
