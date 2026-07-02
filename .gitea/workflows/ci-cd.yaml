@@ -1,21 +1,19 @@
-name: Deploy Homologação Automático 1
+name: Deploy Homologacao
 
-on: [push]
+on:
+  push:
+    branches: [ main ]
 
 jobs:
   deploy-homologacao:
     runs-on: ubuntu-latest
     container:
       image: node:20-alpine
-      options: --network host
     
     steps:
-      - name: Checkout do Código via Git Puro
-        shell: sh
-        run: |
-          apk add --no-cache git ca-certificates
-          git clone http://x-access-token:${{ gitea.token }}@10.0.0.88:3001/${{ gitea.repository }}.git .
-          git checkout ${{ gitea.sha }}
+      # Checkout simplificado usando a action oficial (mais seguro e testado)
+      - name: Checkout do Codigo
+        uses: actions/checkout@v4
         
       - name: Instalar Dependências e Cliente Docker
         run: |
@@ -23,18 +21,20 @@ jobs:
           npm install
           
       - name: Compilar Produção Estática
-        # AQUI A MÁGICA DO NEXT_PUBLIC_ ACONTECE:
         env:
-          NEXT_PUBLIC_API_URL: http://10.0.0.88:3000 # <-- Ajuste a porta se o seu backend não for a 3000
+          NEXT_PUBLIC_API_URL: http://10.0.0.88:3000
         run: |
           npm run build
           
       - name: Injetar Arquivos Direto no Nginx Central via Docker
         run: |
-          REPO_NAME=$(echo "${{ gitea.repository }}" | cut -d'/' -f2 | tr 'A-Z' 'a-z')
-          ORIGINAL_REPO_NAME=$(echo "${{ gitea.repository }}" | cut -d'/' -f2)
+          # No Gitea, usamos a variavel github.repository para compatibilidade
+          REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2 | tr 'A-Z' 'a-z')
+          ORIGINAL_REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
           
           echo "🐳 Injetando build estático dentro do container central nginx-homologacao..."
+          
+          # OBS: O runner precisa ter permissao ao socket docker do host
           docker exec nginx-homologacao mkdir -p /usr/share/nginx/html/$REPO_NAME
           docker exec nginx-homologacao sh -c "rm -rf /usr/share/nginx/html/$REPO_NAME/*"
           docker cp out/. nginx-homologacao:/usr/share/nginx/html/$REPO_NAME/
