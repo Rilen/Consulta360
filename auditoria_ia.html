@@ -19,7 +19,7 @@
   
   <link rel="stylesheet" href="./assets/css/global.css">
 </head>
-<body class="text-slate-800 antialiased selection:bg-blue-100 selection:text-blue-900 pb-20">
+<body class="text-slate-800 antialiased selection:bg-blue-100 selection:text-blue-900">
 
   <!-- Background Orbs -->
   <div class="fixed inset-0 overflow-hidden pointer-events-none -z-10">
@@ -31,12 +31,12 @@
   <header class="sticky top-0 z-50 bg-white/70 backdrop-blur-md border-b border-slate-200 shadow-sm">
     <div class="max-w-[1600px] mx-auto px-6 h-16 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-emerald-400 flex items-center justify-center text-white shadow-lg shadow-indigo-500/20">
-          <i data-lucide="brain" class="w-5 h-5"></i>
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-blue-600/20">
+          <i data-lucide="briefcase" class="w-5 h-5"></i>
         </div>
         <div>
-          <h1 class="text-sm font-bold text-slate-800 leading-tight">Consulta360 Auditoria</h1>
-          <p class="text-[11px] font-medium text-slate-500 uppercase tracking-widest">Painel de Compliance & Insights</p>
+          <h1 class="text-sm font-bold text-slate-800 leading-tight">Consulta360</h1>
+          <p class="text-[11px] font-medium text-slate-500 uppercase tracking-widest">Portal de Transparência</p>
         </div>
       </div>
       <div class="flex items-center gap-4">
@@ -55,11 +55,11 @@
 
   <main class="mt-8 p-6 max-w-[1600px] mx-auto space-y-6">
     
-    <!-- Barra de Controle e Filtros -->
-    <section class="ag-card rounded-2xl p-5 border border-slate-100">
+    <!-- Filtros Inteligentes -->
+    <section class="ag-card rounded-2xl p-6 fade-in">
       <div class="flex items-center justify-between mb-4">
-        <h2 class="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
-          <i data-lucide="database" class="w-4 h-4"></i> Origem de Dados para Inferência
+        <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+          <i data-lucide="filter" class="w-4 h-4"></i> Filtros de Consulta
         </h2>
         <div id="statusCache" class="hidden items-center gap-2 text-xs font-medium text-emerald-400 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full">
           <i data-lucide="zap" class="w-3.5 h-3.5"></i> Memória RAM Neural
@@ -68,17 +68,17 @@
       
       <form id="filter-form" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 items-end">
         <div class="space-y-1.5">
-          <label class="text-[13px] font-medium text-slate-600">Competência</label>
+          <label class="text-[13px] font-medium text-slate-600">Mês de Referência</label>
           <div class="relative">
-            <input type="month" id="mesAno" class="w-full bg-white border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-sm text-slate-800 outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all cursor-pointer color-scheme-dark">
+            <input type="month" id="mesAno" class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all cursor-pointer">
             <i data-lucide="calendar" class="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none"></i>
           </div>
         </div>
 
         <div class="space-y-1.5">
-          <label class="text-[13px] font-medium text-slate-600">Entidade Alvo</label>
+          <label class="text-[13px] font-medium text-slate-600">Entidade</label>
           <div class="relative">
-            <select id="nomeBase" class="w-full bg-white border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-sm text-slate-800 outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all appearance-none cursor-pointer">
+            <select id="nomeBase" class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all appearance-none cursor-pointer">
               <option value="PM RIO DAS OSTRAS - EFETIVOS E COMISSIONADOS">PMRO - Efetivos e Comissionados</option>
               <option value="PM RIO DAS OSTRAS - CONTRATADOS">PMRO - Contratados</option>
               <option value="SAAE - RIO DAS OSTRAS">SAAE - Serviço de Água e Esgoto</option>
