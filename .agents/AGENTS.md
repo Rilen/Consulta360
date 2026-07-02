@@ -19,6 +19,10 @@ O projeto segue estritamente a estrutura modular:
 - Tema "Clean Light": fundo claro com Orbs coloridos desfocados (`bg-blue-400/20 rounded-full blur-3xl`).
 - Componentes em Cartões Glassmorphism: utilize a classe global `.ag-card` (`backdrop-filter: blur(16px)` com bordas semitransparentes e soft-shadows).
 - Ícones: Utilize estritamente a biblioteca Lucide Icons.
+- **Padronização UI/UX:**
+  - Cabeçalho (Header): Deve usar o ícone principal azul e os mesmos 3 links (Consulta, Análise de Dados, Auditoria) destacando a página ativa.
+  - Títulos de Cards de Métrica: Devem usar `<h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider">`.
+  - Botões de Ação: O botão primário de buscar/gerar deve ser arredondado (`rounded-xl`), ter fundo preenchido (`bg-blue-600` ou similar), sombra e animação de clique (`active:scale-95 transition-all`).
 
 ## 4. Regras de Negócio e Dados
 - **Volumetria:** A base possui mais de 3.000 funcionários e alto índice de múltiplas matrículas (vínculos acumulados).
