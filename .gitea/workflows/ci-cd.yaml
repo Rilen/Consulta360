@@ -25,30 +25,32 @@ jobs:
           REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2 | tr 'A-Z' 'a-z')
           ORIGINAL_REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
           
-          echo "🐳 Verificando container central nginx-homologacao..."
-          if ! docker ps -a --format '{{.Names}}' | grep -Eq "^nginx-homologacao\$"; then
-            echo "⚠️ Container nginx-homologacao não encontrado. Criando na porta 3005..."
+          echo "🐳 Verificando qual container está usando a porta 3005..."
+          CENTRAL_CONTAINER=$(docker ps --format '{{.Names}} {{.Ports}}' | grep "3005->" | awk '{print $1}')
+          
+          if [ -z "$CENTRAL_CONTAINER" ]; then
+            echo "⚠️ Nenhum container encontrado na porta 3005. Criando novo nginx-homologacao..."
             docker run -d --name nginx-homologacao --restart unless-stopped -p 3005:80 nginx:alpine
-          elif ! docker ps --format '{{.Names}}' | grep -Eq "^nginx-homologacao\$"; then
-            echo "🔄 Container nginx-homologacao estava parado. Iniciando..."
-            docker start nginx-homologacao
+            CENTRAL_CONTAINER="nginx-homologacao"
+          else
+            echo "✅ Container central encontrado: $CENTRAL_CONTAINER"
           fi
           
-          echo "🐳 Injetando arquivos estáticos dentro do container central nginx-homologacao..."
+          echo "🐳 Injetando arquivos estáticos dentro do container central $CENTRAL_CONTAINER..."
           
           # OBS: O runner precisa ter permissao ao socket docker do host
-          docker exec nginx-homologacao mkdir -p /usr/share/nginx/html/$REPO_NAME
-          docker exec nginx-homologacao sh -c "rm -rf /usr/share/nginx/html/$REPO_NAME/*"
+          docker exec $CENTRAL_CONTAINER mkdir -p /usr/share/nginx/html/$REPO_NAME
+          docker exec $CENTRAL_CONTAINER sh -c "rm -rf /usr/share/nginx/html/$REPO_NAME/*"
           
           # Como é um projeto HTML estático, copiamos do diretório atual (.) em vez de (out/.)
-          docker cp . nginx-homologacao:/usr/share/nginx/html/$REPO_NAME/
+          docker cp . $CENTRAL_CONTAINER:/usr/share/nginx/html/$REPO_NAME/
           
           if [ "$ORIGINAL_REPO_NAME" != "$REPO_NAME" ]; then
             echo "🔄 Criando página de redirecionamento para o caso original ($ORIGINAL_REPO_NAME -> $REPO_NAME)..."
             mkdir -p redirect
             echo "<html><head><meta http-equiv=\"refresh\" content=\"0;url=/${REPO_NAME}/\" /><script>window.location.replace(\"/${REPO_NAME}/\" + window.location.search + window.location.hash);</script></head><body>Redirecting to /${REPO_NAME}/...</body></html>" > redirect/index.html
-            docker exec nginx-homologacao mkdir -p /usr/share/nginx/html/$ORIGINAL_REPO_NAME
-            docker cp redirect/index.html nginx-homologacao:/usr/share/nginx/html/$ORIGINAL_REPO_NAME/index.html
+            docker exec $CENTRAL_CONTAINER mkdir -p /usr/share/nginx/html/$ORIGINAL_REPO_NAME
+            docker cp redirect/index.html $CENTRAL_CONTAINER:/usr/share/nginx/html/$ORIGINAL_REPO_NAME/index.html
           fi
           
           echo "🚀 Sucesso Absoluto! Disponível em: http://10.0.0.88:3005/$REPO_NAME/ (ou http://10.0.0.88:3005/$ORIGINAL_REPO_NAME/)"
