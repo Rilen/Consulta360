@@ -7,23 +7,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest"></script>
-  <style>
-    body {
-      font-family: 'Inter', sans-serif;
-      background-color: #f8fafc;
-    }
-    .ag-card {
-      background: rgba(255, 255, 255, 0.7);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.5);
-      box-shadow: 0 4px 24px -8px rgba(0, 0, 0, 0.05), inset 0 0 0 1px rgba(255, 255, 255, 0.4);
-    }
-    .table-scroll::-webkit-scrollbar { height: 8px; }
-    .table-scroll::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
-    .table-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-    .table-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-  </style>
+  <link rel="stylesheet" href="./assets/css/global.css">
 </head>
 <body class="text-slate-800 antialiased selection:bg-blue-100 selection:text-blue-900">
 
@@ -195,10 +179,12 @@
     </div>
   </main>
 
+  <!-- Scripts Modulares -->
+  <script src="./assets/js/api.js"></script>
+
   <script>
     lucide.createIcons();
-
-    const API_BASE = 'https://webapp1-riodasostras.cidade360.cloud/dadosabertos';
+    const API_ENDPOINT = 'FolhaPagamento';
     const POR_PAGINA_LOCAL = 20;
 
     let dadosBrutos = [];
@@ -226,24 +212,7 @@
     document.getElementById('btnPagAnterior').addEventListener('click', () => mudarPaginaAPI(-1));
     document.getElementById('btnPagProxima').addEventListener('click', () => mudarPaginaAPI(1));
 
-    function mesAnoParaDatas(mesAno) {
-      var parts = mesAno.split('-');
-      var ano = parseInt(parts[0]);
-      var mes = parseInt(parts[1]);
-      var primeiroDia = new Date(ano, mes - 1, 1);
-      var ultimoDia = new Date(ano, mes, 0);
-      return {
-        dataInicial: toBRDate(toInputDate(primeiroDia)),
-        dataFinal: toBRDate(toInputDate(ultimoDia))
-      };
-    }
 
-    function toInputDate(d) { return d.toISOString().split('T')[0]; }
-    function toBRDate(iso) {
-      var parts = iso.split('-');
-      return parts[2] + '/' + parts[1] + '/' + parts[0];
-    }
-    
     function formatCurrency(val) {
       var n = parseFloat(String(val).replace(',', '.'));
       if (isNaN(n)) return val !== undefined && val !== null ? val : '—';
@@ -259,11 +228,7 @@
              k.includes('total') || k.includes('benef');
     }
     
-    function isNomeKey(key) {
-      var k = key.toLowerCase();
-      return k.includes('nome') || k.includes('servidor') || k.includes('colabor') || k.includes('funcionario');
-    }
-    
+
     function formatLabel(key) {
       return key
         .replace(/([A-Z])/g, ' $1')
@@ -435,20 +400,9 @@
         btnBuscar.disabled = false;
         btnBuscar.classList.remove('opacity-70');
         btnBuscar.innerHTML = btnTextOrig;
+        // API_BASE e helpers de Data e Parse movidos para assets/js/api.js;
         lucide.createIcons();
       }
-    }
-
-    function parsePlainText(text) {
-      var linhas = text.trim().split('\n').filter(function(l) { return l.trim(); });
-      if (linhas.length < 2) return [];
-      var headers = linhas[0].split(';').map(function(h) { return h.trim().replace(/"/g, ''); });
-      return linhas.slice(1).map(function(l) {
-        var vals = l.split(';').map(function(v) { return v.trim().replace(/"/g, ''); });
-        var obj = {};
-        headers.forEach(function(h, i) { obj[h] = vals[i] !== undefined ? vals[i] : ''; });
-        return obj;
-      });
     }
 
     function renderizarTabela() {
