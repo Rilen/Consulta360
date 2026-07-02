@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: node:20-alpine
-      networkMode: host
+      options: --network host
     
     steps:
       - name: Checkout do Código via Git Puro
