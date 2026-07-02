@@ -28,3 +28,8 @@ O projeto segue estritamente a estrutura modular:
 - **Volumetria:** A base possui mais de 3.000 funcionários e alto índice de múltiplas matrículas (vínculos acumulados).
 - **Camada de Persistência Local:** Para evitar gargalos de rede e estouro de CORS na API, os dados devem ser cacheados e indexados localmente via IndexedDB.
 - **Unificação por Indivíduo:** Para telas de análise (gráficos e IA), os dados de múltiplas matrículas do mesmo servidor devem ser consolidados/somados por CPF/Nome para refletir a renda real por trabalhador, impedindo distorções nas métricas.
+
+## 5. Fluxo de Encerramento (Finalizar Sessão)
+- **Versionamento:** Sempre que o usuário solicitar "finalizar sessão" ou equivalente, você DEVE incrementar a versão do sistema (ex: v0.0.1 -> v0.0.2).
+- **Atualização:** O número da versão deve ser substituído no rodapé (`<footer>`) de todas as páginas HTML (`index.html`, `graficos.html`, `auditoria_ia.html` e `changelog.html`).
+- **Changelog:** Você deve registrar automaticamente as melhorias da sessão no arquivo `CHANGELOG.md` e espelhar o conteúdo visualmente no arquivo `changelog.html`.
