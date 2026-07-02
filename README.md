@@ -4,7 +4,7 @@ Consulta360 é um sistema de transparência e consulta de folha de pagamento par
 
 ## 🚀 Tecnologias e UI
 
-- **Frontend:** HTML5 semântico puro.
+- **Frontend:** HTML5 semântico com Vanilla JavaScript.
 - **Estilização:** Tailwind CSS (via CDN) utilizando o conceito de **Antigravity UI**.
 - **Design System:**
   - Layout focado em Data Grid.
@@ -15,13 +15,15 @@ Consulta360 é um sistema de transparência e consulta de folha de pagamento par
 
 ## ⚙️ Funcionalidades
 
+- **Integração de API:** Conexão nativa (`fetch`) ao endpoint RESTful para puxar dados da folha e de servidores dinamicamente, com suporte a tratamento de CORS via proxy.
 - **Filtros de Busca:**
-  - Mês de referência
-  - Entidade (Ex: PMRO - Efetivos e Comissionados)
-  - Tipo de Consulta (Ex: Folha de Pagamento)
-  - Busca por nome do colaborador
-- **Métricas em Tempo Real:** Exibição de total de colaboradores, páginas de API, total de proventos e total líquido.
-- **Tabela de Resultados:** Visualização detalhada de salários, vencimentos, descontos e lotação.
+  - Mês de referência nativo (`type="month"`) convertido para períodos.
+  - Entidade (Ex: PMRO - Efetivos e Comissionados).
+  - Tipo de Consulta (Folha de Pagamento ou Servidores).
+  - Busca por nome do colaborador (local e na API).
+- **Métricas em Tempo Real:** Exibição dinâmica de total de colaboradores, páginas de API processadas, total bruto/proventos e total líquido, baseados no retorno da API.
+- **Tabela e Paginação:** Visualização rica e paginada de dados (com paginação dupla API vs Local), com ordenação interativa de colunas geradas dinamicamente.
+- **Exportação:** Exportação dos dados filtrados para CSV.
 
 ## 🛠️ Deploy Automático (CI/CD)
 
