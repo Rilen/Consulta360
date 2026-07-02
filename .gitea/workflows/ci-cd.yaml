@@ -15,16 +15,9 @@ jobs:
       - name: Checkout do Codigo
         uses: actions/checkout@v4
         
-      - name: Instalar Dependências e Cliente Docker
+      - name: Instalar Cliente Docker
         run: |
           apk add --no-cache docker-cli
-          npm install
-          
-      - name: Compilar Produção Estática
-        env:
-          NEXT_PUBLIC_API_URL: http://10.0.0.88:3000
-        run: |
-          npm run build
           
       - name: Injetar Arquivos Direto no Nginx Central via Docker
         run: |
@@ -32,12 +25,14 @@ jobs:
           REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2 | tr 'A-Z' 'a-z')
           ORIGINAL_REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
           
-          echo "🐳 Injetando build estático dentro do container central nginx-homologacao..."
+          echo "🐳 Injetando arquivos estáticos dentro do container central nginx-homologacao..."
           
           # OBS: O runner precisa ter permissao ao socket docker do host
           docker exec nginx-homologacao mkdir -p /usr/share/nginx/html/$REPO_NAME
           docker exec nginx-homologacao sh -c "rm -rf /usr/share/nginx/html/$REPO_NAME/*"
-          docker cp out/. nginx-homologacao:/usr/share/nginx/html/$REPO_NAME/
+          
+          # Como é um projeto HTML estático, copiamos do diretório atual (.) em vez de (out/.)
+          docker cp . nginx-homologacao:/usr/share/nginx/html/$REPO_NAME/
           
           if [ "$ORIGINAL_REPO_NAME" != "$REPO_NAME" ]; then
             echo "🔄 Criando página de redirecionamento para o caso original ($ORIGINAL_REPO_NAME -> $REPO_NAME)..."
