@@ -210,7 +210,7 @@
             <option value="500">Top 500</option>
           </select>
         </div>
-        <div class="w-full h-[400px]">
+        <div id="chartTopContainer" class="w-full h-[400px]">
           <canvas id="chartTop10"></canvas>
         </div>
       </div>
@@ -700,6 +700,13 @@
     function renderChartTop(limit) {
       if (myCharts['top10']) myCharts['top10'].destroy();
       
+      // Ajustar altura dinamicamente para não encavalar
+      const container = document.getElementById('chartTopContainer');
+      const minHeight = 400;
+      const heightPorBarra = 24;
+      const novaAltura = Math.max(minHeight, limit * heightPorBarra);
+      container.style.height = novaAltura + 'px';
+
       // Sort por líquido
       const sorted = [...servidoresProcessados].sort((a, b) => b.totalLiquido - a.totalLiquido).slice(0, limit);
       
