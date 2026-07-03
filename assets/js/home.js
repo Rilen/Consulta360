@@ -133,7 +133,8 @@ async function handleBusca(e) {
     try {
         // 1. Check IndexedDB Cache (Exclusivo)
         const cached = await getCache(cacheKey); // Vem do db.js
-        const metaKey = `meta_folha_${nomeBase}_${mesAno}`;
+        const metaPrefix = endpoint === 'Servidor' ? 'meta_servidor' : 'meta_folha';
+        const metaKey = `${metaPrefix}_${nomeBase}_${mesAno}`;
         const meta = await getMetadata(metaKey);
         
         if (cached) {

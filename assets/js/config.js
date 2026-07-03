@@ -31,6 +31,24 @@ function initConfigModule() {
         });
     }
 
+    const btnSyncServidor = document.getElementById('btnSyncServidor');
+    if (btnSyncServidor) {
+        const newBtn = btnSyncServidor.cloneNode(true);
+        btnSyncServidor.parentNode.replaceChild(newBtn, btnSyncServidor);
+        newBtn.addEventListener('click', async () => {
+            const mesAno = document.getElementById('syncMesServidor').value;
+            const entidade = document.getElementById('syncBaseServidor').value;
+            if(!mesAno) return alert('Selecione o mês para sincronizar a relação de servidores.');
+            
+            const datas = mesAnoParaDatas(mesAno);
+            const url = `${API_BASE}/Servidor?dataInicial=${encodeURIComponent(datas.dataInicial)}&dataFinal=${encodeURIComponent(datas.dataFinal)}&nomeBase=${encodeURIComponent(entidade)}`;
+            const cacheKey = `Servidor_${entidade}_${mesAno}`;
+            const metaKey = `meta_servidor_${entidade}_${mesAno}`;
+            
+            await motorSincronizacao(url, cacheKey, metaKey, 'Servidor', 30);
+        });
+    }
+
     const btnSyncReceitas = document.getElementById('btnSyncReceitas');
     if (btnSyncReceitas) {
         const newBtn = btnSyncReceitas.cloneNode(true);
@@ -100,6 +118,15 @@ async function atualizarLabelsMetadados() {
         const metaFolha = await getMetadata(`meta_folha_${baseFolha}_${mesFolha}`);
         const lblF = document.getElementById('lblSyncFolha');
         if(lblF) lblF.textContent = metaFolha ? formatarData(metaFolha.timestamp) : 'Status: Não sincronizado';
+    }
+
+    // Servidor
+    const mesServ = document.getElementById('syncMesServidor')?.value;
+    const baseServ = document.getElementById('syncBaseServidor')?.value;
+    if(mesServ && baseServ) {
+        const metaServ = await getMetadata(`meta_servidor_${baseServ}_${mesServ}`);
+        const lblS = document.getElementById('lblSyncServidor');
+        if(lblS) lblS.textContent = metaServ ? formatarData(metaServ.timestamp) : 'Status: Não sincronizado';
     }
 
     // Receitas
@@ -222,6 +249,7 @@ async function iniciarMotor(fetchFunc, cacheKey, metaKey, uiPrefix, estimativaPa
         barra.classList.replace('bg-blue-600', 'bg-amber-500');
         barra.classList.replace('bg-green-600', 'bg-amber-500');
         barra.classList.replace('bg-rose-600', 'bg-amber-500');
+        barra.classList.replace('bg-indigo-600', 'bg-amber-500');
 
         // Carrega Mock
         try {
@@ -230,6 +258,13 @@ async function iniciarMotor(fetchFunc, cacheKey, metaKey, uiPrefix, estimativaPa
                 const mockData = await mockRes.json();
                 await setCache(cacheKey, JSON.stringify(mockData));
                 await setMetadata(metaKey, { records: mockData.length });
+            } else if (uiPrefix === 'Servidor') {
+                if (typeof gerarMockServidor === 'function') {
+                    const params = cacheKey.split('_'); // Servidor_entidade_mesAno
+                    const mockS = gerarMockServidor(params[1], params[2]);
+                    await setCache(cacheKey, JSON.stringify(mockS));
+                    await setMetadata(metaKey, { records: mockS.length });
+                }
             } else if (uiPrefix === 'Receitas') {
                 // mock gerado localmente em receitas.js (se carregado)
                 if (typeof gerarMockReceitas === 'function') {
@@ -254,7 +289,7 @@ async function iniciarMotor(fetchFunc, cacheKey, metaKey, uiPrefix, estimativaPa
         }
     } else if (allData.length > 0) {
         // Sucesso
-        const dadosString = (uiPrefix === 'Folha') ? JSON.stringify(allData) : allData;
+        const dadosString = (uiPrefix === 'Folha' || uiPrefix === 'Servidor') ? JSON.stringify(allData) : allData;
         await setCache(cacheKey, dadosString);
         await setMetadata(metaKey, { records: allData.length });
         
@@ -274,4 +309,44 @@ async function iniciarMotor(fetchFunc, cacheKey, metaKey, uiPrefix, estimativaPa
         box.classList.add('hidden');
         barra.classList.replace('bg-rose-500', 'bg-blue-600');
     }, 4000);
+}
+
+// Mock generator para Relação de Servidores (usado no fallback CORS)
+function gerarMockServidor(entidade, mesAno) {
+    const [ano, mes] = mesAno.split('-');
+    const cargos = ['Professor I', 'Professor II', 'Auxiliar Administrativo', 'Técnico em Enfermagem',
+                    'Médico', 'Agente Comunitário de Saúde', 'Auxiliar de Serviços Gerais',
+                    'Motorista', 'Vigia', 'Assistente Social', 'Engenheiro Civil', 'Contador'];
+    const vinculos = ['ESTATUTARIO', 'COMISSIONADO', 'CONTRATADO'];
+    const lotacoes = ['Secretaria de Educação', 'Secretaria de Saúde', 'Secretaria de Obras',
+                      'Secretaria de Administração', 'Gabinete do Prefeito'];
+    
+    const sobrenomes = ['Silva', 'Santos', 'Oliveira', 'Souza', 'Lima', 'Pereira', 'Costa', 'Ferreira',
+                        'Rodrigues', 'Almeida', 'Nunes', 'Carvalho', 'Gomes', 'Martins', 'Araujo',
+                        'Ribeiro', 'Barbosa', 'Rocha', 'Dias', 'Moreira'];
+    const nomes = ['Ana', 'Carlos', 'Maria', 'Joao', 'Paulo', 'Jose', 'Pedro', 'Lucas',
+                   'Mariana', 'Fernanda', 'Rafael', 'Juliana', 'Marcos', 'Patricia', 'Bruno',
+                   'Camila', 'Daniel', 'Amanda', 'Thiago', 'Larissa'];
+    
+    const mock = [];
+    const qtd = Math.floor(Math.random() * 40) + 30;
+    
+    for (let i = 0; i < qtd; i++) {
+        const nome = nomes[Math.floor(Math.random() * nomes.length)];
+        const sobrenome = sobrenomes[Math.floor(Math.random() * sobrenomes.length)];
+        const cargo = cargos[Math.floor(Math.random() * cargos.length)];
+        const matricula = String(10000 + i).padStart(6, '0');
+        
+        mock.push({
+            Matricula: matricula,
+            Nome: `${nome} ${sobrenome}`,
+            Cargo: cargo,
+            Vinculo: vinculos[Math.floor(Math.random() * vinculos.length)],
+            Lotacao: lotacoes[Math.floor(Math.random() * lotacoes.length)],
+            Entidade: entidade,
+            MesReferencia: `${mes}/${ano}`
+        });
+    }
+    
+    return mock;
 }
