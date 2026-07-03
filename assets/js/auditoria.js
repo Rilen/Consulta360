@@ -1,10 +1,14 @@
 // auditoria.js - Módulo de Inteligência Artificial e Compliance
 
 document.addEventListener('routeChanged', (e) => {
-    if (e.detail.route === '#auditoria') {
+    if (e.detail.route === 'auditoria') {
         initAuditoriaModule();
     }
 });
+
+if (window.location.hash === '#auditoria' || window.location.hash.includes('auditoria')) {
+    setTimeout(initAuditoriaModule, 100);
+}
 
 function initAuditoriaModule() {
     const hoje = new Date();

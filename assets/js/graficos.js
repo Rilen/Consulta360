@@ -3,10 +3,14 @@
 let myCharts = {};
 
 document.addEventListener('routeChanged', (e) => {
-    if (e.detail.route === '#graficos') {
+    if (e.detail.route === 'graficos') {
         initGraficosModule();
     }
 });
+
+if (window.location.hash === '#graficos' || window.location.hash.includes('graficos')) {
+    setTimeout(initGraficosModule, 100);
+}
 
 function initGraficosModule() {
     const hoje = new Date();
