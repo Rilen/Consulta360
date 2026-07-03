@@ -25,17 +25,31 @@ let chartPoderInst = null;
 
 const TOTAL_SERVIDORES_ESTIMADO = 3000; // Volumetria base
 
-document.addEventListener('DOMContentLoaded', () => {
-    lucide.createIcons();
+document.addEventListener('routeChanged', (e) => {
+    if (e.detail.route === 'evolucao') {
+        initEvolucaoModule();
+    }
+});
+
+if (window.location.hash === '#evolucao') {
+    setTimeout(initEvolucaoModule, 100);
+}
+
+function initEvolucaoModule() {
+    const form = document.getElementById('filter-form');
+    if (!form || form.dataset.bound === "true") return;
+    form.dataset.bound = "true";
+
+    if (window.lucide) lucide.createIcons();
     
-    document.getElementById('filter-form').addEventListener('submit', function(e) {
+    form.addEventListener('submit', function(e) {
         e.preventDefault();
         gerarHistorico();
     });
 
     // Render inicial
     gerarHistorico();
-});
+}
 
 function gerarHistorico() {
     const anoInicial = parseInt(document.getElementById('anoInicial').value);

@@ -21,7 +21,6 @@ function renderFooter() {
         <div class="flex flex-col md:flex-row items-center justify-between gap-4 border-t border-slate-200 pt-6">
             ${typeof getNpaHtml === 'function' ? getNpaHtml() : ''}
             <div class="flex items-center gap-6">
-                ${typeof getInfosHtml === 'function' ? getInfosHtml() : ''}
                 ${typeof getVersaoHtml === 'function' ? getVersaoHtml() : ''}
             </div>
         </div>
