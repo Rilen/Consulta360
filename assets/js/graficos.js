@@ -52,7 +52,7 @@ async function carregarDadosGraficos(forceUpdate = false) {
         return;
     }
 
-    const cacheKey = `analytics_${mesAno}_${nomeBase}`;
+    const cacheKey = `FolhaPagamento_${nomeBase}_${mesAno}`;
     const statusCache = document.getElementById('statusCache');
     
     esconderErroGraficos();
@@ -60,6 +60,7 @@ async function carregarDadosGraficos(forceUpdate = false) {
 
     try {
         let rawData = await getCache(cacheKey);
+        if (rawData && typeof rawData === 'string') rawData = JSON.parse(rawData);
         const metaKey = `meta_folha_${nomeBase}_${mesAno}`;
         const meta = await getMetadata(metaKey);
 
