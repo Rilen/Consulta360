@@ -13,7 +13,7 @@ if (window.location.hash === '#config' || window.location.hash.includes('config'
 // ── Proxy CORS ──────────────────────────────────
 // Preencha com a URL do seu Worker após fazer deploy: npx wrangler deploy (pasta worker/)
 // Deixe vazio para cair no mock local enquanto não tiver proxy.
-const CORS_PROXY = '';
+const CORS_PROXY = 'https://consulta360-proxy.rilen-lima.workers.dev';
 
 // URL base da API — usada para montar as requisições
 const API_URL = 'https://webapp1-riodasostras.cidade360.cloud/dadosabertos';
