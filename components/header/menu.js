@@ -9,8 +9,8 @@ function getMenuHtml(currentRoute) {
     const isConfig = currentRoute === 'config';
 
     return `
-    <div class="flex items-center justify-between w-full">
-      <div class="flex items-center gap-4 flex-wrap">
+    <div class="flex items-center justify-end w-full">
+      <div class="flex items-center justify-end gap-4 flex-wrap">
         <!-- Consulta -->
         ${
           isHome
