@@ -44,17 +44,17 @@ async function navigateTo(route, pushState = true) {
             window.history.pushState({ route }, '', `#${route}`);
         }
 
-        // Re-renderizar ícones Lucide da nova tela
-        if (typeof lucide !== 'undefined') {
-            lucide.createIcons();
-        }
-
         // Emitir evento customizado para que os scripts da página saibam que a tela mudou
         document.dispatchEvent(new CustomEvent('routeChanged', { detail: { route } }));
 
         // Disparar renderização do Header e Footer novamente para atualizar estados visuais
         if (typeof renderHeader === 'function') renderHeader(route);
         if (typeof renderFooter === 'function') renderFooter();
+        
+        // Re-renderizar ícones Lucide da nova tela E do header/footer recém renderizados
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
 
     } catch (error) {
         console.error(error);

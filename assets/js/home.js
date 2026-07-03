@@ -281,14 +281,14 @@ function renderStats() {
     if (brutoKey || liquidoKey) {
         currentData.forEach(row => {
             if (brutoKey) {
-                let v = parseFloat(String(row[brutoKey]).replace(/\\./g, '').replace(',', '.'));
+                let v = parseFloat(String(row[brutoKey]).replace(/\./g, '').replace(',', '.'));
                 if(!isNaN(v)) {
                     sumBruto += v;
                     if(v > teto) teto = v;
                 }
             }
             if (liquidoKey) {
-                let v = parseFloat(String(row[liquidoKey]).replace(/\\./g, '').replace(',', '.'));
+                let v = parseFloat(String(row[liquidoKey]).replace(/\./g, '').replace(',', '.'));
                 if(!isNaN(v)) sumLiquido += v;
             }
         });
@@ -296,28 +296,28 @@ function renderStats() {
 
     const formatBRL = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
 
-    let html = \`
+    let html = `
         <div class="bg-white border border-slate-200 rounded-xl p-4 flex flex-col gap-1 shadow-sm">
             <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Total de Registros</span>
-            <span class="text-2xl font-black text-slate-800">\${rowCount}</span>
+            <span class="text-2xl font-black text-slate-800">${rowCount}</span>
         </div>
-    \`;
+    `;
 
     if (sumBruto > 0) {
-        html += \`
+        html += `
             <div class="bg-white border border-slate-200 rounded-xl p-4 flex flex-col gap-1 shadow-sm">
                 <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Folha Bruta Total</span>
-                <span class="text-2xl font-black text-slate-800">\${formatBRL(sumBruto)}</span>
+                <span class="text-2xl font-black text-slate-800">${formatBRL(sumBruto)}</span>
             </div>
             <div class="bg-white border border-slate-200 rounded-xl p-4 flex flex-col gap-1 shadow-sm">
                 <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Maior Remuneração (Teto)</span>
-                <span class="text-2xl font-black text-blue-600">\${formatBRL(teto)}</span>
+                <span class="text-2xl font-black text-blue-600">${formatBRL(teto)}</span>
             </div>
             <div class="bg-white border border-slate-200 rounded-xl p-4 flex flex-col gap-1 shadow-sm bg-gradient-to-br from-emerald-50 to-white">
                 <span class="text-xs font-bold text-emerald-600 uppercase tracking-wider">Líquido Desembolsado</span>
-                <span class="text-2xl font-black text-emerald-700">\${formatBRL(sumLiquido)}</span>
+                <span class="text-2xl font-black text-emerald-700">${formatBRL(sumLiquido)}</span>
             </div>
-        \`;
+        `;
     }
 
     document.getElementById('statsRow').innerHTML = html;

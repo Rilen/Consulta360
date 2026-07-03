@@ -17,7 +17,14 @@ const historicoCargos = {
     'Professor':       { 2018: 2500, 2019: 2500, 2020: 2500, 2021: 2500, 2022: 3000, 2023: 3200, 2024: 3400, 2025: 3500, 2026: 3500 },
     'Médico':          { 2018: 6000, 2019: 6000, 2020: 6000, 2021: 6500, 2022: 7000, 2023: 7500, 2024: 8000, 2025: 8500, 2026: 9000 },
     'Guarda Municipal':{ 2018: 2000, 2019: 2100, 2020: 2100, 2021: 2100, 2022: 2400, 2023: 2600, 2024: 2800, 2025: 2900, 2026: 3000 },
-    'Administrativo':  { 2018: 1200, 2019: 1300, 2020: 1300, 2021: 1350, 2022: 1500, 2023: 1600, 2024: 1700, 2025: 1800, 2026: 1900 }
+    'Administrativo':  { 2018: 1200, 2019: 1300, 2020: 1300, 2021: 1350, 2022: 1500, 2023: 1600, 2024: 1700, 2025: 1800, 2026: 1900 },
+    'Enfermeiro':      { 2018: 3000, 2019: 3100, 2020: 3100, 2021: 3200, 2022: 4750, 2023: 4750, 2024: 4750, 2025: 4750, 2026: 4750 },
+    'Técnico de Enfermagem': { 2018: 1800, 2019: 1800, 2020: 1800, 2021: 2000, 2022: 3325, 2023: 3325, 2024: 3325, 2025: 3325, 2026: 3325 },
+    'Fiscal de Tributos':{ 2018: 4000, 2019: 4200, 2020: 4200, 2021: 4200, 2022: 4500, 2023: 4800, 2024: 5000, 2025: 5200, 2026: 5500 },
+    'Assistente Social': { 2018: 2200, 2019: 2300, 2020: 2300, 2021: 2400, 2022: 2600, 2023: 2800, 2024: 2900, 2025: 3000, 2026: 3100 },
+    'Agente de Trânsito':{ 2018: 1500, 2019: 1600, 2020: 1600, 2021: 1700, 2022: 1900, 2023: 2000, 2024: 2200, 2025: 2300, 2026: 2400 },
+    'Gari':              { 2018: 1000, 2019: 1050, 2020: 1100, 2021: 1150, 2022: 1250, 2023: 1350, 2024: 1450, 2025: 1550, 2026: 1650 },
+    'Psicólogo':         { 2018: 2400, 2019: 2500, 2020: 2500, 2021: 2600, 2022: 2800, 2023: 3000, 2024: 3200, 2025: 3300, 2026: 3400 }
 };
 
 let chartCargosInst = null;
@@ -41,6 +48,28 @@ function initEvolucaoModule() {
     form.dataset.bound = "true";
 
     if (window.lucide) lucide.createIcons();
+    
+    // Popular combo de cargos
+    const comboFiltro = document.getElementById('filtroCargoEvolucao');
+    if (comboFiltro) {
+        Object.keys(historicoCargos).sort().forEach(cargo => {
+            const opt = document.createElement('option');
+            opt.value = cargo;
+            opt.innerText = cargo;
+            comboFiltro.appendChild(opt);
+        });
+        
+        // Reagir quando mudar o combo (para não precisar apertar em Gerar toda vez)
+        comboFiltro.addEventListener('change', () => {
+            const anosSelecionados = [];
+            const ini = parseInt(document.getElementById('anoInicial').value);
+            const fim = parseInt(document.getElementById('anoFinal').value);
+            if (ini <= fim) {
+                for (let a = ini; a <= fim; a++) anosSelecionados.push(a.toString());
+                renderizarTabela(anosSelecionados);
+            }
+        });
+    }
     
     form.addEventListener('submit', function(e) {
         e.preventDefault();
@@ -283,7 +312,11 @@ function renderizarTabela(anos) {
 
     // Body
     let tbodyHtml = '';
+    const cargoFiltro = document.getElementById('filtroCargoEvolucao')?.value || 'todos';
+
     for (let cargo in historicoCargos) {
+        if (cargoFiltro !== 'todos' && cargo !== cargoFiltro) continue;
+
         tbodyHtml += `<tr class="hover:bg-slate-50/50 transition-colors">
             <td class="py-3 px-5 text-sm font-semibold text-slate-700 sticky left-0 bg-white border-r border-slate-100">${cargo}</td>`;
         
