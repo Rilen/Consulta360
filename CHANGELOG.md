@@ -2,7 +2,12 @@
 
 Todas as mudanças notáveis no projeto **Consulta360** serão documentadas neste arquivo.
 
-## [Unreleased] - 2026-07-02
+## [v0.0.2] - 2026-07-03
+
+### Modificado
+- **Refatoração e Formatação:** Código HTML do projeto foi formatado e indentado de forma padronizada via formatador automático.
+
+## [v0.0.1] - 2026-07-02
 
 ### Adicionado
 - **Regras de Ouro (AGENTS.md):** Criação do arquivo de constituição arquitetural no diretório `.agents/` para blindar o conhecimento de infraestrutura (Nginx estático), Separação de Preocupações (SoC) e Design System.
