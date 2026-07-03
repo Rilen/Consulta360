@@ -56,11 +56,22 @@ jobs:
           echo "🔧 Configurando proxy reverso para API de Dados Abertos..."
           
           # Gera config completa do Nginx com o proxy reverso para /api/
+          # Inclui CORS headers para permitir acesso de origens externas (GitHub Pages)
           cat > /tmp/default.conf << 'NGINX_EOF'
 server {
     listen       80;
     listen  [::]:80;
     server_name  localhost;
+
+    # ── CORS: permite acesso de qualquer origem (GitHub Pages, etc.) ──
+    add_header Access-Control-Allow-Origin * always;
+    add_header Access-Control-Allow-Methods "GET, OPTIONS" always;
+    add_header Access-Control-Allow-Headers "Accept, Content-Type" always;
+
+    # Preflight (OPTIONS) responde 204 sem proxy
+    if ($request_method = OPTIONS) {
+        return 204;
+    }
 
     # Proxy reverso para API de Dados Abertos — resolve CORS na rede interna
     location /api/ {

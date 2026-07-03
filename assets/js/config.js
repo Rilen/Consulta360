@@ -158,10 +158,12 @@ document.body.addEventListener('change', (e) => {
 
 // Helpers de Rede
 // Quando em rede interna (Nginx proxy), API_BASE = '/api' e as chamadas são diretas.
-// Em domínios públicos (GitHub Pages), roteamos via proxy CORS público.
+// Em domínios públicos (GitHub Pages), roteamos via proxy CORS no Nginx (que adiciona Access-Control-Allow-Origin:*).
 function wrapUrl(url) {
     if (API_BASE === '/api') return url;
-    return 'https://corsproxy.io/?' + encodeURIComponent(url);
+    // Reescreve a URL da API externa para passar pelo proxy CORS do Nginx
+    // Ex: https://webapp1..../dadosabertos/FolhaPagamento?... → http://10.0.0.88:3005/api/FolhaPagamento?...
+    return url.replace(/^https:\/\/webapp1-riodasostras\.cidade360\.cloud\/dadosabertos\//, 'http://10.0.0.88:3005/api/');
 }
 
 // Motor para Query Params (Folha, Servidor)
@@ -173,9 +175,10 @@ async function motorSincronizacao(baseUrl, cacheKey, metaKey, uiPrefix, estimati
 }
 
 // Motor para RESTful paths (Receitas e Despesas)
+// O parâmetro unidadeGestora=CONSOLIDADO é obrigatório na API para estas rotas
 async function motorSincronizacaoRest(baseUrl, entidade, cacheKey, metaKey, uiPrefix, estimativaPaginas = 20) {
     await iniciarMotor(async (pagina) => {
-        const url = wrapUrl(`${baseUrl}/${pagina}/${encodeURIComponent(entidade)}`);
+        const url = wrapUrl(`${baseUrl}/${pagina}/${encodeURIComponent(entidade)}?unidadeGestora=CONSOLIDADO`);
         return await fetch(url, { headers: { 'Accept': 'application/json, text/plain, */*' } });
     }, cacheKey, metaKey, uiPrefix, estimativaPaginas);
 }
