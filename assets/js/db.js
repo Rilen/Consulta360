@@ -87,7 +87,7 @@ async function getMetadata(key) {
     const tx = db.transaction('metadata', 'readonly');
     const store = tx.objectStore('metadata');
     const req = store.get(key);
-    req.onsuccess = () => resolve(req.result ? req.result.value : null);
+    req.onsuccess = () => resolve(req.result || null);
     req.onerror = () => reject(req.error);
   });
 }
