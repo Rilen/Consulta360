@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Consulta360 - Evolução Salarial</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Fonte -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Ícones -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <link rel="stylesheet" href="./assets/css/global.css">
+</head>
+
+<body class="text-slate-800 antialiased selection:bg-blue-100 selection:text-blue-900">
+
+  <!-- Background Orbs -->
+  <div class="fixed inset-0 overflow-hidden pointer-events-none -z-10">
+    <div class="absolute -top-40 -right-40 w-96 h-96 bg-amber-400/20 rounded-full blur-3xl"></div>
+    <div class="absolute top-1/2 -left-20 w-72 h-72 bg-orange-400/10 rounded-full blur-3xl"></div>
+  </div>
+
+  <!-- Header -->
+  <header class="sticky top-0 z-50 bg-white/70 backdrop-blur-md border-b border-slate-200 shadow-sm">
+    <div class="max-w-[1600px] mx-auto px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div
+          class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-blue-600/20">
+          <i data-lucide="briefcase" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h1 class="text-sm font-bold text-slate-800 leading-tight">Consulta360</h1>
+          <p class="text-[11px] font-medium text-slate-500 uppercase tracking-widest">Portal de Transparência</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-4">
+        <a href="./index.html"
+          class="flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors">
+          <i data-lucide="database" class="w-4 h-4 text-blue-500"></i> Consulta
+        </a>
+        <a href="./graficos.html"
+          class="flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors">
+          <i data-lucide="pie-chart" class="w-4 h-4 text-indigo-500"></i> Análise de Dados
+        </a>
+        <a href="./auditoria_ia.html"
+          class="flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-emerald-600 transition-colors">
+          <i data-lucide="brain" class="w-4 h-4 text-emerald-500"></i> Auditoria
+        </a>
+        <div
+          class="px-3 py-1 bg-amber-50 text-amber-600 border border-amber-100 rounded-full text-xs font-bold tracking-wide flex items-center gap-2">
+          <i data-lucide="trending-up" class="w-4 h-4"></i> Evolução
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="mt-8 p-6 max-w-[1600px] mx-auto space-y-6">
+
+    <!-- Header Interno -->
+    <div class="flex flex-col gap-1 mb-2">
+      <h2 class="text-2xl font-black text-slate-800 flex items-center gap-3">
+        <i data-lucide="bar-chart-2" class="w-7 h-7 text-amber-500"></i> 
+        Evolução Salarial & Poder de Compra
+      </h2>
+      <p class="text-sm text-slate-500 max-w-3xl">Análise histórica do impacto inflacionário e da proporção da folha em relação ao Salário Mínimo Nacional.</p>
+    </div>
+
+    <!-- Filtros Inteligentes -->
+    <section class="ag-card rounded-2xl p-6 fade-in">
+      <div class="flex items-center justify-between mb-5">
+        <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+          <i data-lucide="filter" class="w-4 h-4"></i> Controles Temporais
+        </h2>
+        <div id="statusCache"
+          class="items-center gap-2 text-xs font-medium text-blue-600 px-3 py-1 bg-blue-50 border border-blue-100 rounded-full flex">
+          <i data-lucide="server" class="w-3.5 h-3.5"></i> Usando Dataset Histórico
+        </div>
+      </div>
+
+      <form id="filter-form" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 items-end">
+        <div class="space-y-1.5">
+          <label class="text-[13px] font-medium text-slate-600">Ano Inicial</label>
+          <div class="relative">
+            <select id="anoInicial"
+              class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all appearance-none cursor-pointer">
+              <option value="2018">2018</option>
+              <option value="2019">2019</option>
+              <option value="2020">2020</option>
+              <option value="2021">2021</option>
+              <option value="2022">2022</option>
+            </select>
+            <i data-lucide="chevron-down"
+              class="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+          </div>
+        </div>
+
+        <div class="space-y-1.5">
+          <label class="text-[13px] font-medium text-slate-600">Ano Final</label>
+          <div class="relative">
+            <select id="anoFinal"
+              class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all appearance-none cursor-pointer">
+              <option value="2022">2022</option>
+              <option value="2023">2023</option>
+              <option value="2024">2024</option>
+              <option value="2025">2025</option>
+              <option value="2026" selected>2026</option>
+            </select>
+            <i data-lucide="chevron-down"
+              class="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+          </div>
+        </div>
+        
+        <div class="space-y-1.5">
+          <label class="text-[13px] font-medium text-slate-600">Entidade</label>
+          <div class="relative">
+            <select id="nomeBaseEvolucao"
+              class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all appearance-none cursor-pointer">
+              <option value="PMRO">PMRO - Geral (Média Ponderada)</option>
+            </select>
+            <i data-lucide="chevron-down"
+              class="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap justify-start gap-3 mt-2">
+          <button type="submit" id="btnBuscar"
+            class="px-6 py-2.5 bg-amber-500 text-white text-sm font-medium rounded-xl hover:bg-amber-600 active:scale-95 transition-all shadow-sm shadow-amber-500/20 flex items-center gap-2">
+            <i data-lucide="history" class="w-4 h-4"></i> Gerar Histórico
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Área de Dashboards (Renderizado pelo JS) -->
+    <div id="evolutionArea" class="space-y-6">
+      
+      <!-- Cards Superiores de Métricas -->
+      <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        <!-- Defasagem Média -->
+        <div class="ag-card rounded-2xl p-6 flex flex-col justify-center relative overflow-hidden group">
+          <div class="absolute right-0 top-0 w-32 h-32 bg-rose-500/10 rounded-full blur-2xl -mr-10 -mt-10 transition-transform group-hover:scale-110"></div>
+          <div class="flex items-center gap-3 mb-3 relative z-10">
+            <div class="w-10 h-10 rounded-full bg-rose-50 flex items-center justify-center">
+              <i data-lucide="trending-down" class="w-5 h-5 text-rose-500"></i>
+            </div>
+            <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider">Índice de Defasagem Média</h3>
+          </div>
+          <div class="text-3xl font-black text-slate-800 ml-13 relative z-10" id="metric-defasagem">0%</div>
+          <p class="text-xs text-slate-500 mt-2 ml-13 relative z-10">Perda do poder de compra frente ao salário mínimo no período.</p>
+        </div>
+
+        <!-- Custo Superávit/Déficit -->
+        <div class="ag-card rounded-2xl p-6 flex flex-col justify-center relative overflow-hidden group">
+          <div class="absolute right-0 top-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl -mr-10 -mt-10 transition-transform group-hover:scale-110"></div>
+          <div class="flex items-center gap-3 mb-3 relative z-10">
+            <div class="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center">
+              <i data-lucide="piggy-bank" class="w-5 h-5 text-emerald-600"></i>
+            </div>
+            <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider">Custo de Ajuste Global</h3>
+          </div>
+          <div class="text-3xl font-black text-slate-800 ml-13 relative z-10" id="metric-custo">R$ 0,00</div>
+          <p class="text-xs text-slate-500 mt-2 ml-13 relative z-10">Impacto anual estimado para corrigir a defasagem da base atual.</p>
+        </div>
+
+        <!-- Teto vs Piso -->
+        <div class="ag-card rounded-2xl p-6 flex flex-col justify-center relative overflow-hidden group">
+          <div class="absolute right-0 top-0 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl -mr-10 -mt-10 transition-transform group-hover:scale-110"></div>
+          <div class="flex items-center gap-3 mb-3 relative z-10">
+            <div class="w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center">
+              <i data-lucide="scale" class="w-5 h-5 text-amber-600"></i>
+            </div>
+            <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider">Teto vs Piso (Agregado)</h3>
+          </div>
+          <div class="text-3xl font-black text-slate-800 ml-13 relative z-10" id="metric-desigualdade">0x</div>
+          <p class="text-xs text-slate-500 mt-2 ml-13 relative z-10">Razão de distância entre a menor e maior remuneração consolidada.</p>
+        </div>
+
+      </section>
+
+      <!-- Gráficos Principais -->
+      <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <!-- Evolução por Cargo/Ano -->
+        <div class="ag-card rounded-2xl p-6 flex flex-col">
+          <h3 class="text-sm font-bold text-slate-700 mb-2 flex items-center gap-2">
+            <i data-lucide="users" class="w-4 h-4 text-amber-500"></i> 
+            Evolução Salarial por Cargo (Nominal)
+          </h3>
+          <p class="text-xs text-slate-500 mb-6">Média salarial nominal consolidada ao longo dos anos.</p>
+          <div class="w-full flex-1 min-h-[350px] relative">
+            <canvas id="chartCargos"></canvas>
+          </div>
+        </div>
+
+        <!-- Poder de Compra vs Salário Mínimo -->
+        <div class="ag-card rounded-2xl p-6 flex flex-col">
+          <h3 class="text-sm font-bold text-slate-700 mb-2 flex items-center gap-2">
+            <i data-lucide="area-chart" class="w-4 h-4 text-emerald-500"></i> 
+            Poder de Compra vs Indexador (SM)
+          </h3>
+          <p class="text-xs text-slate-500 mb-6">Proporção de crescimento municipal contra a curva do Salário Mínimo.</p>
+          <div class="w-full flex-1 min-h-[350px] relative">
+            <canvas id="chartPoderCompra"></canvas>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- Tabela de Proporção -->
+      <section class="ag-card rounded-2xl p-6 overflow-hidden">
+        <div class="flex items-center justify-between mb-6">
+          <h3 class="text-sm font-bold text-slate-700 flex items-center gap-2">
+            <i data-lucide="table" class="w-4 h-4 text-blue-500"></i>
+            Proporção em Quantidade de Salários Mínimos
+          </h3>
+          <span class="px-3 py-1 bg-slate-100 text-slate-500 text-[10px] font-bold rounded-md uppercase tracking-wider">Histórico</span>
+        </div>
+        
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead class="bg-slate-50 border-y border-slate-100">
+              <tr id="table-head">
+                <!-- Injetado via JS -->
+              </tr>
+            </thead>
+            <tbody id="table-body" class="divide-y divide-slate-100">
+                <!-- Injetado via JS -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </div>
+
+  </main>
+
+  <footer class="mt-8 mb-6 text-center">
+    <a href="./changelog.html"
+      class="text-xs font-semibold text-slate-400 hover:text-blue-500 transition-colors bg-white/50 px-3 py-1.5 rounded-full border border-slate-200 shadow-sm backdrop-blur-sm">v0.0.2</a>
+  </footer>
+
+  <!-- Scripts Modulares -->
+  <script src="./assets/js/evolucao.js"></script>
+
+</body>
+</html>
