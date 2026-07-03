@@ -156,10 +156,18 @@ document.body.addEventListener('change', (e) => {
 });
 
 
-// Motor para Query Params (Folha)
+// Helpers de Rede
+// Quando em rede interna (Nginx proxy), API_BASE = '/api' e as chamadas são diretas.
+// Em domínios públicos (GitHub Pages), roteamos via proxy CORS público.
+function wrapUrl(url) {
+    if (API_BASE === '/api') return url;
+    return 'https://corsproxy.io/?' + encodeURIComponent(url);
+}
+
+// Motor para Query Params (Folha, Servidor)
 async function motorSincronizacao(baseUrl, cacheKey, metaKey, uiPrefix, estimativaPaginas = 50) {
     await iniciarMotor(async (pagina) => {
-        const url = `${baseUrl}&numeroPagina=${pagina}`;
+        const url = wrapUrl(`${baseUrl}&numeroPagina=${pagina}`);
         return await fetch(url, { headers: { 'Accept': 'application/json, text/plain, */*' } });
     }, cacheKey, metaKey, uiPrefix, estimativaPaginas);
 }
@@ -167,7 +175,7 @@ async function motorSincronizacao(baseUrl, cacheKey, metaKey, uiPrefix, estimati
 // Motor para RESTful paths (Receitas e Despesas)
 async function motorSincronizacaoRest(baseUrl, entidade, cacheKey, metaKey, uiPrefix, estimativaPaginas = 20) {
     await iniciarMotor(async (pagina) => {
-        const url = `${baseUrl}/${pagina}/${encodeURIComponent(entidade)}`;
+        const url = wrapUrl(`${baseUrl}/${pagina}/${encodeURIComponent(entidade)}`);
         return await fetch(url, { headers: { 'Accept': 'application/json, text/plain, */*' } });
     }, cacheKey, metaKey, uiPrefix, estimativaPaginas);
 }
