@@ -1,0 +1,3 @@
+# Dados da API — gerados pelo CI/CD (scripts/fetch-data.mjs)
+# Não commitar — cada deploy regenera os JSONs atualizados
+data/

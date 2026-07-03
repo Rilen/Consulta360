@@ -123,10 +123,7 @@ async function handleBusca(e) {
     if(!mesAno) return alert('Selecione o mês de referência');
 
     const cacheKey = `${endpoint}_${nomeBase}_${mesAno}`;
-    const datas = mesAnoParaDatas(mesAno); // Vem do api.js
-    
-    // URL Real da API Base (Paginação será anexada depois)
-    const url = `${API_BASE}/${endpoint}?nomeBase=${encodeURIComponent(nomeBase)}&dataInicial=${encodeURIComponent(datas.dataInicial)}&dataFinal=${encodeURIComponent(datas.dataFinal)}`;
+    const datas = mesAnoParaDatas(mesAno);
 
     changeState('loading');
     
