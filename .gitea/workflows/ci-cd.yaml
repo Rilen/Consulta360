@@ -53,4 +53,47 @@ jobs:
             docker cp redirect/index.html $CENTRAL_CONTAINER:/usr/share/nginx/html/$ORIGINAL_REPO_NAME/index.html
           fi
           
+          echo "🔧 Configurando proxy reverso para API de Dados Abertos..."
+          
+          # Gera config completa do Nginx com o proxy reverso para /api/
+          cat > /tmp/default.conf << 'NGINX_EOF'
+server {
+    listen       80;
+    listen  [::]:80;
+    server_name  localhost;
+
+    # Proxy reverso para API de Dados Abertos — resolve CORS na rede interna
+    location /api/ {
+        proxy_pass https://webapp1-riodasostras.cidade360.cloud/dadosabertos/;
+        proxy_ssl_server_name on;
+        proxy_http_version 1.1;
+        proxy_set_header Host webapp1-riodasostras.cidade360.cloud;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Accept-Encoding "";
+        proxy_buffering off;
+        proxy_read_timeout 120s;
+    }
+
+    location / {
+        root   /usr/share/nginx/html;
+        index  index.html index.htm;
+    }
+
+    error_page   500 502 503 504  /50x.html;
+    location = /50x.html {
+        root   /usr/share/nginx/html;
+    }
+}
+NGINX_EOF
+          
+          docker cp /tmp/default.conf $CENTRAL_CONTAINER:/etc/nginx/conf.d/default.conf
+          
+          echo "🧪 Testando configuração do Nginx..."
+          docker exec $CENTRAL_CONTAINER nginx -t
+          
+          echo "🔄 Recarregando Nginx para aplicar proxy..."
+          docker exec $CENTRAL_CONTAINER nginx -s reload
+          
           echo "🚀 Sucesso Absoluto! Disponível em: http://10.0.0.88:3005/$REPO_NAME/ (ou http://10.0.0.88:3005/$ORIGINAL_REPO_NAME/)"

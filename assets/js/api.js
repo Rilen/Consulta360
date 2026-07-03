@@ -1,7 +1,25 @@
 // ----------------------------------------------------
 // Lógica Base de Requisição e Helpers da API
 // ----------------------------------------------------
-const API_BASE = 'https://webapp1-riodasostras.cidade360.cloud/dadosabertos';
+
+// Detecta o ambiente: rede interna usa proxy reverso do Nginx (/api),
+// GitHub Pages ou outros domínios usam a URL direta com fallback mock
+const API_BASE = (() => {
+    const hostname = window.location.hostname;
+    // localhost e loopback
+    if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1') return '/api';
+    // IPs privados (redes internas)
+    const parts = hostname.split('.');
+    if (parts.length === 4 && /^\d+$/.test(parts[0])) {
+        const first = parseInt(parts[0], 10);
+        const second = parseInt(parts[1], 10);
+        if (first === 10) return '/api';                          // 10.0.0.0/8
+        if (first === 192 && second === 168) return '/api';       // 192.168.0.0/16
+        if (first === 172 && second >= 16 && second <= 31) return '/api'; // 172.16.0.0/12
+    }
+    // GitHub Pages ou outros domínios públicos — URL direta (CORS será gerenciado com fallback mock)
+    return 'https://webapp1-riodasostras.cidade360.cloud/dadosabertos';
+})();
 
 function toInputDate(d) { 
   return d.toISOString().split('T')[0]; 
