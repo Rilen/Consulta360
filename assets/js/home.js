@@ -125,7 +125,7 @@ async function handleBusca(e) {
     const cacheKey = `${endpoint}_${nomeBase}_${mesAno}`;
     const datas = mesAnoParaDatas(mesAno); // Vem do api.js
     
-    // URL Real da API (Note que a API usa dataInicial e dataFinal no formato DD/MM/YYYY)
+    // URL Real da API Base (Paginação será anexada depois)
     const url = `${API_BASE}/${endpoint}?nomeBase=${encodeURIComponent(nomeBase)}&dataInicial=${encodeURIComponent(datas.dataInicial)}&dataFinal=${encodeURIComponent(datas.dataFinal)}`;
 
     changeState('loading');
@@ -154,20 +154,47 @@ async function handleBusca(e) {
             textData = cached.data;
             showOfflineToast('Dados carregados do cache local (Instantâneo)', 'info');
         } else {
-            // 2. Fetch API
-            try {
-                const res = await fetch(url);
-                if (!res.ok) throw new Error('Servidor retornou ' + res.status);
-                textData = await res.text();
-                
-                // Tratar caso a API retorne HTML ou JSON de Erro em vez de CSV
-                if(textData.includes('<!DOCTYPE html>') || textData.includes('{"error"')) {
-                     throw new Error('Retorno inválido da API');
-                }
+            // 2. Fetch API com Paginação
+            let allData = [];
+            let pagina = 1;
+            let hasMore = true;
+            let firstError = null;
 
-                await setCache(cacheKey, textData); // Salva no IndexedDB
-            } catch (fetchErr) {
-                console.warn('API falhou, tentando fallback...', fetchErr);
+            while (hasMore) {
+                const urlPage = `${url}&numeroPagina=${pagina}`;
+                try {
+                    const res = await fetch(urlPage);
+                    if (!res.ok) {
+                        if (res.status === 400 || res.status === 404) {
+                            hasMore = false; // Acabaram as páginas
+                            break;
+                        }
+                        throw new Error('Servidor retornou ' + res.status);
+                    }
+                    
+                    const json = await res.json();
+                    if (!json || json.length === 0) {
+                        hasMore = false;
+                        break;
+                    }
+
+                    allData = allData.concat(json);
+
+                    if (json.length < 200) {
+                        hasMore = false;
+                    } else {
+                        pagina++;
+                        const msgEl = document.getElementById('loadingMsg');
+                        if(msgEl) msgEl.innerText = `Baixando página ${pagina}...`;
+                    }
+                } catch (fetchErr) {
+                    hasMore = false;
+                    if (pagina === 1) firstError = fetchErr; // Falhou logo na primeira
+                }
+            }
+
+            if (pagina === 1 && firstError) {
+                console.warn('API falhou, tentando fallback...', firstError);
                 if (cached) {
                     textData = cached.data;
                     showOfflineToast('⚠️ API Offline. Exibindo dados salvos anteriormente.', 'warning');
@@ -176,10 +203,17 @@ async function handleBusca(e) {
                     document.getElementById('alertaCors').classList.add('flex');
                     throw new Error('API Indisponível e sem cache salvo para este período.');
                 }
+            } else if (allData.length > 0) {
+                textData = JSON.stringify(allData);
+                await setCache(cacheKey, textData);
             }
         }
 
-        originalData = parsePlainText(textData); // Vem do api.js
+        // Restaura mensagem original de loading
+        const msgEl = document.getElementById('loadingMsg');
+        if(msgEl) msgEl.innerText = 'Consultando a API. Isso pode levar alguns segundos.';
+
+        originalData = JSON.parse(textData); // Agora é JSON nativo e não parsePlainText
         
         if (originalData.length === 0) {
             changeState('semDados');
