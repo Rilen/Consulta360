@@ -119,6 +119,8 @@ async function carregarDadosAuditoria() {
                     if (typeof showOfflineToast !== 'undefined') {
                         showOfflineToast('⚠️ API Bloqueada por CORS. Carregando Base de Demonstração (MOCK Local).', 'warning');
                     }
+                    const banner = document.getElementById('offline-banner');
+                    if (banner) banner.classList.remove('hidden');
                 } else {
                     throw new Error('Sem mock');
                 }
@@ -135,6 +137,8 @@ async function carregarDadosAuditoria() {
         if (dadosApi.length > 0) {
             if (!falhaApi) {
                 await setCache(cacheKey, dadosApi);
+                const banner = document.getElementById('offline-banner');
+                if (banner) banner.classList.add('hidden');
             }
             processarEngineIA(dadosApi, datas.labelMMSY);
         } else {

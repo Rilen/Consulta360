@@ -6,6 +6,8 @@ const routes = {
     'graficos': './body/graficos.html',
     'auditoria': './body/auditoria_ia.html',
     'evolucao': './body/evolucao.html',
+    'receitas': './body/receitas.html',
+    'despesas': './body/despesas.html',
     'info': './body/info.html',
     'changelog': './body/changelog.html'
 };

@@ -41,6 +41,12 @@
   <!-- Header Dinâmico -->
   <header id="app-header" class="sticky top-0 z-50 bg-[#004b80] border-b border-[#003860] shadow-md transition-all"></header>
 
+  <!-- Offline Banner (Injetado via JS em caso de CORS) -->
+  <div id="offline-banner" class="hidden bg-red-600 text-white text-xs font-bold uppercase tracking-widest text-center py-2 shadow-inner">
+    <i data-lucide="alert-triangle" class="w-4 h-4 inline-block mr-2 align-text-bottom"></i>
+    Modo de Demonstração Offline: Exibindo dados em cache (API Indisponível)
+  </div>
+
   <!-- Corpo Dinâmico (Router injeta aqui) -->
   <main id="app-body" class="mt-8 p-6 max-w-[1600px] mx-auto space-y-6 flex-1 w-full">
     <!-- Conteúdo será carregado dinamicamente via router.js -->
@@ -69,6 +75,8 @@
   <script src="./assets/js/evolucao.js"></script>
   <script src="./assets/js/graficos.js"></script>
   <script src="./assets/js/auditoria.js"></script>
+  <script src="./assets/js/receitas.js"></script>
+  <script src="./assets/js/despesas.js"></script>
 
 </body>
 </html>

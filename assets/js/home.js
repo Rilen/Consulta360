@@ -206,6 +206,8 @@ async function handleBusca(e) {
                             allData = await mockRes.json();
                             textData = JSON.stringify(allData);
                             showOfflineToast('⚠️ API Bloqueada por CORS. Carregando Base de Demonstração (MOCK Local).', 'warning');
+                            const banner = document.getElementById('offline-banner');
+                            if (banner) banner.classList.remove('hidden');
                         } else {
                             throw new Error('Sem mock');
                         }
@@ -217,6 +219,8 @@ async function handleBusca(e) {
                 }
             } else if (allData.length > 0) {
                 textData = JSON.stringify(allData);
+                const banner = document.getElementById('offline-banner');
+                if (banner) banner.classList.add('hidden');
                 await setCache(cacheKey, textData);
             }
         }

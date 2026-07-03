@@ -4,9 +4,11 @@ function getMenuHtml(currentRoute) {
     const isGraficos = currentRoute === 'graficos';
     const isAuditoria = currentRoute === 'auditoria';
     const isEvolucao = currentRoute === 'evolucao';
+    const isReceitas = currentRoute === 'receitas';
+    const isDespesas = currentRoute === 'despesas';
 
     return `
-    <div class="flex items-center gap-4">
+    <div class="flex items-center gap-4 flex-wrap">
         <!-- Consulta -->
         ${
           isHome
@@ -48,6 +50,28 @@ function getMenuHtml(currentRoute) {
              </div>`
           : `<a href="#" data-route="evolucao" class="px-4 py-1.5 bg-white/5 text-slate-200 border border-white/10 rounded-full text-sm font-medium flex items-center gap-2 hover:bg-white/15 hover:text-white transition-all">
               <i data-lucide="trending-up" class="w-4 h-4 text-amber-400"></i> Evolução
+             </a>`
+        }
+
+        <!-- Receitas -->
+        ${
+          isReceitas
+          ? `<div class="px-4 py-1.5 bg-white/20 text-white border border-white/40 rounded-full text-sm font-semibold flex items-center gap-2 shadow-sm backdrop-blur-md">
+              <i data-lucide="dollar-sign" class="w-4 h-4 text-green-300"></i> Receitas
+             </div>`
+          : `<a href="#" data-route="receitas" class="px-4 py-1.5 bg-white/5 text-slate-200 border border-white/10 rounded-full text-sm font-medium flex items-center gap-2 hover:bg-white/15 hover:text-white transition-all">
+              <i data-lucide="dollar-sign" class="w-4 h-4 text-green-400"></i> Receitas
+             </a>`
+        }
+
+        <!-- Despesas -->
+        ${
+          isDespesas
+          ? `<div class="px-4 py-1.5 bg-white/20 text-white border border-white/40 rounded-full text-sm font-semibold flex items-center gap-2 shadow-sm backdrop-blur-md">
+              <i data-lucide="shopping-cart" class="w-4 h-4 text-rose-300"></i> Despesas
+             </div>`
+          : `<a href="#" data-route="despesas" class="px-4 py-1.5 bg-white/5 text-slate-200 border border-white/10 rounded-full text-sm font-medium flex items-center gap-2 hover:bg-white/15 hover:text-white transition-all">
+              <i data-lucide="shopping-cart" class="w-4 h-4 text-rose-400"></i> Despesas
              </a>`
         }
     </div>

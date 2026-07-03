@@ -1,0 +1,342 @@
+// receitas.js - Módulo de Receitas e Arrecadação
+
+let chartsReceitas = {};
+
+document.addEventListener('routeChanged', (e) => {
+    if (e.detail.route === 'receitas') {
+        initReceitasModule();
+    }
+});
+
+if (window.location.hash === '#receitas' || window.location.hash.includes('receitas')) {
+    setTimeout(initReceitasModule, 100);
+}
+
+function initReceitasModule() {
+    const form = document.getElementById('form-receitas');
+    if (form) {
+        const newForm = form.cloneNode(true);
+        form.parentNode.replaceChild(newForm, form);
+        
+        newForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            carregarDadosReceitas();
+        });
+    }
+}
+
+async function carregarDadosReceitas() {
+    const exercicio = document.getElementById('exercicioReceitas').value;
+    const entidade = document.getElementById('entidadeReceitas').value;
+    
+    if (!exercicio || !entidade) {
+        mostrarErroReceitas('Preencha os filtros para consultar.');
+        return;
+    }
+
+    const cacheKey = `receitas_${exercicio}_${entidade}`;
+    const statusCache = document.getElementById('statusCacheReceitas');
+    
+    esconderErroReceitas();
+    setUiLoadingReceitas(true);
+
+    try {
+        let rawData = await getCache(cacheKey);
+
+        if (rawData) {
+            statusCache.classList.remove('hidden');
+            statusCache.classList.add('flex');
+            processarReceitas(rawData);
+            setUiLoadingReceitas(false);
+            return;
+        }
+
+        statusCache.classList.add('hidden');
+        statusCache.classList.remove('flex');
+        
+        // Formato Swagger: /Receitas/buscarDadosReceitas/{exercicio}/{numeroPagina}/{entidade}
+        // Mas a documentação também fala de /Api/Receita/ListarArrecadacao/arrecadacaoJSON?entidade='[Entidade]'&exercicio=[Ano]&numeroPagina=[numeroPagina]
+        // Baseando-se no Swagger RESTful:
+        const baseUrl = `${API_BASE}/Receitas/buscarDadosReceitas/${exercicio}`;
+
+        let dadosApi = [];
+        let pagina = 1;
+        const maxPaginas = 50;
+        let falhaApi = false;
+
+        while (pagina <= maxPaginas) {
+            const url = `${baseUrl}/${pagina}/${encodeURIComponent(entidade)}`;
+            const loadingMsg = document.getElementById('loadingMsgReceitas');
+            if (loadingMsg) loadingMsg.textContent = `Sincronizando página ${pagina} da API...`;
+
+            try {
+                const resp = await fetch(url, { headers: { 'Accept': 'application/json, text/plain, */*' } });
+                
+                if (!resp.ok) {
+                    falhaApi = true;
+                    break;
+                }
+                
+                const text = await resp.text();
+                if (!text || text.trim() === '') break;
+                
+                let paginaDados;
+                try { paginaDados = JSON.parse(text); } catch(e) { paginaDados = parsePlainText(text); }
+                
+                if (!Array.isArray(paginaDados)) {
+                    if (typeof paginaDados === 'object' && paginaDados !== null) {
+                        const chaves = Object.keys(paginaDados);
+                        const primeiraChave = chaves.find(k => Array.isArray(paginaDados[k]));
+                        paginaDados = primeiraChave ? paginaDados[primeiraChave] : [paginaDados];
+                    } else { paginaDados = []; }
+                }
+                
+                if (paginaDados.length === 0) break;
+                dadosApi = dadosApi.concat(paginaDados);
+                
+                if (paginaDados.length < 200) break;
+                pagina++;
+            } catch(e) {
+                falhaApi = true;
+                break;
+            }
+        }
+
+        if (pagina === 1 && falhaApi) {
+            console.warn('API falhou, tentando fallback local MOCK de Receitas...', baseUrl);
+            // Fallback Genérico caso o endpoint novo sofra CORS
+            dadosApi = gerarMockReceitas(exercicio, entidade);
+            if(typeof showOfflineToast !== 'undefined') {
+                showOfflineToast('⚠️ API Bloqueada por CORS. Carregando Base de Demonstração (MOCK Local) para Receitas.', 'warning');
+            }
+            const banner = document.getElementById('offline-banner');
+            if (banner) banner.classList.remove('hidden');
+        } else if (dadosApi.length > 0) {
+            const banner = document.getElementById('offline-banner');
+            if (banner) banner.classList.add('hidden');
+            await setCache(cacheKey, dadosApi);
+        }
+
+        if (dadosApi.length > 0) {
+            processarReceitas(dadosApi);
+        } else {
+            mostrarErroReceitas('Nenhum dado encontrado para o exercício/entidade informado.');
+            document.getElementById('areaReceitas').classList.add('hidden');
+        }
+
+    } catch (err) {
+        console.error(err);
+        mostrarErroReceitas('Erro ao processar as receitas: ' + err.message);
+        document.getElementById('areaReceitas').classList.add('hidden');
+    } finally {
+        setUiLoadingReceitas(false);
+    }
+}
+
+function gerarMockReceitas(ano, entidade) {
+    const categorias = [
+        { nome: 'Impostos, Taxas e Contribuições de Melhoria', base: 120000000 },
+        { nome: 'Transferências Correntes (FPM, ICMS, IPVA)', base: 450000000 },
+        { nome: 'Receitas Patrimoniais', base: 15000000 },
+        { nome: 'Receitas de Serviços', base: 25000000 },
+        { nome: 'Outras Receitas Correntes', base: 35000000 }
+    ];
+    
+    let mock = [];
+    const meses = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];
+    
+    meses.forEach(mes => {
+        categorias.forEach(cat => {
+            // Variação randomica de +/- 15% por mes
+            const variacao = 1 + ((Math.random() * 0.3) - 0.15);
+            const valorMes = (cat.base / 12) * variacao;
+            
+            mock.push({
+                Mes: mes,
+                Ano: ano,
+                Entidade: entidade,
+                Categoria: cat.nome,
+                ValorArrecadado: valorMes
+            });
+        });
+    });
+    
+    return mock;
+}
+
+function processarReceitas(rawRows) {
+    let totalAno = 0;
+    let mapMensal = {};
+    let mapComposicao = {};
+
+    // Inicializar meses 1 a 12
+    for(let i=1; i<=12; i++) {
+        mapMensal[String(i).padStart(2, '0')] = 0;
+    }
+
+    rawRows.forEach(row => {
+        const valStr = row.ValorArrecadado || row.valor || row.Arrecadado || '0';
+        const valor = parseFloat(String(valStr).replace(',', '.')) || 0;
+        
+        const mesStr = String(row.Mes || row.mes || '01').padStart(2, '0');
+        const catStr = row.Categoria || row.Rubrica || row.Receita || 'Outras';
+
+        totalAno += valor;
+        
+        if(mapMensal[mesStr] !== undefined) {
+            mapMensal[mesStr] += valor;
+        }
+
+        if(!mapComposicao[catStr]) mapComposicao[catStr] = 0;
+        mapComposicao[catStr] += valor;
+    });
+
+    // Atualizar Cards
+    const mediaMes = totalAno / 12;
+    document.getElementById('totalArrecadado').textContent = formatBRL(totalAno);
+    document.getElementById('mediaArrecadacao').textContent = formatBRL(mediaMes);
+    
+    let maiorFonte = '-';
+    let maxVal = 0;
+    Object.keys(mapComposicao).forEach(k => {
+        if(mapComposicao[k] > maxVal) {
+            maxVal = mapComposicao[k];
+            maiorFonte = k;
+        }
+    });
+    document.getElementById('maiorFonteReceita').textContent = maiorFonte;
+
+    document.getElementById('areaReceitas').classList.remove('hidden');
+
+    // Gráficos
+    renderChartMensal(mapMensal);
+    renderChartComposicao(mapComposicao);
+    renderTabelaReceitas(mapComposicao, totalAno);
+}
+
+function renderChartMensal(mapMensal) {
+    if(chartsReceitas['mensal']) chartsReceitas['mensal'].destroy();
+    
+    const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+    const valores = Object.values(mapMensal);
+
+    const ctx = document.getElementById('chartReceitasMensal').getContext('2d');
+    chartsReceitas['mensal'] = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: meses,
+            datasets: [{
+                label: 'Arrecadação (R$)',
+                data: valores,
+                borderColor: '#10b981',
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                borderWidth: 3,
+                tension: 0.3,
+                fill: true,
+                pointBackgroundColor: '#047857'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: { callbacks: { label: ctx => formatBRL(ctx.raw) } }
+            },
+            scales: {
+                y: { grid: { borderDash: [4, 4] } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+}
+
+function renderChartComposicao(mapComposicao) {
+    if(chartsReceitas['composicao']) chartsReceitas['composicao'].destroy();
+    
+    // Sort and limit to top 5
+    const entries = Object.entries(mapComposicao).sort((a,b) => b[1] - a[1]);
+    const topEntries = entries.slice(0, 5);
+    const labels = topEntries.map(e => e[0].length > 25 ? e[0].substring(0, 25) + '...' : e[0]);
+    const data = topEntries.map(e => e[1]);
+
+    const ctx = document.getElementById('chartReceitasComposicao').getContext('2d');
+    chartsReceitas['composicao'] = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                backgroundColor: ['#8b5cf6', '#a855f7', '#d946ef', '#ec4899', '#f43f5e'],
+                borderWidth: 0,
+                cutout: '70%'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'right' },
+                tooltip: { callbacks: { label: ctx => formatBRL(ctx.raw) } }
+            }
+        }
+    });
+}
+
+function renderTabelaReceitas(mapComposicao, total) {
+    const tbody = document.getElementById('tabelaReceitasBody');
+    if(!tbody) return;
+
+    const entries = Object.entries(mapComposicao).sort((a,b) => b[1] - a[1]);
+    
+    tbody.innerHTML = entries.map(e => {
+        const perc = total > 0 ? ((e[1] / total) * 100).toFixed(1) + '%' : '0%';
+        return `
+            <tr class="hover:bg-slate-50 transition-colors">
+                <td class="py-3 px-4 text-xs font-medium text-slate-700">${e[0]}</td>
+                <td class="py-3 px-4 text-xs font-bold text-slate-700 text-right">${formatBRL(e[1])}</td>
+                <td class="py-3 px-4 text-xs font-semibold text-slate-500 text-center">
+                    <span class="inline-block bg-slate-100 px-2 py-1 rounded">${perc}</span>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function formatBRL(val) {
+    return val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+function setUiLoadingReceitas(isLoading) {
+    const btn = document.getElementById('btnBuscarReceitas');
+    const loadState = document.getElementById('loadingReceitas');
+    if(!btn || !loadState) return;
+    
+    if (isLoading) {
+        btn.disabled = true;
+        btn.classList.add('opacity-70');
+        loadState.classList.remove('hidden');
+        loadState.classList.add('flex');
+    } else {
+        btn.disabled = false;
+        btn.classList.remove('opacity-70');
+        loadState.classList.add('hidden');
+        loadState.classList.remove('flex');
+    }
+}
+
+function mostrarErroReceitas(msg) {
+    const errMsg = document.getElementById('msgErroReceitas');
+    const errAlert = document.getElementById('alertaErroReceitas');
+    if(!errMsg || !errAlert) return;
+    errMsg.textContent = msg;
+    errAlert.classList.remove('hidden');
+    errAlert.classList.add('flex');
+}
+
+function esconderErroReceitas() {
+    const errAlert = document.getElementById('alertaErroReceitas');
+    if(!errAlert) return;
+    errAlert.classList.add('hidden');
+    errAlert.classList.remove('flex');
+}
