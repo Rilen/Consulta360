@@ -33,3 +33,32 @@ document.addEventListener('DOMContentLoaded', () => {
     renderHeader(route);
     renderFooter();
 });
+
+function updateStatusBanner(type, message) {
+    const banner = document.getElementById('status-banner');
+    const icon = document.getElementById('status-banner-icon');
+    const text = document.getElementById('status-banner-text');
+    
+    if (!banner || !icon || !text) return;
+    
+    banner.classList.remove('hidden', 'bg-green-600', 'bg-rose-600', 'bg-amber-600');
+    
+    text.textContent = message;
+    
+    if (type === 'success') {
+        banner.classList.add('bg-green-600');
+        icon.setAttribute('data-lucide', 'check-circle');
+    } else if (type === 'warning') {
+        banner.classList.add('bg-amber-600');
+        icon.setAttribute('data-lucide', 'alert-triangle');
+    } else if (type === 'error') {
+        banner.classList.add('bg-rose-600');
+        icon.setAttribute('data-lucide', 'alert-circle');
+    } else {
+        banner.classList.add('hidden'); // hidden
+    }
+    
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+}

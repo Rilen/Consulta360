@@ -42,89 +42,38 @@ async function carregarDadosReceitas() {
 
     try {
         let rawData = await getCache(cacheKey);
+        const metaKey = `meta_receitas_${exercicio}_${entidade}`;
+        const meta = await getMetadata(metaKey);
 
         if (rawData) {
             statusCache.classList.remove('hidden');
             statusCache.classList.add('flex');
+            
+            let dataFormatada = 'Data desconhecida';
+            if (meta && meta.timestamp) {
+                const d = new Date(meta.timestamp);
+                dataFormatada = `${d.toLocaleDateString('pt-BR')} às ${d.toLocaleTimeString('pt-BR')}`;
+            } else {
+                const oldCacheObj = await getCacheRaw(cacheKey);
+                if (oldCacheObj && oldCacheObj.timestamp) {
+                    const d = new Date(oldCacheObj.timestamp);
+                    dataFormatada = `${d.toLocaleDateString('pt-BR')} às ${d.toLocaleTimeString('pt-BR')}`;
+                }
+            }
+            updateStatusBanner('success', `Exibindo dados do Banco Local - Última atualização: ${dataFormatada}`);
+            
             processarReceitas(rawData);
             setUiLoadingReceitas(false);
             return;
-        }
-
-        statusCache.classList.add('hidden');
-        statusCache.classList.remove('flex');
-        
-        // Formato Swagger: /Receitas/buscarDadosReceitas/{exercicio}/{numeroPagina}/{entidade}
-        // Mas a documentação também fala de /Api/Receita/ListarArrecadacao/arrecadacaoJSON?entidade='[Entidade]'&exercicio=[Ano]&numeroPagina=[numeroPagina]
-        // Baseando-se no Swagger RESTful:
-        const baseUrl = `${API_BASE}/Receitas/buscarDadosReceitas/${exercicio}`;
-
-        let dadosApi = [];
-        let pagina = 1;
-        const maxPaginas = 50;
-        let falhaApi = false;
-
-        while (pagina <= maxPaginas) {
-            const url = `${baseUrl}/${pagina}/${encodeURIComponent(entidade)}`;
-            const loadingMsg = document.getElementById('loadingMsgReceitas');
-            if (loadingMsg) loadingMsg.textContent = `Sincronizando página ${pagina} da API...`;
-
-            try {
-                const resp = await fetch(url, { headers: { 'Accept': 'application/json, text/plain, */*' } });
-                
-                if (!resp.ok) {
-                    falhaApi = true;
-                    break;
-                }
-                
-                const text = await resp.text();
-                if (!text || text.trim() === '') break;
-                
-                let paginaDados;
-                try { paginaDados = JSON.parse(text); } catch(e) { paginaDados = parsePlainText(text); }
-                
-                if (!Array.isArray(paginaDados)) {
-                    if (typeof paginaDados === 'object' && paginaDados !== null) {
-                        const chaves = Object.keys(paginaDados);
-                        const primeiraChave = chaves.find(k => Array.isArray(paginaDados[k]));
-                        paginaDados = primeiraChave ? paginaDados[primeiraChave] : [paginaDados];
-                    } else { paginaDados = []; }
-                }
-                
-                if (paginaDados.length === 0) break;
-                dadosApi = dadosApi.concat(paginaDados);
-                
-                if (paginaDados.length < 200) break;
-                pagina++;
-            } catch(e) {
-                falhaApi = true;
-                break;
-            }
-        }
-
-        if (pagina === 1 && falhaApi) {
-            console.warn('API falhou, tentando fallback local MOCK de Receitas...', baseUrl);
-            // Fallback Genérico caso o endpoint novo sofra CORS
-            dadosApi = gerarMockReceitas(exercicio, entidade);
-            if(typeof showOfflineToast !== 'undefined') {
-                showOfflineToast('⚠️ API Bloqueada por CORS. Carregando Base de Demonstração (MOCK Local) para Receitas.', 'warning');
-            }
-            const banner = document.getElementById('offline-banner');
-            if (banner) banner.classList.remove('hidden');
-        } else if (dadosApi.length > 0) {
-            const banner = document.getElementById('offline-banner');
-            if (banner) banner.classList.add('hidden');
-            await setCache(cacheKey, dadosApi);
-        }
-
-        if (dadosApi.length > 0) {
-            processarReceitas(dadosApi);
         } else {
-            mostrarErroReceitas('Nenhum dado encontrado para o exercício/entidade informado.');
+            statusCache.classList.add('hidden');
+            statusCache.classList.remove('flex');
+            updateStatusBanner('error', `Base vazia. Vá em Sincronização para baixar os dados.`);
+            mostrarErroReceitas('Dados não encontrados no Banco Local para este período. Por favor, acesse o menu de Sincronização e faça o download.');
             document.getElementById('areaReceitas').classList.add('hidden');
-        }
-
-    } catch (err) {
+            setUiLoadingReceitas(false);
+            return;
+        }    } catch (err) {
         console.error(err);
         mostrarErroReceitas('Erro ao processar as receitas: ' + err.message);
         document.getElementById('areaReceitas').classList.add('hidden');

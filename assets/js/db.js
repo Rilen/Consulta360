@@ -13,6 +13,9 @@ function initDB() {
       if (!db.objectStoreNames.contains(STORE_NAME)) {
         db.createObjectStore(STORE_NAME, { keyPath: 'id' });
       }
+      if (!db.objectStoreNames.contains('metadata')) {
+        db.createObjectStore('metadata', { keyPath: 'key' });
+      }
     };
     req.onsuccess = function(e) { resolve(e.target.result); };
     req.onerror = function(e) { reject(e.target.error); };
@@ -41,6 +44,17 @@ async function getCache(id) {
   });
 }
 
+async function getCacheRaw(id) {
+  const db = await initDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, 'readonly');
+    const store = tx.objectStore(STORE_NAME);
+    const req = store.get(id);
+    req.onsuccess = () => resolve(req.result || null);
+    req.onerror = () => reject(req.error);
+  });
+}
+
 async function removeCache(id) {
   const db = await initDB();
   return new Promise((resolve, reject) => {
@@ -49,5 +63,31 @@ async function removeCache(id) {
     store.delete(id);
     tx.oncomplete = () => resolve();
     tx.onerror = () => reject(tx.error);
+  });
+}
+
+// ----------------------------------------------------
+// Metadados (Para Sincronização em Massa)
+// ----------------------------------------------------
+
+async function setMetadata(key, value) {
+  const db = await initDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('metadata', 'readwrite');
+    const store = tx.objectStore('metadata');
+    store.put({ key, value, timestamp: Date.now() });
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function getMetadata(key) {
+  const db = await initDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('metadata', 'readonly');
+    const store = tx.objectStore('metadata');
+    const req = store.get(key);
+    req.onsuccess = () => resolve(req.result ? req.result.value : null);
+    req.onerror = () => reject(req.error);
   });
 }

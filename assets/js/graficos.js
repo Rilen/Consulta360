@@ -59,107 +59,35 @@ async function carregarDadosGraficos(forceUpdate = false) {
     setUiLoadingGraficos(true);
 
     try {
-        let rawData = null;
-
-        if (forceUpdate) {
-            await removeCache(cacheKey);
-        } else {
-            rawData = await getCache(cacheKey);
-        }
+        let rawData = await getCache(cacheKey);
+        const metaKey = `meta_folha_${nomeBase}_${mesAno}`;
+        const meta = await getMetadata(metaKey);
 
         if (rawData) {
             statusCache.classList.remove('hidden');
             statusCache.classList.add('flex');
+            
+            let dataFormatada = 'Data desconhecida';
+            if (meta && meta.timestamp) {
+                const d = new Date(meta.timestamp);
+                dataFormatada = `${d.toLocaleDateString('pt-BR')} às ${d.toLocaleTimeString('pt-BR')}`;
+            } else {
+                const oldCacheObj = await getCacheRaw(cacheKey);
+                if (oldCacheObj && oldCacheObj.timestamp) {
+                    const d = new Date(oldCacheObj.timestamp);
+                    dataFormatada = `${d.toLocaleDateString('pt-BR')} às ${d.toLocaleTimeString('pt-BR')}`;
+                }
+            }
+            updateStatusBanner('success', `Exibindo dados do Banco Local - Última atualização: ${dataFormatada}`);
+            
             processarAnalytics(rawData);
             setUiLoadingGraficos(false);
             return;
-        }
-
-        statusCache.classList.add('hidden');
-        statusCache.classList.remove('flex');
-        
-        const datas = mesAnoParaDatas(mesAno);
-        const baseUrl = API_BASE + '/FolhaPagamento' +
-            '?dataInicial=' + datas.dataInicial +
-            '&dataFinal=' + datas.dataFinal +
-            '&nomeBase=' + encodeURIComponent(nomeBase);
-
-        let dadosApi = [];
-        let pagina = 1;
-        const maxPaginas = 100;
-        let falhaApi = false;
-
-        while (pagina <= maxPaginas) {
-            const url = baseUrl + '&numeroPagina=' + pagina;
-            const loadingMsg = document.getElementById('loadingMsg');
-            if (loadingMsg) loadingMsg.textContent = `Sincronizando página ${pagina} da API...`;
-
-            try {
-                const resp = await fetch(url, { headers: { 'Accept': 'application/json, text/plain, */*' } });
-                
-                if (!resp.ok) {
-                    falhaApi = true;
-                    break;
-                }
-                
-                const text = await resp.text();
-                if (!text || text.trim() === '') break;
-                
-                let paginaDados;
-                try { paginaDados = JSON.parse(text); } catch(e) { paginaDados = parsePlainText(text); }
-                
-                if (!Array.isArray(paginaDados)) {
-                    if (typeof paginaDados === 'object' && paginaDados !== null) {
-                        const chaves = Object.keys(paginaDados);
-                        const primeiraChave = chaves.find(k => Array.isArray(paginaDados[k]));
-                        paginaDados = primeiraChave ? paginaDados[primeiraChave] : [paginaDados];
-                    } else { paginaDados = []; }
-                }
-                
-                if (paginaDados.length === 0) break;
-                dadosApi = dadosApi.concat(paginaDados);
-                
-                if (paginaDados.length < 200) break;
-                pagina++;
-            } catch(e) {
-                falhaApi = true;
-                break;
-            }
-        }
-
-        if (pagina === 1 && falhaApi) {
-            console.warn('API falhou, tentando fallback local...', baseUrl);
-            try {
-                const mockRes = await fetch('./payload.json');
-                if (mockRes.ok) {
-                    dadosApi = await mockRes.json();
-                    if(typeof showOfflineToast !== 'undefined') {
-                        showOfflineToast('⚠️ API Bloqueada por CORS. Carregando Base de Demonstração (MOCK Local).', 'warning');
-                    }
-                    const banner = document.getElementById('offline-banner');
-                    if (banner) banner.classList.remove('hidden');
-                } else {
-                    throw new Error('Sem mock');
-                }
-            } catch(e) {
-                const alertaErro = document.getElementById('alertaErro');
-                if (alertaErro) {
-                    alertaErro.classList.remove('hidden');
-                    alertaErro.classList.add('flex');
-                }
-                throw new Error('API Indisponível e sem cache salvo para este período.');
-            }
-        }
-
-        if (dadosApi.length > 0) {
-            if (!falhaApi) {
-                await setCache(cacheKey, dadosApi);
-                const banner = document.getElementById('offline-banner');
-                if (banner) banner.classList.add('hidden');
-            }
-            processarAnalytics(dadosApi);
         } else {
-            mostrarErroGraficos('Nenhum dado encontrado para o período/entidade informado.');
+            statusCache.classList.add('hidden');
+            statusCache.classList.remove('flex');
+            updateStatusBanner('error', `Base vazia. Vá em Sincronização para baixar os dados.`);
+            mostrarErroGraficos('Dados não encontrados no Banco Local para este período. Por favor, acesse o menu de Sincronização e faça o download.');
             document.getElementById('analyticsArea').classList.add('hidden');
         }
 

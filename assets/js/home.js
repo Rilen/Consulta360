@@ -131,103 +131,37 @@ async function handleBusca(e) {
     changeState('loading');
     
     try {
-        let textData = null;
-        
-        // 1. Check IndexedDB Cache
+        // 1. Check IndexedDB Cache (Exclusivo)
         const cached = await getCache(cacheKey); // Vem do db.js
+        const metaKey = `meta_folha_${nomeBase}_${mesAno}`;
+        const meta = await getMetadata(metaKey);
         
-        let useCache = false;
-        if (cached && cached.timestamp) {
-            const now = new Date();
-            const selectedDate = new Date(mesAno + '-01');
-            const isCurrentMonth = (now.getFullYear() === selectedDate.getFullYear() && now.getMonth() === selectedDate.getMonth());
+        if (cached) {
+            textData = typeof cached === 'string' ? cached : JSON.stringify(cached);
             
-            const ageMs = Date.now() - cached.timestamp;
-            if (!isCurrentMonth) {
-                useCache = true; // Mês passado é "imutável", TTL eterno.
-            } else if (ageMs < 24 * 60 * 60 * 1000) {
-                useCache = true; // Mês atual tem TTL de 24h
+            let dataFormatada = 'Data desconhecida';
+            if (meta && meta.timestamp) {
+                const d = new Date(meta.timestamp);
+                dataFormatada = `${d.toLocaleDateString('pt-BR')} às ${d.toLocaleTimeString('pt-BR')}`;
+            } else {
+                // Tenta puxar do timestamp embutido no cache antigo
+                const oldCacheObj = await getCacheRaw(cacheKey);
+                if (oldCacheObj && oldCacheObj.timestamp) {
+                    const d = new Date(oldCacheObj.timestamp);
+                    dataFormatada = `${d.toLocaleDateString('pt-BR')} às ${d.toLocaleTimeString('pt-BR')}`;
+                }
             }
-        }
-        
-        if (useCache) {
-            textData = cached.data;
-            showOfflineToast('Dados carregados do cache local (Instantâneo)', 'info');
+            updateStatusBanner('success', `Exibindo dados do Banco Local - Última atualização: ${dataFormatada}`);
         } else {
-            // 2. Fetch API com Paginação
-            let allData = [];
-            let pagina = 1;
-            let hasMore = true;
-            let firstError = null;
-
-            while (hasMore) {
-                const urlPage = `${url}&numeroPagina=${pagina}`;
-                try {
-                    const res = await fetch(urlPage);
-                    if (!res.ok) {
-                        if (res.status === 400 || res.status === 404) {
-                            hasMore = false; // Acabaram as páginas
-                            break;
-                        }
-                        throw new Error('Servidor retornou ' + res.status);
-                    }
-                    
-                    const json = await res.json();
-                    if (!json || json.length === 0) {
-                        hasMore = false;
-                        break;
-                    }
-
-                    allData = allData.concat(json);
-
-                    if (json.length < 200) {
-                        hasMore = false;
-                    } else {
-                        pagina++;
-                        const msgEl = document.getElementById('loadingMsg');
-                        if(msgEl) msgEl.innerText = `Baixando página ${pagina}...`;
-                    }
-                } catch (fetchErr) {
-                    hasMore = false;
-                    if (pagina === 1) firstError = fetchErr; // Falhou logo na primeira
-                }
-            }
-
-            if (pagina === 1 && firstError) {
-                console.warn('API falhou, tentando fallback...', firstError);
-                if (cached) {
-                    textData = cached.data;
-                    showOfflineToast('⚠️ API Offline. Exibindo dados salvos anteriormente.', 'warning');
-                } else {
-                    // Fallback para Base de Demonstração
-                    try {
-                        const mockRes = await fetch('./payload.json');
-                        if (mockRes.ok) {
-                            allData = await mockRes.json();
-                            textData = JSON.stringify(allData);
-                            showOfflineToast('⚠️ API Bloqueada por CORS. Carregando Base de Demonstração (MOCK Local).', 'warning');
-                            const banner = document.getElementById('offline-banner');
-                            if (banner) banner.classList.remove('hidden');
-                        } else {
-                            throw new Error('Sem mock');
-                        }
-                    } catch(e) {
-                        document.getElementById('alertaCors').classList.remove('hidden');
-                        document.getElementById('alertaCors').classList.add('flex');
-                        throw new Error('API Indisponível e sem cache salvo para este período.');
-                    }
-                }
-            } else if (allData.length > 0) {
-                textData = JSON.stringify(allData);
-                const banner = document.getElementById('offline-banner');
-                if (banner) banner.classList.add('hidden');
-                await setCache(cacheKey, textData);
-            }
+            updateStatusBanner('error', `Base vazia. Vá em Sincronização para baixar os dados.`);
+            document.getElementById('alertaCors').classList.remove('hidden');
+            document.getElementById('alertaCors').classList.add('flex');
+            throw new Error('Dados não encontrados no Banco Local para este período. Por favor, acesse o menu de Sincronização e faça o download.');
         }
 
         // Restaura mensagem original de loading
         const msgEl = document.getElementById('loadingMsg');
-        if(msgEl) msgEl.innerText = 'Consultando a API. Isso pode levar alguns segundos.';
+        if(msgEl) msgEl.innerText = 'Processando dados da base local...';
 
         originalData = JSON.parse(textData); // Agora é JSON nativo e não parsePlainText
         

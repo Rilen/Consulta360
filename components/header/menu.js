@@ -6,9 +6,11 @@ function getMenuHtml(currentRoute) {
     const isEvolucao = currentRoute === 'evolucao';
     const isReceitas = currentRoute === 'receitas';
     const isDespesas = currentRoute === 'despesas';
+    const isConfig = currentRoute === 'config';
 
     return `
-    <div class="flex items-center gap-4 flex-wrap">
+    <div class="flex items-center justify-between w-full">
+      <div class="flex items-center gap-4 flex-wrap">
         <!-- Consulta -->
         ${
           isHome
@@ -74,6 +76,20 @@ function getMenuHtml(currentRoute) {
               <i data-lucide="shopping-cart" class="w-4 h-4 text-rose-400"></i> Despesas
              </a>`
         }
+      </div>
+
+      <!-- Configurações -->
+      <div class="ml-4 border-l border-white/20 pl-4">
+        ${
+          isConfig
+          ? `<div class="px-4 py-1.5 bg-white/20 text-white border border-white/40 rounded-full text-sm font-semibold flex items-center gap-2 shadow-sm backdrop-blur-md">
+              <i data-lucide="settings" class="w-4 h-4 text-slate-300"></i> Sincronização
+             </div>`
+          : `<a href="#" data-route="config" class="px-4 py-1.5 bg-white/5 text-slate-200 border border-white/10 rounded-full text-sm font-medium flex items-center gap-2 hover:bg-white/15 hover:text-white transition-all">
+              <i data-lucide="settings" class="w-4 h-4 text-slate-300"></i> Sincronização
+             </a>`
+        }
+      </div>
     </div>
     `;
 }

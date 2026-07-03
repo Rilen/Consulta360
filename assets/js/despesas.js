@@ -42,83 +42,37 @@ async function carregarDadosDespesas() {
 
     try {
         let rawData = await getCache(cacheKey);
+        const metaKey = `meta_despesas_${exercicio}_${entidade}`;
+        const meta = await getMetadata(metaKey);
 
         if (rawData) {
             statusCache.classList.remove('hidden');
             statusCache.classList.add('flex');
+            
+            let dataFormatada = 'Data desconhecida';
+            if (meta && meta.timestamp) {
+                const d = new Date(meta.timestamp);
+                dataFormatada = `${d.toLocaleDateString('pt-BR')} às ${d.toLocaleTimeString('pt-BR')}`;
+            } else {
+                const oldCacheObj = await getCacheRaw(cacheKey);
+                if (oldCacheObj && oldCacheObj.timestamp) {
+                    const d = new Date(oldCacheObj.timestamp);
+                    dataFormatada = `${d.toLocaleDateString('pt-BR')} às ${d.toLocaleTimeString('pt-BR')}`;
+                }
+            }
+            updateStatusBanner('success', `Exibindo dados do Banco Local - Última atualização: ${dataFormatada}`);
+            
             processarDespesas(rawData);
             setUiLoadingDespesas(false);
             return;
-        }
-
-        statusCache.classList.add('hidden');
-        statusCache.classList.remove('flex');
-        
-        // Formato Swagger: /Despesas/buscarDadosDespesas/{exercicio}/{numeroPagina}/{entidade}
-        const baseUrl = `${API_BASE}/Despesas/buscarDadosDespesas/${exercicio}`;
-
-        let dadosApi = [];
-        let pagina = 1;
-        const maxPaginas = 50;
-        let falhaApi = false;
-
-        while (pagina <= maxPaginas) {
-            const url = `${baseUrl}/${pagina}/${encodeURIComponent(entidade)}`;
-            const loadingMsg = document.getElementById('loadingMsgDespesas');
-            if (loadingMsg) loadingMsg.textContent = `Sincronizando página ${pagina} da API...`;
-
-            try {
-                const resp = await fetch(url, { headers: { 'Accept': 'application/json, text/plain, */*' } });
-                
-                if (!resp.ok) {
-                    falhaApi = true;
-                    break;
-                }
-                
-                const text = await resp.text();
-                if (!text || text.trim() === '') break;
-                
-                let paginaDados;
-                try { paginaDados = JSON.parse(text); } catch(e) { paginaDados = parsePlainText(text); }
-                
-                if (!Array.isArray(paginaDados)) {
-                    if (typeof paginaDados === 'object' && paginaDados !== null) {
-                        const chaves = Object.keys(paginaDados);
-                        const primeiraChave = chaves.find(k => Array.isArray(paginaDados[k]));
-                        paginaDados = primeiraChave ? paginaDados[primeiraChave] : [paginaDados];
-                    } else { paginaDados = []; }
-                }
-                
-                if (paginaDados.length === 0) break;
-                dadosApi = dadosApi.concat(paginaDados);
-                
-                if (paginaDados.length < 200) break;
-                pagina++;
-            } catch(e) {
-                falhaApi = true;
-                break;
-            }
-        }
-
-        if (pagina === 1 && falhaApi) {
-            console.warn('API falhou, tentando fallback local MOCK de Despesas...', baseUrl);
-            dadosApi = gerarMockDespesas(exercicio, entidade);
-            if(typeof showOfflineToast !== 'undefined') {
-                showOfflineToast('⚠️ API Bloqueada por CORS. Carregando Base de Demonstração (MOCK Local) para Despesas.', 'warning');
-            }
-            const banner = document.getElementById('offline-banner');
-            if (banner) banner.classList.remove('hidden');
-        } else if (dadosApi.length > 0) {
-            const banner = document.getElementById('offline-banner');
-            if (banner) banner.classList.add('hidden');
-            await setCache(cacheKey, dadosApi);
-        }
-
-        if (dadosApi.length > 0) {
-            processarDespesas(dadosApi);
         } else {
-            mostrarErroDespesas('Nenhum dado encontrado para o exercício/entidade informado.');
+            statusCache.classList.add('hidden');
+            statusCache.classList.remove('flex');
+            updateStatusBanner('error', `Base vazia. Vá em Sincronização para baixar os dados.`);
+            mostrarErroDespesas('Dados não encontrados no Banco Local para este período. Por favor, acesse o menu de Sincronização e faça o download.');
             document.getElementById('areaDespesas').classList.add('hidden');
+            setUiLoadingDespesas(false);
+            return;
         }
 
     } catch (err) {
