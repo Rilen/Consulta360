@@ -199,9 +199,21 @@ async function handleBusca(e) {
                     textData = cached.data;
                     showOfflineToast('⚠️ API Offline. Exibindo dados salvos anteriormente.', 'warning');
                 } else {
-                    document.getElementById('alertaCors').classList.remove('hidden');
-                    document.getElementById('alertaCors').classList.add('flex');
-                    throw new Error('API Indisponível e sem cache salvo para este período.');
+                    // Fallback para Base de Demonstração
+                    try {
+                        const mockRes = await fetch('./payload.json');
+                        if (mockRes.ok) {
+                            allData = await mockRes.json();
+                            textData = JSON.stringify(allData);
+                            showOfflineToast('⚠️ API Bloqueada por CORS. Carregando Base de Demonstração (MOCK Local).', 'warning');
+                        } else {
+                            throw new Error('Sem mock');
+                        }
+                    } catch(e) {
+                        document.getElementById('alertaCors').classList.remove('hidden');
+                        document.getElementById('alertaCors').classList.add('flex');
+                        throw new Error('API Indisponível e sem cache salvo para este período.');
+                    }
                 }
             } else if (allData.length > 0) {
                 textData = JSON.stringify(allData);
