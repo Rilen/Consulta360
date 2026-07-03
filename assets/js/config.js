@@ -156,14 +156,23 @@ document.body.addEventListener('change', (e) => {
 });
 
 
+// ── Proxy CORS (Cloudflare Worker gratuito — 100k req/dia) ──
+// Deploy: entre na pasta worker/ e rode: npx wrangler deploy
+// Depois troque a URL abaixo pela sua URL gerada
+// Deixe como '' (string vazia) para desabilitar e usar apenas mock
+const CORS_PROXY = 'https://consulta360-proxy.rilen.workers.dev';
+
 // Helpers de Rede
-// Quando em rede interna (Nginx proxy), API_BASE = '/api' e as chamadas são diretas.
-// Em domínios públicos (GitHub Pages), roteamos via proxy CORS no Nginx (que adiciona Access-Control-Allow-Origin:*).
+// Quando em rede interna (API_BASE = '/api'), as chamadas são diretas via Nginx.
+// Em domínios públicos (GitHub Pages), roteamos via proxy CORS configurável.
 function wrapUrl(url) {
     if (API_BASE === '/api') return url;
-    // Reescreve a URL da API externa para passar pelo proxy CORS do Nginx
-    // Ex: https://webapp1..../dadosabertos/FolhaPagamento?... → http://10.0.0.88:3005/api/FolhaPagamento?...
-    return url.replace(/^https:\/\/webapp1-riodasostras\.cidade360\.cloud\/dadosabertos\//, 'http://10.0.0.88:3005/api/');
+    // Se tiver proxy CORS configurado, usa ele
+    if (CORS_PROXY && CORS_PROXY.length > 0 && CORS_PROXY !== 'DISABLED') {
+        return CORS_PROXY + '/?url=' + encodeURIComponent(url);
+    }
+    // Sem proxy — tenta direto (vai falhar CORS no navegador, cai no mock)
+    return url;
 }
 
 // Motor para Query Params (Folha, Servidor)

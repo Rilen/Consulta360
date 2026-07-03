@@ -17,7 +17,7 @@
         <i data-lucide="info" class="w-5 h-5 flex-shrink-0 text-amber-500 mt-0.5"></i>
         <div>
             <strong class="font-bold block mb-1">Aviso de Rede (CORS)</strong>
-            <p id="msgErroConfig">A API bloqueou a conexão direta por CORS. O sistema tenta via proxy Nginx (com CORS headers) e, se não disponível, carrega a <b>Base de Demonstração (Mock Local)</b> para que você possa continuar utilizando os relatórios.</p>
+            <p id="msgErroConfig">A API não permite acesso direto do navegador (CORS). Configure o proxy gratuito via <b>Cloudflare Worker</b> (pasta <code>worker/</code>) para sincronizar dados reais. Sem ele, o sistema carrega a <b>Base de Demonstração (Mock Local)</b> para testes.</p>
         </div>
     </div>
 
