@@ -49,18 +49,10 @@ function initEvolucaoModule() {
 
     if (window.lucide) lucide.createIcons();
     
-    // Popular combo de cargos
-    const comboFiltro = document.getElementById('filtroCargoEvolucao');
-    if (comboFiltro) {
-        Object.keys(historicoCargos).sort().forEach(cargo => {
-            const opt = document.createElement('option');
-            opt.value = cargo;
-            opt.innerText = cargo;
-            comboFiltro.appendChild(opt);
-        });
-        
-        // Reagir quando mudar o combo (para não precisar apertar em Gerar toda vez)
-        comboFiltro.addEventListener('change', () => {
+    // Campo de busca textual para filtrar cargos na tabela
+    const buscaInput = document.getElementById('buscaCargoTabela');
+    if (buscaInput) {
+        buscaInput.addEventListener('input', () => {
             const anosSelecionados = [];
             const ini = parseInt(document.getElementById('anoInicial').value);
             const fim = parseInt(document.getElementById('anoFinal').value);
@@ -312,10 +304,10 @@ function renderizarTabela(anos) {
 
     // Body
     let tbodyHtml = '';
-    const cargoFiltro = document.getElementById('filtroCargoEvolucao')?.value || 'todos';
+    const termoBusca = (document.getElementById('buscaCargoTabela')?.value || '').toLowerCase().trim();
 
     for (let cargo in historicoCargos) {
-        if (cargoFiltro !== 'todos' && cargo !== cargoFiltro) continue;
+        if (termoBusca && !cargo.toLowerCase().includes(termoBusca)) continue;
 
         tbodyHtml += `<tr class="hover:bg-slate-50/50 transition-colors">
             <td class="py-3 px-5 text-sm font-semibold text-slate-700 sticky left-0 bg-white border-r border-slate-100">${cargo}</td>`;
