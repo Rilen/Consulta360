@@ -8,17 +8,50 @@
 
     <!-- Timeline / Lista de Versões -->
     <div class="space-y-8" id="changelog-container">
-      
-      <!-- Versão V0.0.2 -->
+      <!-- Versão V0.0.3 -->
       <section class="ag-card rounded-2xl p-8 relative overflow-hidden group">
         <div class="absolute right-0 top-0 w-32 h-32 bg-blue-500/5 rounded-full blur-2xl -mr-10 -mt-10"></div>
         
         <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-5">
           <div class="flex items-center gap-3">
-            <span class="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded-full tracking-wider">v0.0.2</span>
+            <span class="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded-full tracking-wider">v0.0.3</span>
             <span class="text-sm font-medium text-slate-500">03 de Julho de 2026</span>
           </div>
           <span class="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md border border-emerald-100">Atual</span>
+        </div>
+
+        <div class="space-y-6 relative z-10">
+          <div>
+            <h3 class="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Adicionado
+            </h3>
+            <ul class="list-disc list-inside text-sm text-slate-600 space-y-2 ml-1">
+              <li><strong>Arquitetura Offline-First:</strong> Todas as páginas agora consultam os dados exclusivamente do IndexedDB local, sem travar o navegador.</li>
+              <li><strong>Injeção de Mock:</strong> Ao detectar bloqueio CORS, o motor inteligentemente injeta os dados da Base de Demonstração garantindo a funcionalidade dos gráficos e dashboards sem servidor.</li>
+              <li><strong>GitHub Actions (CI/CD):</strong> Pipeline criado para manter sincronismo duplo e publicar o projeto no GitHub Pages para acesso externo.</li>
+            </ul>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-blue-400"></span> Modificado
+            </h3>
+            <ul class="list-disc list-inside text-sm text-slate-600 space-y-2 ml-1">
+              <li><strong>Estilização do Menu:</strong> Alinhamento perfeito dos botões de navegação à direita.</li>
+              <li><strong>Tratamento de Alerta de CORS:</strong> Texto do painel de Sincronização alterado de Erro para Aviso.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Versão V0.0.2 -->
+      <section class="ag-card rounded-2xl p-8 relative overflow-hidden group opacity-80">
+        <div class="absolute right-0 top-0 w-32 h-32 bg-slate-500/5 rounded-full blur-2xl -mr-10 -mt-10"></div>
+        
+        <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-5">
+          <div class="flex items-center gap-3">
+            <span class="px-3 py-1 bg-slate-100 text-slate-600 text-xs font-bold rounded-full tracking-wider">v0.0.2</span>
+            <span class="text-sm font-medium text-slate-500">03 de Julho de 2026</span>
+          </div>
         </div>
 
         <div class="space-y-6 relative z-10">
