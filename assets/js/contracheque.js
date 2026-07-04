@@ -276,10 +276,6 @@ function parseTextoContracheque(text, nomeArquivo) {
         valorLiquido: null
     };
 
-    // ── Nome ──
-    const nomeMatch = t.match(/Nome\s+do\s+Funcion[áa]rio\s+Matr[íi]cula\s+([A-ZÀ-Ú][A-ZÀ-Úa-zà-ú\s]+?)(?:\s+Matr[íi]cula|\s+CPF|\s+Lotacao|\s+Lota[cç][aã]o|\s+Admiss)/i);
-    if (nomeMatch) resultado.nome = nomeMatch[1].trim();
-
     // ── CPF ──
     const cpfMatch = t.match(/(\d{3}\.\d{3}\.\d{3}-\d{2})/);
     if (cpfMatch) resultado.cpf = cpfMatch[1];
@@ -287,6 +283,35 @@ function parseTextoContracheque(text, nomeArquivo) {
     // ── Matrícula ──
     const matrMatch = t.match(/(\d{4,6}-\d(?:\/\d)?)/);
     if (matrMatch) resultado.matricula = matrMatch[1];
+
+    // ── Nome ──
+    let nomeExtraido = null;
+    const nomeMatch1 = t.match(/Nome\s+do\s+Funcion[áa]rio\s+Matr[íi]cula\s+([A-ZÀ-Ú][A-ZÀ-Úa-zà-ú\s]+?)(?:\s+Matr[íi]cula|\s+CPF|\s+Lotacao|\s+Lota[cç][aã]o|\s+Admiss)/i);
+    if (nomeMatch1) nomeExtraido = nomeMatch1[1].trim();
+
+    // Fallback 1: nome aparece entre "Matrícula" e a matrícula numérica
+    if (!nomeExtraido) {
+        const nomeMatch2 = t.match(/Matr[íi]cula\s+([A-ZÀ-Ú][A-ZÀ-Úa-zà-ú\s]{5,50}?)\s{2,}(\d{4,6}-\d)/i);
+        if (nomeMatch2) nomeExtraido = nomeMatch2[1].trim();
+    }
+
+    // Fallback 2: procurar um nome próprio perto da matrícula já extraída
+    if (!nomeExtraido && resultado.matricula) {
+        const idx2 = t.indexOf(resultado.matricula);
+        if (idx2 > 0) {
+            const antes = t.substring(Math.max(0, idx2 - 100), idx2);
+            const nomeBackup = antes.match(/([A-ZÀ-Ú][a-zà-ú]+(?:\s+[A-ZÀ-Ú][a-zà-ú]+){1,5})$/);
+            if (nomeBackup) nomeExtraido = nomeBackup[1].trim();
+        }
+    }
+
+    // Fallback 3: nome no formato "NomeServidor" ou "Nome:" comum em alguns PDFs
+    if (!nomeExtraido) {
+        const nomeMatch3 = t.match(/NomeServidor\s*:?\s*([A-ZÀ-Ú][A-ZÀ-Úa-zà-ú\s]+?)(?:\s+Cargo|\s+Matr|$)/i);
+        if (nomeMatch3) nomeExtraido = nomeMatch3[1].trim();
+    }
+
+    if (nomeExtraido) resultado.nome = nomeExtraido;
 
     // ── Competência ──
     const compMatch1 = t.match(/([A-Z][a-zçÇ]+)\s*\/\s*(\d{4})/);
@@ -358,19 +383,33 @@ function parseTextoContracheque(text, nomeArquivo) {
     const liqMatch = t.match(/Valor\s+L[íi]quido\s+([\d\.]+,\d{2})/i);
     if (liqMatch) resultado.valorLiquido = parseFloat(liqMatch[1].replace(/\./g, '').replace(',', '.'));
 
+    // Extrair totais: o texto após "Totais" contém "Valor Líquido XXXX" seguido
+    // dos totais reais de Rendimentos e Descontos. Removemos "Valor Líquido XXXX"
+    // para que a regex capture apenas os dois números dos totais.
     const totaisResto = t.substring(totaisIdx >= 0 ? totaisIdx : 0);
-    const totaisMatch = totaisResto.match(/Totais\s+.*?([\d\.]+,\d{2})\s+([\d\.]+,\d{2})/);
+    const semLiq = totaisResto.replace(/Valor\s+L[íi]quido\s+[\d\.]+,\d{2}/i, '');
+    const totaisMatch = semLiq.match(/Totais\s+.*?([\d\.]+,\d{2})\s+([\d\.]+,\d{2})/);
     if (totaisMatch) {
         resultado.totalRendimentos = parseFloat(totaisMatch[1].replace(/\./g, '').replace(',', '.'));
         resultado.totalDescontos = parseFloat(totaisMatch[2].replace(/\./g, '').replace(',', '.'));
     }
 
-    if (resultado.totalRendimentos === null) {
-        resultado.totalRendimentos = resultado.rubricas.reduce((s, r) => s + (r.rendimentos || 0), 0);
+    // Fallback: somar rubricas individualmente
+    const somaRubRend = resultado.rubricas.reduce((s, r) => s + (r.rendimentos || 0), 0);
+    const somaRubDesc = resultado.rubricas.reduce((s, r) => s + (r.descontos || 0), 0);
+
+    // Se o regex de totais divergir >1% da soma das rubricas, prefere a soma
+    if (resultado.totalRendimentos !== null && somaRubRend > 0 &&
+        Math.abs(resultado.totalRendimentos - somaRubRend) / somaRubRend > 0.01) {
+        resultado.totalRendimentos = somaRubRend;
     }
-    if (resultado.totalDescontos === null) {
-        resultado.totalDescontos = resultado.rubricas.reduce((s, r) => s + (r.descontos || 0), 0);
+    if (resultado.totalDescontos !== null && somaRubDesc > 0 &&
+        Math.abs(resultado.totalDescontos - somaRubDesc) / somaRubDesc > 0.01) {
+        resultado.totalDescontos = somaRubDesc;
     }
+
+    if (resultado.totalRendimentos === null) resultado.totalRendimentos = somaRubRend;
+    if (resultado.totalDescontos === null) resultado.totalDescontos = somaRubDesc;
 
     if (!resultado.nome && !resultado.matricula) return null;
 
