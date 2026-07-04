@@ -602,16 +602,30 @@ function gerarParecer(dadosAPI, entidade) {
     } else if (padraoConsolidacaoParcial) {
         // Caso ideal: usuário enviou todos os PDFs, a soma bate em Prov e Desc, só Liq diverge
         const valorExtraLiq = Math.abs(difLiquido);
+        const liqCorretoAPI = apiProventos - apiDescontos;
         textoMotivo = `
             <p>A API do <strong>cidade360.cloud</strong> (endpoint <code>/dadosabertos/FolhaPagamento</code>) consolida múltiplos contra-cheques de uma mesma matrícula dentro da competência em um <strong>único registro</strong>. No entanto, a consolidação é <strong>parcial</strong>:</p>
             <ul class="list-disc list-inside space-y-1 ml-2">
-                <li>O campo de <strong>proventos</strong> acumula corretamente as verbas de todos os contra-cheques da matrícula (<strong>${fmtMoeda(apiProventos)}</strong>).</li>
+                <li>O campo de <strong>proventos</strong> acumula corretamente as verbas de todos os contra-cheques da matrícula — em conformidade com a definição do próprio sistema Pronim, que estabelece que Proventos é "composto pela soma dos valores de cargo Efetivo, função gratificada, cargo comissionado, horas extras, benefícios, férias, <strong>13º salário</strong>, indenizações e outros ganhos" (<strong>${fmtMoeda(apiProventos)}</strong>).</li>
                 <li>O campo de <strong>descontos</strong> também acumula corretamente (<strong>${fmtMoeda(apiDescontos)}</strong>).</li>
                 <li>O campo de <strong>líquido</strong>, porém, reproduz apenas o valor do primeiro contra-cheque, ignorando o líquido dos demais documentos de pagamento (<strong>${fmtMoeda(valorExtraLiq)}</strong> a menor).</li>
             </ul>
-            <p>Como consequência, a equação contábil básica <strong>Proventos − Descontos = Líquido</strong> não se sustenta: a API reporta proventos de ${fmtMoeda(apiProventos)} e descontos de ${fmtMoeda(apiDescontos)}, mas um líquido de apenas ${fmtMoeda(apiLiquido)} (deveria ser ${fmtMoeda(soma.liquido)}).</p>
+            <p>Segundo o <strong>dicionário de dados oficial do sistema Pronim</strong> (módulo "Detalhes de Servidor Efetivo"):</p>
+            <blockquote class="border-l-4 border-slate-300 pl-4 my-3 text-slate-500 italic space-y-1">
+                <p><strong>Vencimentos Totais:</strong> "É o resultado da soma dos proventos com as vantagens."</p>
+                <p><strong>Líquido:</strong> "É o resultado da subtração dos vencimentos totais com os descontos totais."</p>
+            </blockquote>
+            <p>Aplicando a <strong>fórmula oficial do próprio sistema</strong> aos dados consolidados pela API:</p>
+            <div class="bg-slate-100 rounded-lg p-3 my-2 font-mono text-xs">
+                <p>Vencimentos Totais = Proventos + Vantagens = ${fmtMoeda(apiProventos)} + ${fmtMoeda(0)} = <strong>${fmtMoeda(apiProventos)}</strong></p>
+                <p>Líquido (fórmula Pronim) = Vencimentos Totais − Descontos = ${fmtMoeda(apiProventos)} − ${fmtMoeda(apiDescontos)} = <strong>${fmtMoeda(liqCorretoAPI)}</strong></p>
+                <p>Líquido informado pela API = <strong class="text-rose-600">${fmtMoeda(apiLiquido)}</strong> ← diverge da fórmula</p>
+            </div>
+            <p>Como consequência, a equação contábil definida pelo próprio Pronim — <strong>Líquido = Vencimentos Totais − Descontos</strong> — não se sustenta nos registros retornados pelo endpoint.</p>
+            <p class="font-semibold">Evidência complementar:</p>
+            <p>O sistema Pronim consultado diretamente exibe as duas linhas separadas ("13º Salário Adiantamento" e "Folha Mensal") com os totais corretos: proventos ${fmtMoeda(apiProventos)}, descontos ${fmtMoeda(apiDescontos)}, líquido ${fmtMoeda(liqCorretoAPI)}. O erro está exclusivamente na camada de exposição via API.</p>
             <p class="font-semibold">Recomendação:</p>
-            <p>Ajustar a rotina de agregação do endpoint para que, ao consolidar múltiplos contra-cheques, o campo <code>Liquido</code> também seja somado, garantindo a integridade da igualdade contábil <strong>Proventos − Descontos = Líquido</strong>.</p>
+            <p>Ajustar a rotina de agregação do endpoint <code>/dadosabertos/FolhaPagamento</code> para que, ao consolidar múltiplos contra-cheques de uma mesma matrícula, o campo <code>Liquido</code> seja recalculado conforme a fórmula definida no dicionário de dados do próprio Pronim: <strong>Liquido = VencimentosTotais − Descontos</strong>.</p>
         `;
     } else if (suspeita13 && numPDFs === 1) {
         // Usuário enviou só 1 PDF, mas API claramente tem dados de mais de um
