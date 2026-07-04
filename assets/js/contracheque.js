@@ -286,29 +286,22 @@ function parseTextoContracheque(text, nomeArquivo) {
 
     // ── Nome ──
     let nomeExtraido = null;
-    const nomeMatch1 = t.match(/Nome\s+do\s+Funcion[áa]rio\s+Matr[íi]cula\s+([A-ZÀ-Ú][A-ZÀ-Úa-zà-ú\s]+?)(?:\s+Matr[íi]cula|\s+CPF|\s+Lotacao|\s+Lota[cç][aã]o|\s+Admiss)/i);
+    
+    // Estratégia 1: regex tolerante que captura o nome mesmo com layouts variados
+    const nomeMatch1 = t.match(/Nome\s+do\s+Funcion[áa]rio\s+(?:Matr[íi]cula\s+)?([A-ZÀ-Ú][A-ZÀ-Úa-zà-ú\s]{4,80}?)(?:\s*\d{4,6}-\d|\s+CPF|\s+Lotacao|\s+Lota[cç][aã]o|\s+Admiss|\s{2,})/i);
     if (nomeMatch1) nomeExtraido = nomeMatch1[1].trim();
 
-    // Fallback 1: nome aparece entre "Matrícula" e a matrícula numérica
-    if (!nomeExtraido) {
-        const nomeMatch2 = t.match(/Matr[íi]cula\s+([A-ZÀ-Ú][A-ZÀ-Úa-zà-ú\s]{5,50}?)\s{2,}(\d{4,6}-\d)/i);
-        if (nomeMatch2) nomeExtraido = nomeMatch2[1].trim();
-    }
-
-    // Fallback 2: procurar um nome próprio perto da matrícula já extraída
+    // Estratégia 2: o nome está em qualquer posição perto da matrícula
     if (!nomeExtraido && resultado.matricula) {
-        const idx2 = t.indexOf(resultado.matricula);
-        if (idx2 > 0) {
-            const antes = t.substring(Math.max(0, idx2 - 100), idx2);
-            const nomeBackup = antes.match(/([A-ZÀ-Ú][a-zà-ú]+(?:\s+[A-ZÀ-Ú][a-zà-ú]+){1,5})$/);
+        // Procura a posição da matrícula no texto normalizado
+        const idxMatr = t.indexOf(resultado.matricula);
+        if (idxMatr > 10) {
+            // Olha os 150 caracteres anteriores à matrícula
+            const antes = t.substring(Math.max(0, idxMatr - 150), idxMatr);
+            // Encontra sequência de 2-6 palavras iniciadas com maiúscula
+            const nomeBackup = antes.match(/([\p{Lu}][\p{L}]{1,20}(?:\s+[\p{Lu}][\p{L}]{1,20}){1,5})$/u);
             if (nomeBackup) nomeExtraido = nomeBackup[1].trim();
         }
-    }
-
-    // Fallback 3: nome no formato "NomeServidor" ou "Nome:" comum em alguns PDFs
-    if (!nomeExtraido) {
-        const nomeMatch3 = t.match(/NomeServidor\s*:?\s*([A-ZÀ-Ú][A-ZÀ-Úa-zà-ú\s]+?)(?:\s+Cargo|\s+Matr|$)/i);
-        if (nomeMatch3) nomeExtraido = nomeMatch3[1].trim();
     }
 
     if (nomeExtraido) resultado.nome = nomeExtraido;
@@ -401,14 +394,23 @@ function parseTextoContracheque(text, nomeArquivo) {
         resultado.totalDescontos = somaRubDesc;
     }
 
-    // Tenta extrair o Valor Líquido do texto; se não encontrar ou for <= 0,
-    // calcula pela fórmula contábil
+    // ── Valor Líquido ──
+    // Calculado contabilmente: Prov − Desc (verdade contábil, independente
+    // de onde o "Valor Líquido" aparece no layout do PDF).
+    const liqCalculado = (resultado.totalRendimentos || 0) - (resultado.totalDescontos || 0);
+
     const liqMatch = t.match(/Valor\s+L[íi]quido\s+([\d\.]+,\d{2})/i);
     if (liqMatch) {
-        resultado.valorLiquido = parseFloat(liqMatch[1].replace(/\./g, '').replace(',', '.'));
-    }
-    if (!resultado.valorLiquido || resultado.valorLiquido <= 0) {
-        resultado.valorLiquido = (resultado.totalRendimentos || 0) - (resultado.totalDescontos || 0);
+        const liqDeclarado = parseFloat(liqMatch[1].replace(/\./g, '').replace(',', '.'));
+        // Só confia no valor extraído do texto se ele bater com a fórmula contábil
+        // (tolerância de R$ 0,50 para arredondamentos)
+        if (Math.abs(liqDeclarado - liqCalculado) < 0.5) {
+            resultado.valorLiquido = liqDeclarado;
+        } else {
+            resultado.valorLiquido = liqCalculado;
+        }
+    } else {
+        resultado.valorLiquido = liqCalculado;
     }
 
     console.log('[contracheque] Parser:', {
