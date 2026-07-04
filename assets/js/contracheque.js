@@ -1,8 +1,11 @@
 // contracheque.js — Auditoria de Contracheque via PDF
 // Extrai dados do PDF, cruza com IndexedDB e gera parecer técnico-contábil.
+// Suporte a múltiplos PDFs: o usuário pode enviar todos os contra-cheques
+// do mesmo mês (salário + adiantamento 13º, etc.) e o sistema soma antes
+// de comparar com a API.
 
-// ── Referência globais ──
-let pdfDadosExtraidos = null;  // objeto com os dados parseados do PDF
+// ── Estado global ──
+let pdfsCarregados = [];  // array de { dados, nomeArquivo, id }
 
 const MESES = {
     'janeiro': '01', 'fevereiro': '02', 'março': '03', 'marco': '03',
@@ -10,6 +13,8 @@ const MESES = {
     'agosto': '08', 'setembro': '09', 'outubro': '10',
     'novembro': '11', 'dezembro': '12'
 };
+
+let contadorId = 0;
 
 // ─────────────────────────────────────────────────
 // Inicialização
@@ -24,14 +29,9 @@ if (window.location.hash === '#contracheque' || window.location.hash.includes('c
 
 function initContrachequeModule() {
     if (window.lucide) lucide.createIcons();
-    pdfDadosExtraidos = null;
 
-    // Esconder seções de resultado
-    document.getElementById('dadosExtraidos').classList.add('hidden');
-    document.getElementById('resultadoAuditoria').classList.add('hidden');
-    document.getElementById('estadoSemAPI').classList.add('hidden');
+    resetarTudo();
 
-    // Drop zone
     const dropZone = document.getElementById('dropZone');
     const pdfInput = document.getElementById('pdfInput');
     const dropInner = document.getElementById('dropZoneInner');
@@ -44,23 +44,21 @@ function initContrachequeModule() {
 
     dropZone.addEventListener('dragover', (e) => {
         e.preventDefault();
-        dropZone.classList.add('border-indigo-400', 'bg-indigo-50/30');
+        dropZone.classList.add('border-violet-400', 'bg-violet-50/30');
     });
     dropZone.addEventListener('dragleave', () => {
-        dropZone.classList.remove('border-indigo-400', 'bg-indigo-50/30');
+        dropZone.classList.remove('border-violet-400', 'bg-violet-50/30');
     });
     dropZone.addEventListener('drop', (e) => {
         e.preventDefault();
-        dropZone.classList.remove('border-indigo-400', 'bg-indigo-50/30');
-        const file = e.dataTransfer.files[0];
-        if (file && file.type === 'application/pdf') processarPDF(file);
+        dropZone.classList.remove('border-violet-400', 'bg-violet-50/30');
+        if (e.dataTransfer.files.length > 0) processarMultiplosPDFs(e.dataTransfer.files);
     });
     pdfInput.addEventListener('change', () => {
-        const file = pdfInput.files[0];
-        if (file) processarPDF(file);
+        if (pdfInput.files.length > 0) processarMultiplosPDFs(pdfInput.files);
     });
 
-    // Botão Auditar
+    // Botões
     const btnAuditar = document.getElementById('btnAuditar');
     if (btnAuditar) {
         const newBtn = btnAuditar.cloneNode(true);
@@ -68,81 +66,99 @@ function initContrachequeModule() {
         newBtn.addEventListener('click', () => cruzarComAPI());
     }
 
-    // Botão Limpar
     const btnLimpar = document.getElementById('btnLimpar');
     if (btnLimpar) {
         const newBtn = btnLimpar.cloneNode(true);
         btnLimpar.parentNode.replaceChild(newBtn, btnLimpar);
-        newBtn.addEventListener('click', () => {
-            pdfDadosExtraidos = null;
-            document.getElementById('dadosExtraidos').classList.add('hidden');
-            document.getElementById('resultadoAuditoria').classList.add('hidden');
-            document.getElementById('estadoSemAPI').classList.add('hidden');
-            dropInner.classList.remove('hidden');
-            dropProc.classList.add('hidden');
-            pdfInput.value = '';
-        });
+        newBtn.addEventListener('click', () => resetarTudo());
     }
 }
 
+function resetarTudo() {
+    pdfsCarregados = [];
+    document.getElementById('resultadoAuditoria').classList.add('hidden');
+    document.getElementById('estadoSemAPI').classList.add('hidden');
+    document.getElementById('acoesUpload').classList.add('hidden');
+    document.getElementById('resumoSoma').classList.add('hidden');
+    document.getElementById('listaPDFs').innerHTML = '';
+    document.getElementById('badgePdfs').classList.add('hidden');
+    document.getElementById('dropZoneInner').classList.remove('hidden');
+    document.getElementById('dropZoneProcessing').classList.add('hidden');
+    if (document.getElementById('pdfInput')) document.getElementById('pdfInput').value = '';
+    contadorId = 0;
+}
+
 // ─────────────────────────────────────────────────
-// Processamento do PDF
+// Processamento em lote de PDFs
 // ─────────────────────────────────────────────────
 
-async function processarPDF(file) {
+async function processarMultiplosPDFs(files) {
     const dropInner = document.getElementById('dropZoneInner');
     const dropProc = document.getElementById('dropZoneProcessing');
     const statusEl = document.getElementById('processingStatus');
 
     dropInner.classList.add('hidden');
     dropProc.classList.remove('hidden');
-    document.getElementById('dadosExtraidos').classList.add('hidden');
-    document.getElementById('resultadoAuditoria').classList.add('hidden');
-    document.getElementById('estadoSemAPI').classList.add('hidden');
 
-    try {
-        // Carregar pdf.js se ainda não estiver disponível
-        if (typeof pdfjsLib === 'undefined') {
-            await carregarPDFJS();
+    const arrayFiles = Array.from(files);
+    let erros = 0;
+
+    for (let i = 0; i < arrayFiles.length; i++) {
+        const file = arrayFiles[i];
+        statusEl.textContent = `Processando ${i + 1}/${arrayFiles.length}: ${file.name}...`;
+
+        try {
+            if (typeof pdfjsLib === 'undefined') {
+                await carregarPDFJS();
+            }
+
+            const arrayBuffer = await file.arrayBuffer();
+            const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+
+            let fullText = '';
+            for (let p = 1; p <= pdf.numPages; p++) {
+                const page = await pdf.getPage(p);
+                const content = await page.getTextContent();
+                fullText += content.items.map(item => item.str).join(' ') + '\n';
+            }
+
+            const dados = parseTextoContracheque(fullText, file.name);
+            if (!dados) {
+                erros++;
+                console.warn(`Não foi possível extrair dados do PDF: ${file.name}`);
+                continue;
+            }
+
+            pdfsCarregados.push({
+                dados: dados,
+                nomeArquivo: file.name,
+                id: ++contadorId
+            });
+
+        } catch (err) {
+            erros++;
+            console.error(`Erro ao processar ${file.name}:`, err);
         }
-
-        statusEl.textContent = 'Lendo arquivo...';
-        const arrayBuffer = await file.arrayBuffer();
-        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-        statusEl.textContent = `PDF carregado (${pdf.numPages} páginas). Extraindo texto...`;
-
-        let fullText = '';
-        for (let i = 1; i <= pdf.numPages; i++) {
-            const page = await pdf.getPage(i);
-            const content = await page.getTextContent();
-            const pageText = content.items.map(item => item.str).join(' ');
-            fullText += pageText + '\n';
-        }
-
-        statusEl.textContent = 'Texto extraído. Parseando dados...';
-        pdfDadosExtraidos = parseTextoContracheque(fullText);
-
-        if (!pdfDadosExtraidos) {
-            throw new Error('Não foi possível identificar os dados do contra-cheque no PDF enviado.');
-        }
-
-        preencherDadosExtraidos(pdfDadosExtraidos);
-        dropProc.classList.add('hidden');
-        dropInner.classList.remove('hidden');
-        document.getElementById('dadosExtraidos').classList.remove('hidden');
-        document.getElementById('dadosExtraidos').scrollIntoView({ behavior: 'smooth' });
-        if (window.lucide) lucide.createIcons();
-
-    } catch (err) {
-        console.error(err);
-        dropProc.classList.add('hidden');
-        dropInner.classList.remove('hidden');
-        alert('Erro ao processar o PDF: ' + err.message);
     }
+
+    dropProc.classList.add('hidden');
+    dropInner.classList.remove('hidden');
+
+    if (pdfsCarregados.length === 0) {
+        alert('Nenhum PDF pôde ser processado. Verifique se os arquivos são contra-cheques válidos.');
+        return;
+    }
+
+    if (erros > 0) {
+        statusEl.textContent = `${pdfsCarregados.length} processado(s), ${erros} com erro.`;
+    }
+
+    atualizarUI();
 }
 
 async function carregarPDFJS() {
     return new Promise((resolve, reject) => {
+        if (typeof pdfjsLib !== 'undefined') { resolve(); return; }
         const script = document.createElement('script');
         script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
         script.onload = () => {
@@ -155,13 +171,96 @@ async function carregarPDFJS() {
 }
 
 // ─────────────────────────────────────────────────
+// Atualizar toda a UI com a lista atual de PDFs
+// ─────────────────────────────────────────────────
+
+function atualizarUI() {
+    const listaEl = document.getElementById('listaPDFs');
+    const badge = document.getElementById('badgePdfs');
+    const acoes = document.getElementById('acoesUpload');
+    const resumo = document.getElementById('resumoSoma');
+
+    if (pdfsCarregados.length === 0) {
+        acoes.classList.add('hidden');
+        resumo.classList.add('hidden');
+        badge.classList.add('hidden');
+        listaEl.innerHTML = '';
+        return;
+    }
+
+    // Badge
+    badge.textContent = `${pdfsCarregados.length} PDF${pdfsCarregados.length > 1 ? 's' : ''}`;
+    badge.classList.remove('hidden');
+
+    // Cards de cada PDF
+    listaEl.innerHTML = pdfsCarregados.map(p => {
+        const d = p.dados;
+        const tipo = detectarTipoContracheque(d);
+        const tipoLabel = tipo === '13' ? 'Adiant. 13º' : tipo === 'ferias' ? 'Férias' : 'Salário';
+        const tipoColor = tipo === '13'
+            ? 'bg-amber-100 text-amber-700'
+            : tipo === 'ferias'
+                ? 'bg-sky-100 text-sky-700'
+                : 'bg-emerald-100 text-emerald-700';
+
+        return `
+        <div class="bg-white border border-slate-200 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center gap-3 hover:shadow-sm transition-shadow">
+            <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <span class="text-sm font-semibold text-slate-800 truncate">${d.nome || 'Não identificado'}</span>
+                    <span class="px-2 py-0.5 text-[10px] font-bold rounded-full ${tipoColor}">${tipoLabel}</span>
+                </div>
+                <div class="flex items-center gap-3 mt-1 text-xs text-slate-500">
+                    <span class="font-mono">Mat: ${d.matricula || 'N/I'}</span>
+                    <span>${d.competencia || 'N/I'}</span>
+                    <span class="text-slate-400">${p.nomeArquivo}</span>
+                </div>
+                <div class="flex items-center gap-4 mt-2 text-xs">
+                    <span><span class="text-slate-400">Prov:</span> <span class="text-emerald-600 font-mono font-medium">${fmtMoeda(d.totalRendimentos || 0)}</span></span>
+                    <span><span class="text-slate-400">Desc:</span> <span class="text-rose-600 font-mono font-medium">${fmtMoeda(d.totalDescontos || 0)}</span></span>
+                    <span><span class="text-slate-400">Líq:</span> <span class="text-slate-800 font-mono font-bold">${fmtMoeda(d.valorLiquido || 0)}</span></span>
+                </div>
+            </div>
+            <button onclick="removerPDF(${p.id})" class="flex-shrink-0 p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors" title="Remover">
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+        </div>`;
+    }).join('');
+
+    // Soma
+    const somaProventos = pdfsCarregados.reduce((s, p) => s + (p.dados.totalRendimentos || 0), 0);
+    const somaDescontos = pdfsCarregados.reduce((s, p) => s + (p.dados.totalDescontos || 0), 0);
+    const somaLiquido = pdfsCarregados.reduce((s, p) => s + (p.dados.valorLiquido || 0), 0);
+
+    document.getElementById('somaProventos').textContent = fmtMoeda(somaProventos);
+    document.getElementById('somaDescontos').textContent = fmtMoeda(somaDescontos);
+    document.getElementById('somaLiquido').textContent = fmtMoeda(somaLiquido);
+    resumo.classList.remove('hidden');
+
+    acoes.classList.remove('hidden');
+
+    if (window.lucide) lucide.createIcons();
+}
+
+function removerPDF(id) {
+    pdfsCarregados = pdfsCarregados.filter(p => p.id !== id);
+    document.getElementById('resultadoAuditoria').classList.add('hidden');
+    document.getElementById('estadoSemAPI').classList.add('hidden');
+    atualizarUI();
+    if (pdfsCarregados.length === 0) {
+        document.getElementById('acoesUpload').classList.add('hidden');
+        document.getElementById('resumoSoma').classList.add('hidden');
+        document.getElementById('badgePdfs').classList.add('hidden');
+    }
+}
+
+// ─────────────────────────────────────────────────
 // Parser: extrai dados estruturados do texto do PDF
 // ─────────────────────────────────────────────────
 
-function parseTextoContracheque(text) {
-    // Normalizar: remover quebras múltiplas, normalizar espaços
+function parseTextoContracheque(text, nomeArquivo) {
     const t = text.replace(/\s+/g, ' ').trim();
-    
+
     const resultado = {
         nome: null,
         matricula: null,
@@ -178,23 +277,18 @@ function parseTextoContracheque(text) {
     };
 
     // ── Nome ──
-    // Procura após "Nome do Funcionário" até a próxima palavra-chave
-    const nomeMatch = t.match(/Nome\s+do\s+Funcion[áa]rio\s+Matr[íi]cula\s+([A-ZÀ-Ú][A-ZÀ-Úa-zà-ú\s]+?)(?:\s+Matr[íi]cula|\s+CPF|\s+Lotacao|\s+Lot[açã]ção|\s+Admiss)/i);
-    if (nomeMatch) {
-        resultado.nome = nomeMatch[1].trim();
-    }
+    const nomeMatch = t.match(/Nome\s+do\s+Funcion[áa]rio\s+Matr[íi]cula\s+([A-ZÀ-Ú][A-ZÀ-Úa-zà-ú\s]+?)(?:\s+Matr[íi]cula|\s+CPF|\s+Lotacao|\s+Lota[cç][aã]o|\s+Admiss)/i);
+    if (nomeMatch) resultado.nome = nomeMatch[1].trim();
 
     // ── CPF ──
     const cpfMatch = t.match(/(\d{3}\.\d{3}\.\d{3}-\d{2})/);
     if (cpfMatch) resultado.cpf = cpfMatch[1];
 
     // ── Matrícula ──
-    // Formato comum: "XXXXX-X/X" ou "XXXXXX-X"
     const matrMatch = t.match(/(\d{4,6}-\d(?:\/\d)?)/);
     if (matrMatch) resultado.matricula = matrMatch[1];
 
     // ── Competência ──
-    // "Junho / 2026" ou "06/2026"
     const compMatch1 = t.match(/([A-Z][a-zçÇ]+)\s*\/\s*(\d{4})/);
     if (compMatch1) {
         const mesNome = compMatch1[1].toLowerCase();
@@ -208,15 +302,11 @@ function parseTextoContracheque(text) {
 
     // ── Cargo ──
     const cargoMatch = t.match(/Cargo\s+([A-ZÀ-Ú][A-ZÀ-Úa-zà-ú\s\-\.]+?)(?:\s+N[íi]vel|\s+Nivel|\s+Salarial|\s+V[íi]nculo|\s+Vinculo)/i);
-    if (cargoMatch) {
-        resultado.cargo = cargoMatch[1].trim();
-    }
+    if (cargoMatch) resultado.cargo = cargoMatch[1].trim();
 
     // ── Lotação ──
     const lotMatch1 = t.match(/CNPJ\s+[\d\.\/-]+\s+([A-ZÀ-Ú][A-ZÀ-Úa-zà-ú\s\-]+?)(?:\s+V[íi]nculo|\s+Vinculo|\s+Cargo)/i);
-    if (lotMatch1) {
-        resultado.lotacao = lotMatch1[1].trim();
-    }
+    if (lotMatch1) resultado.lotacao = lotMatch1[1].trim();
     if (!resultado.lotacao) {
         const lotMatch2 = t.match(/Lota[cç][aã]o\s+(?:Admiss[aã]o\s+[\d\/]+\s+)?([A-ZÀ-Ú][A-ZÀ-Úa-zà-ú\s\-]+?)(?:\s+Admiss|\s+CNPJ|\s+V[íi]nculo|\s+Vinculo|\s+Cargo)/i);
         if (lotMatch2) resultado.lotacao = lotMatch2[1].trim();
@@ -231,21 +321,14 @@ function parseTextoContracheque(text) {
     if (sbMatch) resultado.salarioBase = parseFloat(sbMatch[1].replace(/\./g, '').replace(',', '.'));
 
     // ── Rubricas ──
-    // Encontra a seção entre "Código Descrição" e "Totais"
     const codDescIdx = t.search(/C[óo]digo\s+Descri[cç][ãa]o/i);
     const totaisIdx = t.search(/Totais/i);
-    
+
     if (codDescIdx >= 0 && totaisIdx > codDescIdx) {
         const secaoRubricas = t.substring(codDescIdx, totaisIdx);
-
-        // Cada rubrica: código numérico + texto + valores
-        // Padrão: número (código) seguido de descrição (texto) seguido de valores numéricos
         const linhas = secaoRubricas.split(/(?=\d{1,4}\s+[A-ZÀ-Ú])/);
 
         for (const linha of linhas) {
-            // Tenta extrair: código, descrição, rendimento, desconto
-            // Formato: "2 Vencimento Basico 30 Dias 2.811,38"
-            // ou: "450 Pensão Liquído 1-Folha 30 1.176,15"
             const match = linha.match(/^(\d{1,4})\s+(.+?)\s+([\d\.]+,\d{2})\s*(?:([\d\.]+,\d{2}))?$/);
             if (match) {
                 const rub = {
@@ -254,14 +337,11 @@ function parseTextoContracheque(text) {
                     rendimentos: null,
                     descontos: null
                 };
-                // O terceiro valor pode ser rendimento ou desconto dependendo da posição
                 const val1 = parseFloat(match[3].replace(/\./g, '').replace(',', '.'));
                 if (match[4]) {
-                    const val2 = parseFloat(match[4].replace(/\./g, '').replace(',', '.'));
                     rub.rendimentos = val1;
-                    rub.descontos = val2;
+                    rub.descontos = parseFloat(match[4].replace(/\./g, '').replace(',', '.'));
                 } else {
-                    // Descobrir se é rendimento ou desconto pelo contexto
                     const descUpper = rub.descricao.toUpperCase();
                     if (/DESCONTO|PENS[AÃ]O|PREV|SIND|OSTRAS/i.test(descUpper)) {
                         rub.descontos = val1;
@@ -278,7 +358,6 @@ function parseTextoContracheque(text) {
     const liqMatch = t.match(/Valor\s+L[íi]quido\s+([\d\.]+,\d{2})/i);
     if (liqMatch) resultado.valorLiquido = parseFloat(liqMatch[1].replace(/\./g, '').replace(',', '.'));
 
-    // Tenta extrair totais de Rendimentos e Descontos (linha após "Totais")
     const totaisResto = t.substring(totaisIdx >= 0 ? totaisIdx : 0);
     const totaisMatch = totaisResto.match(/Totais\s+.*?([\d\.]+,\d{2})\s+([\d\.]+,\d{2})/);
     if (totaisMatch) {
@@ -286,7 +365,6 @@ function parseTextoContracheque(text) {
         resultado.totalDescontos = parseFloat(totaisMatch[2].replace(/\./g, '').replace(',', '.'));
     }
 
-    // Fallback: calcular totais das rubricas
     if (resultado.totalRendimentos === null) {
         resultado.totalRendimentos = resultado.rubricas.reduce((s, r) => s + (r.rendimentos || 0), 0);
     }
@@ -294,163 +372,140 @@ function parseTextoContracheque(text) {
         resultado.totalDescontos = resultado.rubricas.reduce((s, r) => s + (r.descontos || 0), 0);
     }
 
-    // ── Validação mínima ──
     if (!resultado.nome && !resultado.matricula) return null;
-    
+
     return resultado;
 }
 
 // ─────────────────────────────────────────────────
-// Preencher UI com dados extraídos
+// Detecta o tipo de contra-cheque
 // ─────────────────────────────────────────────────
 
-function preencherDadosExtraidos(d) {
-    document.getElementById('ext-nome').textContent = d.nome || 'Não identificado';
-    document.getElementById('ext-matricula').textContent = d.matricula || 'Não identificada';
-    document.getElementById('ext-competencia').textContent = d.competencia || 'Não identificada';
-    document.getElementById('ext-cargo').textContent = d.cargo || 'Não identificado';
-    document.getElementById('ext-lotacao').textContent = d.lotacao || 'Não identificada';
-
-    // Rubricas
-    const tbody = document.getElementById('ext-rubricas');
-    if (d.rubricas.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" class="py-3 text-center text-slate-400 text-sm">Nenhuma rubrica identificada</td></tr>';
-    } else {
-        tbody.innerHTML = d.rubricas.map(r => `
-            <tr class="hover:bg-slate-50/50">
-                <td class="py-2 px-3 font-mono text-xs text-slate-500">${r.codigo}</td>
-                <td class="py-2 px-3 text-xs text-slate-700">${r.descricao}</td>
-                <td class="py-2 px-3 text-xs text-right ${(r.rendimentos || 0) > 0 ? 'text-emerald-600 font-medium' : 'text-slate-300'}">${(r.rendimentos || 0) > 0 ? fmtMoeda(r.rendimentos) : '—'}</td>
-                <td class="py-2 px-3 text-xs text-right ${(r.descontos || 0) > 0 ? 'text-rose-600 font-medium' : 'text-slate-300'}">${(r.descontos || 0) > 0 ? fmtMoeda(r.descontos) : '—'}</td>
-            </tr>
-        `).join('');
-    }
-
-    // Totais
-    const totais = document.getElementById('ext-totais');
-    totais.innerHTML = `
-        <tr>
-            <td colspan="2" class="py-2 px-3 text-xs uppercase text-slate-500">Totais</td>
-            <td class="py-2 px-3 text-xs text-right font-bold text-emerald-700">${fmtMoeda(d.totalRendimentos || 0)}</td>
-            <td class="py-2 px-3 text-xs text-right font-bold text-rose-700">${fmtMoeda(d.totalDescontos || 0)}</td>
-        </tr>
-        <tr>
-            <td colspan="3" class="py-2 px-3 text-xs uppercase text-slate-500">Valor Líquido</td>
-            <td class="py-2 px-3 text-xs text-right font-black text-slate-800 text-base">${fmtMoeda(d.valorLiquido || 0)}</td>
-        </tr>
-    `;
+function detectarTipoContracheque(dados) {
+    if (!dados || !dados.rubricas) return 'salario';
+    const todasDesc = dados.rubricas.map(r => r.descricao).join(' ').toUpperCase();
+    if (/13[º°]|DECIMO|D[ÉE]CIMO|ADIANTAMENTO.*13|13.*ADIANTAMENTO/i.test(todasDesc)) return '13';
+    if (/F[ÉE]RIAS|ABONO.*F[ÉE]RIAS|TERCO.*CONST|1\/3/i.test(todasDesc)) return 'ferias';
+    return 'salario';
 }
 
 // ─────────────────────────────────────────────────
-// Cruzamento com API (IndexedDB)
+// Cruzamento com API (usando soma de todos os PDFs)
 // ─────────────────────────────────────────────────
 
 async function cruzarComAPI() {
-    if (!pdfDadosExtraidos) return alert('Envie um PDF primeiro.');
+    if (pdfsCarregados.length === 0) return alert('Envie ao menos um PDF primeiro.');
 
-    const d = pdfDadosExtraidos;
-
-    // Mostrar loading
     document.getElementById('resultadoAuditoria').classList.add('hidden');
     document.getElementById('estadoSemAPI').classList.add('hidden');
-    document.getElementById('dadosExtraidos').scrollIntoView({ behavior: 'smooth' });
 
-    try {
-        // Determinar a competência para buscar no banco
-        const comp = d.competencia; // ex: "06/2026"
-        if (!comp) {
-            alert('Não foi possível identificar a competência no PDF. Verifique se o PDF contém o mês/ano.');
-            return;
-        }
-        const [mes, ano] = comp.split('/');
-        const mesAno = ano + '-' + mes; // "2026-06"
-
-        // Procurar em todas as entidades
-        const entidades = [
-            'PM RIO DAS OSTRAS - EFETIVOS E COMISSIONADOS',
-            'PM RIO DAS OSTRAS - CONTRATADOS',
-            'SAAE - RIO DAS OSTRAS'
-        ];
-
-        let dadosAPI = null;
-        let entidadeEncontrada = null;
-
-        for (const entidade of entidades) {
-            const cacheKey = `FolhaPagamento_${entidade}_${mesAno}`;
-            let raw = await getCache(cacheKey);
-            if (!raw) continue;
-            if (typeof raw === 'string') {
-                try { raw = JSON.parse(raw); } catch (_) { continue; }
-            }
-            if (!Array.isArray(raw) || raw.length === 0) continue;
-
-            // Buscar por nome (case-insensitive) e/ou matrícula
-            const nomeBusca = d.nome ? d.nome.toUpperCase().trim() : '';
-            const matrBusca = d.matricula ? d.matricula.replace(/\D/g, '') : '';
-
-            const encontrados = raw.filter(row => {
-                const nomeRow = (row.NomeServidor || '').toUpperCase().trim();
-                const matrRow = (row.Matricula || '').replace(/\D/g, '');
-                
-                if (matrBusca && matrBusca.length >= 4 && matrRow.includes(matrBusca)) return true;
-                if (nomeBusca && nomeRow.includes(nomeBusca)) return true;
-                return false;
-            });
-
-            if (encontrados.length > 0) {
-                dadosAPI = encontrados;
-                entidadeEncontrada = entidade;
-                break;
-            }
-        }
-
-        if (!dadosAPI || dadosAPI.length === 0) {
-            document.getElementById('estadoSemAPI').classList.remove('hidden');
-            document.getElementById('estadoSemAPI').scrollIntoView({ behavior: 'smooth' });
-            return;
-        }
-
-        // Gerar parecer
-        gerarParecer(d, dadosAPI, entidadeEncontrada);
-
-    } catch (err) {
-        console.error(err);
-        alert('Erro ao cruzar dados: ' + err.message);
+    const primeiro = pdfsCarregados[0].dados;
+    const comp = primeiro.competencia;
+    if (!comp) {
+        alert('Não foi possível identificar a competência no PDF. Verifique se o PDF contém o mês/ano.');
+        return;
     }
+    const [mes, ano] = comp.split('/');
+    const mesAno = ano + '-' + mes;
+
+    // Buscar na API
+    const entidades = [
+        'PM RIO DAS OSTRAS - EFETIVOS E COMISSIONADOS',
+        'PM RIO DAS OSTRAS - CONTRATADOS',
+        'SAAE - RIO DAS OSTRAS'
+    ];
+
+    let dadosAPI = null;
+    let entidadeEncontrada = null;
+
+    for (const entidade of entidades) {
+        const cacheKey = `FolhaPagamento_${entidade}_${mesAno}`;
+        let raw = await getCache(cacheKey);
+        if (!raw) continue;
+        if (typeof raw === 'string') {
+            try { raw = JSON.parse(raw); } catch (_) { continue; }
+        }
+        if (!Array.isArray(raw) || raw.length === 0) continue;
+
+        const nomeBusca = primeiro.nome ? primeiro.nome.toUpperCase().trim() : '';
+        const matrBusca = primeiro.matricula ? primeiro.matricula.replace(/\D/g, '') : '';
+
+        const encontrados = raw.filter(row => {
+            const nomeRow = (row.NomeServidor || '').toUpperCase().trim();
+            const matrRow = (row.Matricula || '').replace(/\D/g, '');
+            if (matrBusca && matrBusca.length >= 4 && matrRow.includes(matrBusca)) return true;
+            if (nomeBusca && nomeRow.includes(nomeBusca)) return true;
+            return false;
+        });
+
+        if (encontrados.length > 0) {
+            dadosAPI = encontrados;
+            entidadeEncontrada = entidade;
+            break;
+        }
+    }
+
+    if (!dadosAPI || dadosAPI.length === 0) {
+        document.getElementById('estadoSemAPI').classList.remove('hidden');
+        document.getElementById('estadoSemAPI').scrollIntoView({ behavior: 'smooth' });
+        return;
+    }
+
+    gerarParecer(dadosAPI, entidadeEncontrada);
 }
 
 // ─────────────────────────────────────────────────
 // Geração do parecer técnico-contábil
 // ─────────────────────────────────────────────────
 
-function gerarParecer(d, dadosAPI, entidade) {
-    // Consolidar registros da API (pode ter múltiplos vínculos)
+function gerarParecer(dadosAPI, entidade) {
+    // Soma de todos os PDFs enviados
+    const soma = {
+        proventos: pdfsCarregados.reduce((s, p) => s + (p.dados.totalRendimentos || 0), 0),
+        descontos: pdfsCarregados.reduce((s, p) => s + (p.dados.totalDescontos || 0), 0),
+        liquido: pdfsCarregados.reduce((s, p) => s + (p.dados.valorLiquido || 0), 0)
+    };
+
+    // Consolidar registros da API
     let apiProventos = 0, apiDescontos = 0, apiLiquido = 0;
     const apiCargos = new Set();
 
     for (const row of dadosAPI) {
-        const prov = parseFloat(row.Proventos) || parseFloat(String(row.Proventos || '').replace(',', '.')) || 0;
-        const desc = parseFloat(row.Descontos) || parseFloat(String(row.Descontos || '').replace(',', '.')) || 0;
-        const liq = parseFloat(row.Liquido) || parseFloat(String(row.Liquido || '').replace(',', '.')) || 0;
-        apiProventos += prov;
-        apiDescontos += desc;
-        apiLiquido += liq;
+        apiProventos += parseFloat(row.Proventos) || parseFloat(String(row.Proventos || '').replace(',', '.')) || 0;
+        apiDescontos += parseFloat(row.Descontos) || parseFloat(String(row.Descontos || '').replace(',', '.')) || 0;
+        apiLiquido += parseFloat(row.Liquido) || parseFloat(String(row.Liquido || '').replace(',', '.')) || 0;
         if (row.Cargo) apiCargos.add(row.Cargo);
     }
 
-    const numVinculos = dadosAPI.length;
+    const numVinculosAPI = dadosAPI.length;
+    const numPDFs = pdfsCarregados.length;
 
     // Comparações
-    const difProventos = (d.totalRendimentos || 0) - apiProventos;
-    const difDescontos = (d.totalDescontos || 0) - apiDescontos;
-    const difLiquido = (d.valorLiquido || 0) - apiLiquido;
+    const difProventos = soma.proventos - apiProventos;
+    const difDescontos = soma.descontos - apiDescontos;
+    const difLiquido = soma.liquido - apiLiquido;
 
-    const tol = 0.02; // tolerância de 2 centavos
+    const tol = 0.02;
     const provOk = Math.abs(difProventos) <= tol;
     const descOk = Math.abs(difDescontos) <= tol;
     const liqOk = Math.abs(difLiquido) <= tol;
 
     const tudoOk = provOk && descOk && liqOk;
+
+    // ── Diagnóstico: quando há múltiplos PDFs e o padrão de consolidação parcial ──
+    // Se proventos e descontos batem (soma de todos os CC bate com API), mas líquido não,
+    // e temos múltiplos PDFs, é o caso clássico de consolidação parcial.
+    const padraoConsolidacaoParcial = numPDFs > 1 && provOk && descOk && !liqOk;
+
+    // Se só tem 1 PDF e proventos não batem, verificar se a diferença corresponde a um
+    // líquido de outro contra-cheque (caso do 13º)
+    let suspeita13 = false;
+    if (numPDFs === 1 && !provOk && liqOk && descOk) {
+        // Prov API > Prov PDF: API tem um extra
+        // Liq API = Liq PDF: mas o líquido é o mesmo
+        // Isso acontece quando API consolidou dois CC mas só pegou líquido do primeiro
+        suspeita13 = true;
+    }
 
     // ── Alerta de Status ──
     const alerta = document.getElementById('alertaStatus');
@@ -465,7 +520,15 @@ function gerarParecer(d, dadosAPI, entidade) {
         alertaTitulo.className = 'text-sm font-bold text-emerald-800';
         alertaTitulo.textContent = 'Contracheque Válido — Sem Divergências';
         alertaMsg.className = 'text-xs text-emerald-600 mt-1';
-        alertaMsg.textContent = `Os dados do PDF conferem com os registros da API (${numVinculos} vínculo${numVinculos > 1 ? 's' : ''} encontrado${numVinculos > 1 ? 's' : ''} em ${entidade}).`;
+        alertaMsg.textContent = `Os dados de ${numPDFs} PDF${numPDFs > 1 ? 's' : ''} conferem com ${numVinculosAPI} registro${numVinculosAPI > 1 ? 's' : ''} da API (${entidade}).`;
+    } else if (padraoConsolidacaoParcial) {
+        alerta.className = 'ag-card rounded-2xl p-4 flex items-start gap-3 bg-amber-50 border border-amber-200';
+        alertaIcon.className = 'w-6 h-6 flex-shrink-0 mt-0.5 text-amber-600';
+        alertaIcon.setAttribute('data-lucide', 'alert-triangle');
+        alertaTitulo.className = 'text-sm font-bold text-amber-800';
+        alertaTitulo.textContent = 'Consolidação Parcial Detectada';
+        alertaMsg.className = 'text-xs text-amber-600 mt-1';
+        alertaMsg.textContent = `A API somou corretamente os proventos e descontos dos ${numPDFs} contra-cheques, mas o líquido reflete apenas um deles. Diferença no líquido: ${fmtMoeda(difLiquido)}.`;
     } else {
         alerta.className = 'ag-card rounded-2xl p-4 flex items-start gap-3 bg-rose-50 border border-rose-200';
         alertaIcon.className = 'w-6 h-6 flex-shrink-0 mt-0.5 text-rose-600';
@@ -473,27 +536,58 @@ function gerarParecer(d, dadosAPI, entidade) {
         alertaTitulo.className = 'text-sm font-bold text-rose-800';
         alertaTitulo.textContent = 'Divergência Detectada';
         alertaMsg.className = 'text-xs text-rose-600 mt-1';
-        alertaMsg.textContent = `Foram encontradas inconsistências entre o contra-cheque e os dados da API. ${numVinculos} vínculo${numVinculos > 1 ? 's' : ''} localizado${numVinculos > 1 ? 's' : ''} em ${entidade}.`;
+        alertaMsg.textContent = `Inconsistências entre ${numPDFs} PDF${numPDFs > 1 ? 's' : ''} e ${numVinculosAPI} registro${numVinculosAPI > 1 ? 's' : ''} da API (${entidade}).`;
     }
 
     // ── Parecer Técnico-Contábil ──
     const parecer = document.getElementById('parecerConteudo');
+    const primeiro = pdfsCarregados[0].dados;
 
     let textoMotivo = '';
-    if (!provOk && !liqOk && numVinculos > 1) {
+
+    if (tudoOk) {
         textoMotivo = `
-            <p>A API do <strong>cidade360.cloud</strong> consolida múltiplos contra-cheques de uma mesma matrícula dentro da competência em um único registro. No entanto, a consolidação é <strong>parcial</strong>:</p>
+            <p>Todos os campos analisados — proventos, descontos e valor líquido — apresentam <strong>conformidade plena</strong> entre o(s) contra-cheque(s) oficial(is) e os dados fornecidos pela API <code>cidade360.cloud</code>.</p>
+            <p>Não foram identificadas inconsistências contábeis para esta matrícula na competência analisada.</p>
+        `;
+    } else if (padraoConsolidacaoParcial) {
+        // Caso ideal: usuário enviou todos os PDFs, a soma bate em Prov e Desc, só Liq diverge
+        const valorExtraLiq = Math.abs(difLiquido);
+        textoMotivo = `
+            <p>A API do <strong>cidade360.cloud</strong> (endpoint <code>/dadosabertos/FolhaPagamento</code>) consolida múltiplos contra-cheques de uma mesma matrícula dentro da competência em um <strong>único registro</strong>. No entanto, a consolidação é <strong>parcial</strong>:</p>
             <ul class="list-disc list-inside space-y-1 ml-2">
-                <li>O campo de <strong>proventos</strong> acumula corretamente as verbas de todos os contra-cheques da matrícula.</li>
-                <li>Os campos de <strong>descontos</strong> e <strong>líquido</strong> reproduzem apenas os valores do primeiro contra-cheque, ignorando os demais documentos de pagamento.</li>
+                <li>O campo de <strong>proventos</strong> acumula corretamente as verbas de todos os contra-cheques da matrícula (<strong>${fmtMoeda(apiProventos)}</strong>).</li>
+                <li>O campo de <strong>descontos</strong> também acumula corretamente (<strong>${fmtMoeda(apiDescontos)}</strong>).</li>
+                <li>O campo de <strong>líquido</strong>, porém, reproduz apenas o valor do primeiro contra-cheque, ignorando o líquido dos demais documentos de pagamento (<strong>${fmtMoeda(valorExtraLiq)}</strong> a menor).</li>
             </ul>
-            <p>Como consequência, a equação contábil básica <strong>Proventos − Descontos = Líquido</strong> não se sustenta nos registros da API quando há múltiplos contra-cheques para a mesma matrícula no mesmo mês.</p>
+            <p>Como consequência, a equação contábil básica <strong>Proventos − Descontos = Líquido</strong> não se sustenta: a API reporta proventos de ${fmtMoeda(apiProventos)} e descontos de ${fmtMoeda(apiDescontos)}, mas um líquido de apenas ${fmtMoeda(apiLiquido)} (deveria ser ${fmtMoeda(soma.liquido)}).</p>
             <p class="font-semibold">Recomendação:</p>
-            <p>Ajustar a rotina de agregação do endpoint <code>/dadosabertos/FolhaPagamento</code> para que todos os campos de valor sejam tratados de forma uniforme — somados integralmente ou mantidos como registros individuais, preservando a rastreabilidade de cada documento de pagamento.</p>
+            <p>Ajustar a rotina de agregação do endpoint para que, ao consolidar múltiplos contra-cheques, o campo <code>Liquido</code> também seja somado, garantindo a integridade da igualdade contábil <strong>Proventos − Descontos = Líquido</strong>.</p>
+        `;
+    } else if (suspeita13 && numPDFs === 1) {
+        // Usuário enviou só 1 PDF, mas API claramente tem dados de mais de um
+        const valorExtra = Math.abs(difProventos);
+        textoMotivo = `
+            <p>Você enviou <strong>1 contra-cheque</strong>, mas a API contém proventos superiores em <strong>${fmtMoeda(valorExtra)}</strong>. Os descontos e o líquido batem exatamente com o PDF enviado.</p>
+            <p>Este é o padrão clássico de <strong>consolidação parcial</strong>: a API consolidou dois contra-cheques da matrícula (ex: salário mensal + adiantamento do 13º salário) em um único registro, somando corretamente os proventos de ambos, mas mantendo apenas os descontos e o líquido do primeiro.</p>
+            <p>A diferença de <strong>${fmtMoeda(valorExtra)}</strong> nos proventos provavelmente corresponde a um <strong>segundo contra-cheque</strong> (adiantamento de 13º, férias, etc.) que não foi contabilizado nos descontos nem no líquido.</p>
+            <p class="font-semibold">Recomendação:</p>
+            <p>Para um diagnóstico completo, <strong>envie também o segundo contra-cheque</strong> (clique na área de upload novamente). Com ambos os PDFs, o sistema confirmará se a soma bate e gerará o parecer de consolidação parcial. Encaminhe este parecer à equipe técnica do <code>cidade360.cloud</code> para correção do endpoint.</p>
+        `;
+    } else if (!provOk && !descOk && numPDFs > 1) {
+        textoMotivo = `
+            <p>A API do <strong>cidade360.cloud</strong> consolida múltiplos contra-cheques de uma mesma matrícula na competência em um único registro. A divergência atinge múltiplos campos:</p>
+            <ul class="list-disc list-inside space-y-1 ml-2">
+                <li><strong>Proventos:</strong> diferença de ${fmtMoeda(Math.abs(difProventos))} ${difProventos > 0 ? '(PDF maior que API)' : '(API maior que PDF)'}</li>
+                <li><strong>Descontos:</strong> diferença de ${fmtMoeda(Math.abs(difDescontos))} ${difDescontos > 0 ? '(PDF maior que API)' : '(API maior que PDF)'}</li>
+                <li><strong>Líquido:</strong> diferença de ${fmtMoeda(Math.abs(difLiquido))} ${difLiquido > 0 ? '(PDF maior que API)' : '(API maior que PDF)'}</li>
+            </ul>
+            <p class="font-semibold">Recomendação:</p>
+            <p>Revisar a rotina de agregação do endpoint <code>/dadosabertos/FolhaPagamento</code> para que todos os campos de valor sejam tratados de forma uniforme — somados integralmente ou mantidos como registros individuais, preservando a rastreabilidade de cada documento de pagamento.</p>
         `;
     } else if (!provOk) {
         textoMotivo = `
-            <p>O valor total de <strong>rendimentos/proventos</strong> informado pela API diverge do contra-cheque oficial.</p>
+            <p>O valor total de <strong>rendimentos/proventos</strong> informado pela API diverge do contra-cheque oficial em ${fmtMoeda(Math.abs(difProventos))}.</p>
             <p class="font-semibold">Possíveis causas:</p>
             <ul class="list-disc list-inside space-y-1 ml-2">
                 <li>Verba transitória ou de exercício anterior computada indevidamente pela API.</li>
@@ -505,36 +599,31 @@ function gerarParecer(d, dadosAPI, entidade) {
         `;
     } else if (!descOk) {
         textoMotivo = `
-            <p>O valor total de <strong>descontos</strong> informado pela API diverge do contra-cheque oficial.</p>
+            <p>O valor total de <strong>descontos</strong> informado pela API diverge do contra-cheque oficial em ${fmtMoeda(Math.abs(difDescontos))}.</p>
             <p class="font-semibold">Recomendação:</p>
             <p>Verificar se há rubricas de desconto não contabilizadas ou contabilizadas incorretamente no endpoint da API.</p>
         `;
     } else if (!liqOk) {
         textoMotivo = `
-            <p>O <strong>valor líquido</strong> informado pela API diverge do contra-cheque oficial, embora os proventos e descontos estejam consistentes individualmente. Isso sugere um erro de arredondamento ou cálculo final no endpoint.</p>
+            <p>O <strong>valor líquido</strong> informado pela API diverge do contra-cheque oficial em ${fmtMoeda(Math.abs(difLiquido))}, embora os proventos e descontos estejam consistentes individualmente.</p>
             <p class="font-semibold">Recomendação:</p>
             <p>Revisar a fórmula de cálculo do campo <code>Liquido</code> no endpoint <code>/dadosabertos/FolhaPagamento</code>.</p>
-        `;
-    } else {
-        textoMotivo = `
-            <p>Todos os campos analisados — proventos, descontos e valor líquido — apresentam <strong>conformidade plena</strong> entre o contra-cheque oficial e os dados fornecidos pela API <code>cidade360.cloud</code>.</p>
-            <p>Não foram identificadas inconsistências contábeis para esta matrícula na competência analisada.</p>
         `;
     }
 
     parecer.innerHTML = `
         <div class="space-y-3">
             <div class="flex items-center gap-2 text-xs text-slate-400 uppercase tracking-wider font-bold">
-                <span>Parecer</span>
+                <span>Parecer Técnico-Contábil</span>
                 <span class="flex-1 border-t border-slate-200"></span>
                 <span>${new Date().toLocaleDateString('pt-BR')}</span>
             </div>
             <p><strong>Objeto:</strong> Divergência entre contra-cheque oficial (PDF) e API de dados abertos de Folha de Pagamento — <code>webapp1-riodasostras.cidade360.cloud</code>.</p>
-            <p><strong>Servidor:</strong> ${d.nome || 'Não identificado'} | <strong>Matrícula:</strong> ${d.matricula || 'N/I'} | <strong>Competência:</strong> ${d.competencia || 'N/I'}</p>
-            <p><strong>Entidade na API:</strong> ${entidade} (${numVinculos} registro${numVinculos > 1 ? 's' : ''})</p>
+            <p><strong>Servidor:</strong> ${primeiro.nome || 'Não identificado'} | <strong>Matrícula:</strong> ${primeiro.matricula || 'N/I'} | <strong>Competência:</strong> ${primeiro.competencia || 'N/I'}</p>
+            <p><strong>PDFs enviados:</strong> ${numPDFs} contra-cheque${numPDFs > 1 ? 's' : ''} | <strong>Registros na API:</strong> ${numVinculosAPI} (entidade: ${entidade})</p>
             ${textoMotivo}
             <div class="mt-2 pt-3 border-t border-slate-200 text-xs text-slate-400">
-                <em>Este parecer foi gerado automaticamente pelo módulo de Auditoria de Contracheque do Consulta360. Os dados do PDF foram extraídos por OCR textual (pdf.js) e cruzados com o banco local IndexedDB abastecido pela API de dados abertos.</em>
+                <em>Este parecer foi gerado automaticamente pelo módulo de Auditoria de Contracheque do Consulta360. Os dados do PDF foram extraídos via pdf.js e cruzados com o banco local IndexedDB abastecido pela API de dados abertos. Nenhum dado foi transmitido a servidores externos.</em>
             </div>
         </div>
     `;
@@ -542,15 +631,40 @@ function gerarParecer(d, dadosAPI, entidade) {
     // ── Tabela Comparativa ──
     const tbody = document.getElementById('tbodyComparativo');
     const linhas = [
-        { campo: 'Registros (vínculos)', pdf: '1', api: String(numVinculos), ok: numVinculos === 1 ? '⚠️' : '⚠️ múltiplos' },
-        { campo: 'Proventos / Rendimentos', pdf: fmtMoeda(d.totalRendimentos || 0), api: fmtMoeda(apiProventos), ok: provOk },
-        { campo: 'Descontos', pdf: fmtMoeda(d.totalDescontos || 0), api: fmtMoeda(apiDescontos), ok: descOk },
-        { campo: 'Valor Líquido', pdf: fmtMoeda(d.valorLiquido || 0), api: fmtMoeda(apiLiquido), ok: liqOk },
+        { campo: 'PDFs enviados', pdf: String(numPDFs), api: `${numVinculosAPI} registro(s)`, ok: '—' },
+        { campo: 'Proventos / Rendimentos', pdf: fmtMoeda(soma.proventos), api: fmtMoeda(apiProventos), ok: provOk },
+        { campo: 'Descontos', pdf: fmtMoeda(soma.descontos), api: fmtMoeda(apiDescontos), ok: descOk },
+        { campo: 'Valor Líquido', pdf: fmtMoeda(soma.liquido), api: fmtMoeda(apiLiquido), ok: liqOk },
     ];
-    if (d.salarioBase !== null) {
+    if (primeiro.salarioBase !== null) {
         const apiSB = parseFloat(dadosAPI[0]?.SalarioBase) || parseFloat(String(dadosAPI[0]?.SalarioBase || '').replace(',', '.')) || 0;
-        linhas.push({ campo: 'Salário Base', pdf: fmtMoeda(d.salarioBase), api: fmtMoeda(apiSB), ok: '—' });
+        linhas.push({ campo: 'Salário Base (1º CC)', pdf: fmtMoeda(primeiro.salarioBase), api: fmtMoeda(apiSB), ok: '—' });
     }
+
+    // Se há múltiplos PDFs, adicionar linha de decomposição
+    if (numPDFs > 1) {
+        linhas.push({ campo: '— Decomposição dos PDFs —', pdf: '', api: '', ok: '—' });
+        pdfsCarregados.forEach(p => {
+            const tipo = detectarTipoContracheque(p.dados);
+            const tipoIcone = tipo === '13' ? '📌 13º' : tipo === 'ferias' ? '🏖 Férias' : '💰 Salário';
+            linhas.push({
+                campo: `  ${tipoIcone} (${p.nomeArquivo})`,
+                pdf: `Prov ${fmtMoeda(p.dados.totalRendimentos || 0)} | Desc ${fmtMoeda(p.dados.totalDescontos || 0)} | Líq ${fmtMoeda(p.dados.valorLiquido || 0)}`,
+                api: '—',
+                ok: '—'
+            });
+        });
+    }
+
+    // Linha extra: check da equação contábil na API
+    const apiEquacao = apiProventos - apiDescontos;
+    const apiEquacaoOk = Math.abs(apiEquacao - apiLiquido) <= tol;
+    linhas.push({
+        campo: 'Eq. contábil da API (Prov−Desc=Líq)',
+        pdf: '—',
+        api: apiEquacaoOk ? '✅ Válida' : `❌ ${fmtMoeda(apiProventos)} − ${fmtMoeda(apiDescontos)} = ${fmtMoeda(apiEquacao)} ≠ ${fmtMoeda(apiLiquido)}`,
+        ok: apiEquacaoOk ? '✅' : '❌'
+    });
 
     tbody.innerHTML = linhas.map(l => {
         let statusHtml = '';
@@ -558,10 +672,10 @@ function gerarParecer(d, dadosAPI, entidade) {
             statusHtml = '<span class="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-100 text-emerald-700 text-[10px] font-bold rounded-full">✅ Confere</span>';
         } else if (l.ok === false || l.ok === '❌') {
             statusHtml = '<span class="inline-flex items-center gap-1 px-2 py-0.5 bg-rose-100 text-rose-700 text-[10px] font-bold rounded-full">❌ Divergente</span>';
-        } else if (typeof l.ok === 'string') {
-            statusHtml = '<span class="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-100 text-amber-700 text-[10px] font-bold rounded-full">' + l.ok + '</span>';
+        } else if (typeof l.ok === 'string' && l.ok !== '—') {
+            statusHtml = `<span class="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-100 text-amber-700 text-[10px] font-bold rounded-full">${l.ok}</span>`;
         } else {
-            statusHtml = '<span class="text-slate-400 text-xs">—</span>';
+            statusHtml = '<span class="text-slate-400 text-xs">' + (l.ok || '—') + '</span>';
         }
         return `<tr class="hover:bg-slate-50/50">
             <td class="py-3 px-4 text-sm font-medium text-slate-700">${l.campo}</td>
@@ -585,3 +699,6 @@ function gerarParecer(d, dadosAPI, entidade) {
 function fmtMoeda(v) {
     return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
+
+// ── Expõe função global para o onclick no HTML ──
+window.removerPDF = removerPDF;
