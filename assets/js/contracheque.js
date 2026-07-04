@@ -347,7 +347,9 @@ function parseTextoContracheque(text, nomeArquivo) {
 
     // ── Rubricas ──
     const codDescIdx = t.search(/C[óo]digo\s+Descri[cç][ãa]o/i);
-    const totaisIdx = t.search(/Totais/i);
+    let totaisIdx = t.search(/Totais/i);
+    // Fallback: alguns PDFs usam "Total" no singular
+    if (totaisIdx < 0) totaisIdx = t.search(/Total\s/);
 
     if (codDescIdx >= 0 && totaisIdx > codDescIdx) {
         const secaoRubricas = t.substring(codDescIdx, totaisIdx);
@@ -380,44 +382,42 @@ function parseTextoContracheque(text, nomeArquivo) {
     }
 
     // ── Totais / Valor Líquido ──
-    // Estratégia: somar rubricas é mais confiável do que regex nos totais,
-    // pois o layout de "Totais" varia entre tipos de contra-cheque.
+    // ABANDONAMOS o regex de "Totais" — o layout varia entre tipos de
+    // contra-cheque. A soma das rubricas é a verdade contábil.
     const somaRubRend = resultado.rubricas.reduce((s, r) => s + (r.rendimentos || 0), 0);
     const somaRubDesc = resultado.rubricas.reduce((s, r) => s + (r.descontos || 0), 0);
 
-    // Tenta extrair o Valor Líquido do texto
-    const liqMatch = t.match(/Valor\s+L[íi]quido\s+([\d\.]+,\d{2})/i);
-    if (liqMatch) resultado.valorLiquido = parseFloat(liqMatch[1].replace(/\./g, '').replace(',', '.'));
-
-    // Tenta extrair os totais da linha "Totais" mas valida contra a soma das rubricas
-    const totaisResto = t.substring(totaisIdx >= 0 ? totaisIdx : 0);
-    // Remove "Valor Líquido X.XXX,XX" (pode estar em qualquer posição após Totais)
-    const semLiq = totaisResto.replace(/Valor\s+L[íi]quido\s+[\d\.]+,\d{2}/gi, '');
-    // Remove também "Salário Base:" e "Salário Contribuição:" e afins que aparecem após totais
-    const apenasTotais = semLiq.replace(/Sal[áa]rio\s+(Base|Contribui[cç][ãa]o|Fam[íi]lia)\s*:?\s*[\d\.]+,\d{2}/gi, '')
-                               .replace(/Base\s+C[áa]lc\.\s+IRRF\s*:?\s*[\d\.]+,\d{2}/gi, '');
-    const totaisMatch = apenasTotais.match(/Totais\s+.*?([\d\.]+,\d{2})\s+([\d\.]+,\d{2})/);
-    if (totaisMatch) {
-        const regexRend = parseFloat(totaisMatch[1].replace(/\./g, '').replace(',', '.'));
-        const regexDesc = parseFloat(totaisMatch[2].replace(/\./g, '').replace(',', '.'));
-
-        // Validação: se o regex divergir da soma das rubricas, prefere a soma
-        const rendOk = somaRubRend > 0 && Math.abs(regexRend - somaRubRend) < 1;
-        const descOk = Math.abs(regexDesc - somaRubDesc) < 1;
-
-        resultado.totalRendimentos = rendOk ? regexRend : somaRubRend;
-        resultado.totalDescontos = descOk ? regexDesc : somaRubDesc;
+    // Se nenhuma rubrica foi extraída, tenta extrair direto dos totais como último recurso
+    if (resultado.rubricas.length === 0) {
+        const totaisResto = t.substring(totaisIdx >= 0 ? totaisIdx : 0);
+        const numeros = [...totaisResto.matchAll(/([\d\.]+,\d{2})/g)].map(m => parseFloat(m[1].replace(/\./g, '').replace(',', '.')));
+        if (numeros.length >= 2) {
+            // Primeiro número após Totais = Rendimentos, segundo = Descontos
+            resultado.totalRendimentos = numeros[0];
+            resultado.totalDescontos = numeros[1];
+        }
     } else {
-        // Fallback puro: só soma das rubricas
         resultado.totalRendimentos = somaRubRend;
         resultado.totalDescontos = somaRubDesc;
     }
 
-    // Se o Valor Líquido não foi extraído ou parece errado, calcula pela fórmula
-    if (!resultado.valorLiquido || resultado.valorLiquido <= 0) {
-        const liqCalculado = (resultado.totalRendimentos || 0) - (resultado.totalDescontos || 0);
-        if (liqCalculado > 0) resultado.valorLiquido = liqCalculado;
+    // Tenta extrair o Valor Líquido do texto; se não encontrar ou for <= 0,
+    // calcula pela fórmula contábil
+    const liqMatch = t.match(/Valor\s+L[íi]quido\s+([\d\.]+,\d{2})/i);
+    if (liqMatch) {
+        resultado.valorLiquido = parseFloat(liqMatch[1].replace(/\./g, '').replace(',', '.'));
     }
+    if (!resultado.valorLiquido || resultado.valorLiquido <= 0) {
+        resultado.valorLiquido = (resultado.totalRendimentos || 0) - (resultado.totalDescontos || 0);
+    }
+
+    console.log('[contracheque] Parser:', {
+        arquivo: nomeArquivo,
+        rubricas: resultado.rubricas.length,
+        somaRend: somaRubRend, somaDesc: somaRubDesc,
+        finalRend: resultado.totalRendimentos, finalDesc: resultado.totalDescontos,
+        liquido: resultado.valorLiquido
+    });
 
     if (!resultado.nome && !resultado.matricula) return null;
 
