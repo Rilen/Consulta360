@@ -8,6 +8,7 @@ const routes = {
     'evolucao': './body/evolucao.html',
     'receitas': './body/receitas.html',
     'despesas': './body/despesas.html',
+    'contracheque': './body/contracheque.html',
     'config': './body/config.html',
     'info': './body/info.html',
     'changelog': './body/changelog.html'

@@ -4,6 +4,7 @@ function getMenuHtml(currentRoute) {
     const isGraficos = currentRoute === 'graficos';
     const isAuditoria = currentRoute === 'auditoria';
     const isEvolucao = currentRoute === 'evolucao';
+    const isContracheque = currentRoute === 'contracheque';
     const isReceitas = currentRoute === 'receitas';
     const isDespesas = currentRoute === 'despesas';
     const isConfig = currentRoute === 'config';
@@ -41,6 +42,17 @@ function getMenuHtml(currentRoute) {
              </div>`
           : `<a href="#" data-route="auditoria" class="px-4 py-1.5 bg-white/5 text-slate-200 border border-white/10 rounded-full text-sm font-medium flex items-center gap-2 hover:bg-white/15 hover:text-white transition-all">
               <i data-lucide="brain" class="w-4 h-4 text-emerald-400"></i> Auditoria
+             </a>`
+        }
+
+        <!-- Contracheque -->
+        ${
+          isContracheque
+          ? `<div class="px-4 py-1.5 bg-white/20 text-white border border-white/40 rounded-full text-sm font-semibold flex items-center gap-2 shadow-sm backdrop-blur-md">
+              <i data-lucide="file-check" class="w-4 h-4 text-violet-300"></i> Contracheque
+             </div>`
+          : `<a href="#" data-route="contracheque" class="px-4 py-1.5 bg-white/5 text-slate-200 border border-white/10 rounded-full text-sm font-medium flex items-center gap-2 hover:bg-white/15 hover:text-white transition-all">
+              <i data-lucide="file-check" class="w-4 h-4 text-violet-400"></i> Contracheque
              </a>`
         }
         
