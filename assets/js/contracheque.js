@@ -380,36 +380,44 @@ function parseTextoContracheque(text, nomeArquivo) {
     }
 
     // ── Totais / Valor Líquido ──
-    const liqMatch = t.match(/Valor\s+L[íi]quido\s+([\d\.]+,\d{2})/i);
-    if (liqMatch) resultado.valorLiquido = parseFloat(liqMatch[1].replace(/\./g, '').replace(',', '.'));
-
-    // Extrair totais: o texto após "Totais" contém "Valor Líquido XXXX" seguido
-    // dos totais reais de Rendimentos e Descontos. Removemos "Valor Líquido XXXX"
-    // para que a regex capture apenas os dois números dos totais.
-    const totaisResto = t.substring(totaisIdx >= 0 ? totaisIdx : 0);
-    const semLiq = totaisResto.replace(/Valor\s+L[íi]quido\s+[\d\.]+,\d{2}/i, '');
-    const totaisMatch = semLiq.match(/Totais\s+.*?([\d\.]+,\d{2})\s+([\d\.]+,\d{2})/);
-    if (totaisMatch) {
-        resultado.totalRendimentos = parseFloat(totaisMatch[1].replace(/\./g, '').replace(',', '.'));
-        resultado.totalDescontos = parseFloat(totaisMatch[2].replace(/\./g, '').replace(',', '.'));
-    }
-
-    // Fallback: somar rubricas individualmente
+    // Estratégia: somar rubricas é mais confiável do que regex nos totais,
+    // pois o layout de "Totais" varia entre tipos de contra-cheque.
     const somaRubRend = resultado.rubricas.reduce((s, r) => s + (r.rendimentos || 0), 0);
     const somaRubDesc = resultado.rubricas.reduce((s, r) => s + (r.descontos || 0), 0);
 
-    // Se o regex de totais divergir >1% da soma das rubricas, prefere a soma
-    if (resultado.totalRendimentos !== null && somaRubRend > 0 &&
-        Math.abs(resultado.totalRendimentos - somaRubRend) / somaRubRend > 0.01) {
+    // Tenta extrair o Valor Líquido do texto
+    const liqMatch = t.match(/Valor\s+L[íi]quido\s+([\d\.]+,\d{2})/i);
+    if (liqMatch) resultado.valorLiquido = parseFloat(liqMatch[1].replace(/\./g, '').replace(',', '.'));
+
+    // Tenta extrair os totais da linha "Totais" mas valida contra a soma das rubricas
+    const totaisResto = t.substring(totaisIdx >= 0 ? totaisIdx : 0);
+    // Remove "Valor Líquido X.XXX,XX" (pode estar em qualquer posição após Totais)
+    const semLiq = totaisResto.replace(/Valor\s+L[íi]quido\s+[\d\.]+,\d{2}/gi, '');
+    // Remove também "Salário Base:" e "Salário Contribuição:" e afins que aparecem após totais
+    const apenasTotais = semLiq.replace(/Sal[áa]rio\s+(Base|Contribui[cç][ãa]o|Fam[íi]lia)\s*:?\s*[\d\.]+,\d{2}/gi, '')
+                               .replace(/Base\s+C[áa]lc\.\s+IRRF\s*:?\s*[\d\.]+,\d{2}/gi, '');
+    const totaisMatch = apenasTotais.match(/Totais\s+.*?([\d\.]+,\d{2})\s+([\d\.]+,\d{2})/);
+    if (totaisMatch) {
+        const regexRend = parseFloat(totaisMatch[1].replace(/\./g, '').replace(',', '.'));
+        const regexDesc = parseFloat(totaisMatch[2].replace(/\./g, '').replace(',', '.'));
+
+        // Validação: se o regex divergir da soma das rubricas, prefere a soma
+        const rendOk = somaRubRend > 0 && Math.abs(regexRend - somaRubRend) < 1;
+        const descOk = Math.abs(regexDesc - somaRubDesc) < 1;
+
+        resultado.totalRendimentos = rendOk ? regexRend : somaRubRend;
+        resultado.totalDescontos = descOk ? regexDesc : somaRubDesc;
+    } else {
+        // Fallback puro: só soma das rubricas
         resultado.totalRendimentos = somaRubRend;
-    }
-    if (resultado.totalDescontos !== null && somaRubDesc > 0 &&
-        Math.abs(resultado.totalDescontos - somaRubDesc) / somaRubDesc > 0.01) {
         resultado.totalDescontos = somaRubDesc;
     }
 
-    if (resultado.totalRendimentos === null) resultado.totalRendimentos = somaRubRend;
-    if (resultado.totalDescontos === null) resultado.totalDescontos = somaRubDesc;
+    // Se o Valor Líquido não foi extraído ou parece errado, calcula pela fórmula
+    if (!resultado.valorLiquido || resultado.valorLiquido <= 0) {
+        const liqCalculado = (resultado.totalRendimentos || 0) - (resultado.totalDescontos || 0);
+        if (liqCalculado > 0) resultado.valorLiquido = liqCalculado;
+    }
 
     if (!resultado.nome && !resultado.matricula) return null;
 
