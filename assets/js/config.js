@@ -128,6 +128,29 @@ async function iniciarMotor(fetchFunc, cacheKey, metaKey, uiPrefix, estimativaPa
 
     let pagina = 1, allData = [], falhou = false;
 
+    // ── 1. Tentar ler do Cache Colaborativo (Nginx Local) ──
+    try {
+        txt.textContent = 'Verificando cache colaborativo no servidor...';
+        const cacheUrl = `./data/${cacheKey}.json`;
+        const localResp = await fetch(cacheUrl, { cache: 'no-store' });
+        if (localResp.ok) {
+            const data = await localResp.json();
+            if (Array.isArray(data) && data.length > 0) {
+                await setCache(cacheKey, JSON.stringify(data));
+                await setMetadata(metaKey, { records: data.length });
+                txt.textContent = `Carregado do Cache Local da Rede! ${data.length} registros.`;
+                perc.textContent = '100%'; barra.style.width = '100%';
+                atualizarLabelsMetadados();
+                btn.disabled = false;
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                setTimeout(() => { box.classList.add('hidden'); }, 4000);
+                return; // Encerra aqui, não vai para a nuvem
+            }
+        }
+    } catch(e) {
+        // Ignora erro de rede/CORS local e segue para a API oficial
+    }
+
     while (true) {
         const p = Math.min(Math.round((pagina / estimativaPaginas) * 100), 99);
         txt.textContent = `Buscando página ${pagina}...`;
@@ -190,8 +213,22 @@ async function iniciarMotor(fetchFunc, cacheKey, metaKey, uiPrefix, estimativaPa
         const dados = (uiPrefix === 'Folha' || uiPrefix === 'Servidor') ? JSON.stringify(allData) : allData;
         await setCache(cacheKey, dados);
         await setMetadata(metaKey, { records: allData.length });
-        txt.textContent = `Concluído! ${allData.length} registros.`;
+        txt.textContent = `Concluído! ${allData.length} registros. Salvando no Servidor Local...`;
         perc.textContent = '100%'; barra.style.width = '100%';
+        
+        // ── 2. Gravar no Cache Colaborativo (Nginx Local) via WebDAV (PUT) ──
+        try {
+            const uploadPayload = typeof dados === 'string' ? dados : JSON.stringify(dados);
+            await fetch(`./data/${cacheKey}.json`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: uploadPayload
+            });
+            txt.textContent = `Concluído e Compartilhado! ${allData.length} registros.`;
+        } catch(e) {
+            txt.textContent = `Concluído! ${allData.length} registros (Cache Local não salvo).`;
+        }
+        
         atualizarLabelsMetadados();
     } else {
         txt.textContent = 'Nenhum dado encontrado.'; perc.textContent = '0%'; barra.style.width = '0%';

@@ -45,6 +45,28 @@ jobs:
           # Como é um projeto HTML estático, copiamos do diretório atual (.) em vez de (out/.)
           docker cp . $CENTRAL_CONTAINER:/usr/share/nginx/html/$REPO_NAME/
           
+          # Habilitar WebDAV para a pasta /data/ (Cache Colaborativo)
+          echo 'server {
+              listen 80;
+              server_name localhost;
+              location / {
+                  root /usr/share/nginx/html;
+                  index index.html index.htm;
+              }
+              location ~ ^/([^/]+)/data/ {
+                  root /usr/share/nginx/html;
+                  dav_methods PUT DELETE;
+                  create_full_put_path on;
+                  dav_access user:rw group:rw all:rw;
+                  client_max_body_size 50M;
+              }
+          }' > default.conf
+          docker cp default.conf $CENTRAL_CONTAINER:/etc/nginx/conf.d/default.conf
+          docker exec $CENTRAL_CONTAINER mkdir -p /usr/share/nginx/html/$REPO_NAME/data
+          docker exec $CENTRAL_CONTAINER chown -R nginx:nginx /usr/share/nginx/html
+          docker exec $CENTRAL_CONTAINER nginx -s reload
+
+          
           if [ "$ORIGINAL_REPO_NAME" != "$REPO_NAME" ]; then
             echo "🔄 Criando página de redirecionamento para o caso original ($ORIGINAL_REPO_NAME -> $REPO_NAME)..."
             mkdir -p redirect
