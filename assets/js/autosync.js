@@ -10,60 +10,53 @@ document.addEventListener('DOMContentLoaded', () => {
 async function iniciarAutoSync() {
     if (typeof getMetadata !== 'function' || typeof setCache !== 'function') return;
 
-    // Lista de entidades principais para auto-sync
-    const bases = [
-        'PM RIO DAS OSTRAS - EFETIVOS E COMISSIONADOS',
-        'SAAE - RIO DAS OSTRAS'
-    ];
-    
-    // Meses recentes (ex: últimos 3 meses)
-    const hoje = new Date();
-    const mesesParaVerificar = [];
-    for (let i = 0; i < 4; i++) {
-        let d = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
-        let m = String(d.getMonth() + 1).padStart(2, '0');
-        let a = d.getFullYear();
-        mesesParaVerificar.push(`${a}-${m}`);
-    }
+    // Em vez de dar "tiro no escuro" e gerar erros 404 vermelhos no console,
+    // vamos tentar ler a listagem do diretório /data/ do Nginx (se o autoindex estiver ligado).
+    try {
+        const dirResp = await fetch('./data/', { cache: 'no-store' });
+        if (!dirResp.ok) return; // Se o servidor proibir (403) ou não achar (404), saímos silenciosamente.
 
-    let baixados = 0;
+        const html = await dirResp.text();
+        
+        // Extrai todos os nomes de arquivos .json que aparecem no HTML do Nginx
+        const jsonFiles = [...html.matchAll(/href="([^"]+\.json)"/g)].map(m => m[1]);
+        
+        let baixados = 0;
 
-    for (const base of bases) {
-        for (const mes of mesesParaVerificar) {
-            const cacheKey = `FolhaPagamento_${base}_${mes}`;
-            const metaKey = `meta_folha_${base}_${mes}`;
+        for (const fileName of jsonFiles) {
+            // O fileName no Nginx geralmente vem codificado (ex: FolhaPagamento_PM%20RIO...)
+            const cacheKey = decodeURIComponent(fileName.replace('.json', ''));
+            
+            // Só sincronizar arquivos que comecem com FolhaPagamento (evitar lixo)
+            if (!cacheKey.startsWith('FolhaPagamento_')) continue;
 
-            // 1. Já temos localmente?
+            const metaKey = 'meta_' + cacheKey.replace('FolhaPagamento_', 'folha_');
+
+            // 1. Já temos localmente no PC?
             const localMeta = await getMetadata(metaKey);
-            if (localMeta) continue; // Já temos, pula!
+            if (localMeta) continue; // Pula!
 
-            // 2. Não temos localmente. Tem na rede (Intranet/Nginx)?
-            try {
-                const resp = await fetch(`./data/${cacheKey}.json`, { method: 'HEAD', cache: 'no-store' });
-                if (resp.ok) {
-                    // 3. Está na rede! Vamos puxar o JSON completo em background
-                    const dataResp = await fetch(`./data/${cacheKey}.json`, { cache: 'no-store' });
-                    if (dataResp.ok) {
-                        const data = await dataResp.json();
-                        if (data && data.length > 0) {
-                            await setCache(cacheKey, JSON.stringify(data));
-                            await setMetadata(metaKey, { records: data.length, auto: true });
-                            baixados++;
-                            console.log(`[AutoSync] Baixado com sucesso: ${cacheKey}`);
-                        }
-                    }
+            // 2. Não temos! Como o Nginx listou que o arquivo existe, vamos baixar com 100% de certeza que não dará 404.
+            const dataResp = await fetch(`./data/${fileName}`, { cache: 'no-store' });
+            if (dataResp.ok) {
+                const data = await dataResp.json();
+                if (data && data.length > 0) {
+                    await setCache(cacheKey, JSON.stringify(data));
+                    await setMetadata(metaKey, { records: data.length, auto: true });
+                    baixados++;
+                    console.log(`[AutoSync] Baixado com sucesso: ${cacheKey}`);
                 }
-            } catch(e) {
-                // Silencioso. Sem rede ou arquivo não existe.
             }
             
-            // Pausa pequena entre verificações para poupar CPU
+            // Pausa entre downloads para não travar a rede
             await new Promise(r => setTimeout(r, 500));
         }
-    }
 
-    if (baixados > 0 && typeof updateStatusBanner === 'function') {
-        updateStatusBanner('success', `Auto-Sync concluiu o download de ${baixados} arquivos de folha recentes da intranet para o seu PC!`);
-        setTimeout(() => updateStatusBanner('', ''), 6000);
+        if (baixados > 0 && typeof updateStatusBanner === 'function') {
+            updateStatusBanner('success', `Auto-Sync concluiu o download de ${baixados} arquivos recentes da intranet para o seu PC!`);
+            setTimeout(() => updateStatusBanner('', ''), 6000);
+        }
+    } catch(e) {
+        // Silencioso, falhou ao ler o diretório.
     }
 }
