@@ -79,7 +79,8 @@ function processarAgrupamentoCargos(folhaData) {
         cargo = cargo.trim().toUpperCase();
         if (!cargo) cargo = 'NÃO ESPECIFICADO';
 
-        const bruto = parseFloat(String(reg.Bruto || reg.bruto || '0').replace(',', '.')) || 0;
+        const valorBrutoString = String(reg.Bruto || reg.bruto || reg.VencimentosTotais || reg.Proventos || '0');
+        const bruto = parseFloat(valorBrutoString.replace(',', '.')) || 0;
         
         // Ignora quem ganha zero ou negativo no bruto para não distorcer as médias
         if (bruto <= 0) return;
