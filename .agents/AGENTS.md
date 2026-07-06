@@ -26,7 +26,8 @@ O projeto segue estritamente a estrutura modular:
 
 ## 4. Regras de Negócio e Dados
 - **Volumetria:** A base possui mais de 3.000 funcionários e alto índice de múltiplas matrículas (vínculos acumulados).
-- **Camada de Persistência Local:** Para evitar gargalos de rede e estouro de CORS na API, os dados devem ser cacheados e indexados localmente via IndexedDB.
+- **Cache Colaborativo (Replicador):** O servidor Nginx atua como um replicador local estático via WebDAV (pasta `/data/`). O primeiro usuário a sincronizar um mês busca da API externa e faz o upload invisível (PUT) para o Nginx. Os próximos usuários baixam instantaneamente dessa cópia local.
+- **Camada de Persistência Local (Browser):** Para performance da UI, os dados baixados do cache colaborativo ou da API devem ser salvos no IndexedDB do usuário.
 - **Unificação por Indivíduo:** Para telas de análise (gráficos e IA), os dados de múltiplas matrículas do mesmo servidor devem ser consolidados/somados por CPF/Nome para refletir a renda real por trabalhador, impedindo distorções nas métricas.
 
 ## 5. Fluxo de Encerramento (Finalizar Sessão)
