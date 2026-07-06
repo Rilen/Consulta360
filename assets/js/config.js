@@ -54,6 +54,7 @@ function initConfigModule() {
         const entidade = document.getElementById('syncBaseServidor').value;
         if (!mesAno) return alert('Selecione o mês.');
         const datas = mesAnoParaDatas(mesAno);
+        const API_URL = getApiUrlForEntidade(entidade);
         const baseUrl = `${API_URL}/Servidor?dataInicial=${encodeURIComponent(datas.dataInicial)}&dataFinal=${encodeURIComponent(datas.dataFinal)}&nomeBase=${encodeURIComponent(entidade)}`;
         const cacheKey = `Servidor_${entidade}_${mesAno}`;
         const metaKey = `meta_servidor_${entidade}_${mesAno}`;
