@@ -4,6 +4,7 @@ Sua missão é manter a integridade, a performance e o padrão visual do sistema
 
 ## 1. Verdades Absolutas de Infraestrutura
 - **Roteamento e Portas:** A aplicação roda centralizada no servidor central (10.0.0.88) na porta 3005. O roteamento NÃO é por portas, mas por subdiretórios. Esta aplicação responde exclusivamente em `http://10.0.0.88:3005/consulta360/`.
+- **Nginx Autoindex:** A pasta `/data/` no servidor Nginx DEVE ter a diretiva `autoindex on;` habilitada. Isso é essencial para que o script de Auto-Sync (`autosync.js`) consiga ler a lista de arquivos de cache disponíveis sem gerar erros 403 (Forbidden) ou 404 no console do navegador.
 - **Caminhos Estáticos:** Toda e qualquer referência a scripts, estilos ou links entre páginas DEVE usar caminhos relativos (ex: `./assets/css/global.css`) para não quebrar o mapeamento do Nginx.
 - **Deploy:** O deploy é estático e automatizado via Gitea Actions injetando os arquivos direto no subdiretório do Nginx. Nunca sugira expor portas conflitantes ou Dockerfiles isolados que quebrem essa regra.
 
