@@ -4,6 +4,19 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Consulta360 - SPA</title>
+  
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="./manifest.json">
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./service-worker.js')
+          .then(reg => console.log('Service Worker Registrado!', reg))
+          .catch(err => console.error('Falha no Service Worker', err));
+      });
+    }
+  </script>
+
   <!-- Favicon -->
   <link rel="icon" type="image/x-icon" href="./favicon.ico">
 
@@ -79,6 +92,9 @@
   <script src="./assets/js/receitas.js?v=14"></script>
   <script src="./assets/js/despesas.js?v=14"></script>
   <script src="./assets/js/config.js?v=14"></script>
+  <script src="./assets/js/autosync.js?v=14"></script>
+  <script src="./assets/js/dashboard.js?v=14"></script>
+  <script src="./assets/js/diff.js?v=14"></script>
 
 </body>
 </html>

@@ -30,7 +30,11 @@ O projeto segue estritamente a estrutura modular:
 - **Camada de Persistência Local (Browser):** Para performance da UI, os dados baixados do cache colaborativo ou da API devem ser salvos no IndexedDB do usuário.
 - **Unificação por Indivíduo:** Para telas de análise (gráficos e IA), os dados de múltiplas matrículas do mesmo servidor devem ser consolidados/somados por CPF/Nome para refletir a renda real por trabalhador, impedindo distorções nas métricas.
 
-## 5. Fluxo de Encerramento (Finalizar Sessão)
+## 5. Arquitetura PWA e Background Sync
+- **PWA e Modo Offline:** O sistema funciona como um Progressive Web App (PWA). O arquivo `manifest.json` e o `service-worker.js` garantem que a interface estática esteja sempre disponível, permitindo a navegação no painel (consultando o IndexedDB) mesmo sem rede e blindando o sistema contra quedas de infraestrutura.
+- **Auto-Sync:** Sempre priorize o carregamento invisível de dados em background. Se os meses cruciais (ou recentes) já constarem no Nginx local, o sistema deve puxá-los proativamente para popular o IndexedDB sem exigir que o usuário abra a tela de sincronização.
+
+## 6. Fluxo de Encerramento (Finalizar Sessão)
 - **Versionamento:** Sempre que o usuário solicitar "finalizar sessão" ou equivalente, você DEVE incrementar a versão do sistema (ex: v0.0.1 -> v0.0.2).
 - **Atualização:** O número da versão deve ser substituído no rodapé (`<footer>`) de todas as páginas HTML (`index.html`, `graficos.html`, `auditoria_ia.html` e `changelog.html`).
 - **Changelog:** Você deve registrar automaticamente TODAS as mudanças e melhorias da sessão no arquivo `CHANGELOG.md` e espelhar o conteúdo visualmente no arquivo `changelog.html` sempre que a sessão for finalizada.

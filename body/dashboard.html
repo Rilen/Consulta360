@@ -1,0 +1,80 @@
+<!-- Macro-Dashboard (BI) -->
+<div class="space-y-6 fade-in max-w-[1600px] mx-auto">
+
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 shadow-inner">
+                <i data-lucide="layout-dashboard" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Macro-Dashboard (BI Local)</h1>
+                <p class="text-sm text-slate-500">Métricas globais processadas em tempo real a partir do cache local.</p>
+            </div>
+        </div>
+        <button type="button" onclick="loadDashboardData()" class="px-5 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-xl hover:bg-blue-700 active:scale-95 transition-all shadow-sm flex items-center gap-2">
+            <i data-lucide="refresh-cw" class="w-4 h-4"></i> Atualizar Dados
+        </button>
+    </div>
+
+    <!-- Cards Principais -->
+    <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        <div class="ag-card rounded-2xl p-5 flex flex-col justify-center relative overflow-hidden">
+            <div class="absolute right-0 top-0 w-24 h-24 bg-blue-500/10 rounded-full blur-xl -mr-10 -mt-10"></div>
+            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1 z-10 flex items-center gap-1.5"><i data-lucide="database" class="w-3.5 h-3.5"></i> Meses em Cache</span>
+            <span id="dashMeses" class="text-3xl font-bold text-slate-800 z-10">0</span>
+            <span class="text-xs text-slate-500 mt-1 z-10">Folhas armazenadas localmente</span>
+        </div>
+
+        <div class="ag-card rounded-2xl p-5 flex flex-col justify-center relative overflow-hidden">
+            <div class="absolute right-0 top-0 w-24 h-24 bg-emerald-500/10 rounded-full blur-xl -mr-10 -mt-10"></div>
+            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1 z-10 flex items-center gap-1.5"><i data-lucide="users" class="w-3.5 h-3.5"></i> Servidores Únicos (Total)</span>
+            <span id="dashServidores" class="text-3xl font-bold text-emerald-600 z-10">0</span>
+            <span class="text-xs text-slate-500 mt-1 z-10">Em toda a base histórica</span>
+        </div>
+
+        <div class="ag-card rounded-2xl p-5 flex flex-col justify-center relative overflow-hidden">
+            <div class="absolute right-0 top-0 w-24 h-24 bg-rose-500/10 rounded-full blur-xl -mr-10 -mt-10"></div>
+            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1 z-10 flex items-center gap-1.5"><i data-lucide="dollar-sign" class="w-3.5 h-3.5"></i> Custo Total da Folha</span>
+            <span id="dashCusto" class="text-3xl font-bold text-rose-600 z-10">R$ 0,00</span>
+            <span class="text-xs text-slate-500 mt-1 z-10">Somatório de todos os meses</span>
+        </div>
+
+        <div class="ag-card rounded-2xl p-5 flex flex-col justify-center relative overflow-hidden">
+            <div class="absolute right-0 top-0 w-24 h-24 bg-purple-500/10 rounded-full blur-xl -mr-10 -mt-10"></div>
+            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1 z-10 flex items-center gap-1.5"><i data-lucide="trending-up" class="w-3.5 h-3.5"></i> Teto Histórico (Líquido)</span>
+            <span id="dashTeto" class="text-3xl font-bold text-purple-600 z-10">R$ 0,00</span>
+            <span class="text-xs text-slate-500 mt-1 z-10">Maior salário único pago</span>
+        </div>
+    </section>
+
+    <!-- Gráficos Main -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <div class="ag-card rounded-2xl p-6 lg:col-span-2">
+            <h3 class="text-sm font-bold text-slate-700 mb-4 flex items-center gap-2">
+                <i data-lucide="bar-chart-2" class="w-4 h-4 text-blue-500"></i>
+                Evolução Global do Custo da Folha
+            </h3>
+            <div class="w-full h-[350px]">
+                <canvas id="chartEvolucaoGlobal"></canvas>
+            </div>
+        </div>
+
+        <!-- Ranking de Cargos / Maiores Remunerações -->
+        <div class="ag-card rounded-2xl p-6">
+            <h3 class="text-sm font-bold text-slate-700 mb-4 flex items-center gap-2">
+                <i data-lucide="award" class="w-4 h-4 text-emerald-500"></i>
+                Top 10 Maiores Salários da História
+            </h3>
+            <div class="overflow-y-auto max-h-[350px] pr-2 custom-scrollbar">
+                <div id="listaTopSalarios" class="space-y-3">
+                    <p class="text-sm text-slate-500 text-center py-10">Aguardando processamento...</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>

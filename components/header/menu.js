@@ -10,8 +10,8 @@ function getMenuHtml(currentRoute) {
     const isConfig = currentRoute === 'config';
 
     return `
-    <div class="flex items-center justify-end w-full">
-      <div class="flex items-center justify-end gap-4 flex-wrap">
+    <div class="flex items-center justify-start md:justify-end w-full min-w-max">
+      <div class="flex items-center gap-2 md:gap-4 flex-nowrap">
         <!-- Consulta -->
         ${
           isHome
@@ -31,6 +31,28 @@ function getMenuHtml(currentRoute) {
              </div>`
           : `<a href="#" data-route="graficos" class="px-4 py-1.5 bg-white/5 text-slate-200 border border-white/10 rounded-full text-sm font-medium flex items-center gap-2 hover:bg-white/15 hover:text-white transition-all">
               <i data-lucide="pie-chart" class="w-4 h-4 text-indigo-400"></i> Análise de Dados
+             </a>`
+        }
+
+        <!-- Macro-Dashboard -->
+        ${
+          currentRoute === 'dashboard'
+          ? `<div class="px-4 py-1.5 bg-white/20 text-white border border-white/40 rounded-full text-sm font-semibold flex items-center gap-2 shadow-sm backdrop-blur-md">
+              <i data-lucide="layout-dashboard" class="w-4 h-4 text-cyan-300"></i> Macro-Dashboard
+             </div>`
+          : `<a href="#" data-route="dashboard" class="px-4 py-1.5 bg-white/5 text-slate-200 border border-white/10 rounded-full text-sm font-medium flex items-center gap-2 hover:bg-white/15 hover:text-white transition-all">
+              <i data-lucide="layout-dashboard" class="w-4 h-4 text-cyan-400"></i> Macro-Dashboard
+             </a>`
+        }
+
+        <!-- Diff -->
+        ${
+          currentRoute === 'diff'
+          ? `<div class="px-4 py-1.5 bg-white/20 text-white border border-white/40 rounded-full text-sm font-semibold flex items-center gap-2 shadow-sm backdrop-blur-md">
+              <i data-lucide="history" class="w-4 h-4 text-fuchsia-300"></i> Máquina do Tempo
+             </div>`
+          : `<a href="#" data-route="diff" class="px-4 py-1.5 bg-white/5 text-slate-200 border border-white/10 rounded-full text-sm font-medium flex items-center gap-2 hover:bg-white/15 hover:text-white transition-all">
+              <i data-lucide="history" class="w-4 h-4 text-fuchsia-400"></i> Máquina do Tempo
              </a>`
         }
         

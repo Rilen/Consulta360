@@ -1,0 +1,16 @@
+{
+  "name": "Consulta360 - GOVTIC",
+  "short_name": "Consulta360",
+  "description": "Sistema avançado de transparência, inteligência e auditoria de dados governamentais.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#004b80",
+  "theme_color": "#004b80",
+  "icons": [
+    {
+      "src": "./favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    }
+  ]
+}

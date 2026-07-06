@@ -6,9 +6,11 @@ function renderHeader(currentRoute) {
     if (!headerEl) return;
 
     headerEl.innerHTML = `
-        <div class="max-w-[1600px] mx-auto px-6 h-16 flex items-center justify-between">
+        <div class="max-w-[1600px] mx-auto px-4 md:px-6 h-auto md:h-16 py-4 md:py-0 flex flex-col md:flex-row items-center justify-between gap-4 md:gap-0">
             ${typeof getLogoHtml === 'function' ? getLogoHtml() : ''}
-            ${typeof getMenuHtml === 'function' ? getMenuHtml(currentRoute) : ''}
+            <div class="w-full overflow-x-auto pb-2 md:pb-0 scrollbar-hide">
+                ${typeof getMenuHtml === 'function' ? getMenuHtml(currentRoute) : ''}
+            </div>
         </div>
     `;
 }

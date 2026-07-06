@@ -1,46 +1,25 @@
 # Consulta360
 
-Consulta360 é um sistema de transparência e consulta de folha de pagamento para servidores e colaboradores. O objetivo principal da aplicação é fornecer uma interface rápida, limpa e responsiva para a visualização de dados financeiros, com suporte a filtros dinâmicos.
+Consulta360 é um sistema avançado de transparência, inteligência e auditoria de folha de pagamento e dados públicos. O objetivo da aplicação é fornecer uma interface rápida, limpa e autônoma, processando grandes volumes de dados no lado do cliente com arquitetura colaborativa.
 
-## 🚀 Tecnologias e UI
+## 🚀 Arquitetura e Tecnologias
 
-- **Frontend:** HTML5 semântico com Vanilla JavaScript.
-- **Estilização:** Tailwind CSS (via CDN) utilizando o conceito de **Antigravity UI**.
-- **Design System:**
-  - Layout focado em Data Grid.
-  - Cartões com soft-shadows e hover effects.
-  - Tabela com formatação especializada para dados financeiros e scroll suave.
-  - Tematização "Clean Light" para alta fidelidade e leitura de dados.
-- **Ícones:** Lucide Icons.
+- **Frontend Core:** HTML5 Semântico e Vanilla JavaScript (Single Page Application via `router.js`).
+- **Design System (Antigravity UI):** Tailwind CSS, layout focado em Data Grid, Glassmorphism e Lucide Icons.
+- **Armazenamento Descentralizado:**
+  - **IndexedDB:** Motor principal do sistema. Todo o processamento (filtros, paginação, totais) é realizado instantaneamente no banco de dados do navegador do usuário, suportando milhares de registros em milissegundos sem tráfego de rede.
+  - **Cache Colaborativo Local (Intranet):** Utiliza o protocolo WebDAV do Nginx. Quando o primeiro usuário baixa dados pesados da API governamental, o sistema compartilha (*upload* silencioso) o arquivo `.json` no servidor Nginx (`/data/`). Os próximos usuários baixam a cópia local, minimizando requisições externas e garantindo ultra-velocidade.
+- **Proxy em Borda:** Roteamento via Cloudflare Worker Serverless para contornar bloqueios CORS da API original de forma invisível.
 
-## ⚙️ Funcionalidades
+## ⚙️ Funcionalidades Principais
 
-- **Integração de API:** Conexão nativa (`fetch`) ao endpoint RESTful para puxar dados da folha e de servidores dinamicamente, com suporte a tratamento de CORS via proxy.
-- **Filtros de Busca:**
-  - Mês de referência nativo (`type="month"`) convertido para períodos.
-  - Entidade (Ex: PMRO - Efetivos e Comissionados).
-  - Tipo de Consulta (Folha de Pagamento ou Servidores).
-  - Busca por nome do colaborador (local e na API).
-- **Métricas em Tempo Real:** Exibição dinâmica de total de colaboradores, páginas de API processadas, total bruto/proventos e total líquido, baseados no retorno da API.
-- **Tabela e Paginação:** Visualização rica e paginada de dados (com paginação dupla API vs Local), com ordenação interativa de colunas geradas dinamicamente.
-- **Exportação:** Exportação dos dados filtrados para CSV.
+- **Auto-Sincronização Invisível:** Baixa os dados disponíveis na intranet automaticamente para o IndexedDB em background.
+- **Evolução Salarial:** Consome o IndexedDB do usuário para plotar o histórico real de ganhos ao longo do tempo, unificando matrículas diferentes por CPF.
+- **Auditoria Inteligente (Upload PDF):** Lê contracheques e arquivos em tempo real no navegador, comparando rubricas contra os dados governamentais e alertando fraudes ou divergências.
+- **Business Intelligence (Macro-Dashboard):** Processa milhares de registros para entregar métricas globais, cruzamento de vínculos (Efetivos x Comissionados) e ranking salarial na hora.
+- **Máquina do Tempo (Diff Salarial):** Compara automaticamente a base de dados de dois meses distintos e exibe quem foi contratado, demitido ou recebeu aumentos/cortes.
+- **Progressive Web App (PWA):** Instalável no desktop/mobile, permite navegação e consulta históricas mesmo 100% offline.
 
 ## 🛠️ Deploy Automático (CI/CD)
 
-Este repositório está configurado com um pipeline de CI/CD via **Gitea Actions** (`.gitea/workflows/ci-cd.yaml`). 
-
-O fluxo automatizado realiza as seguintes etapas a cada `push` na branch `main`:
-1. Faz o checkout do código fonte.
-2. Identifica automaticamente o container central `nginx` rodando na porta `3005`.
-3. Injeta o código estático no subdiretório respectivo do Nginx (ex: `http://<IP>:3005/consulta360/`).
-4. (Opcional) Cria um `index.html` de redirecionamento caso o nome do repositório possua maiúsculas.
-
-## 🖥️ Instalação do Runner
-
-Caso seja necessário configurar um novo Runner no servidor hospedeiro para executar as Actions do Gitea, utilize o script `setup_gitea_runner.sh` fornecido na raiz do projeto.
-
-Execute no servidor Ubuntu:
-```bash
-chmod +x setup_gitea_runner.sh
-sudo ./setup_gitea_runner.sh
-```
+O pipeline roda via **Gitea Actions** e atualiza os subdiretórios estáticos do servidor Nginx local (`http://10.0.0.88:3005/consulta360/`). Apenas os arquivos HTML/JS/CSS são atualizados, garantindo que o diretório `/data/` de cache colaborativo não seja afetado pelas pipelines de deploy.

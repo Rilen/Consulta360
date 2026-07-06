@@ -4,6 +4,8 @@
 const routes = {
     'home': './body/home.html',
     'graficos': './body/graficos.html',
+    'dashboard': './body/dashboard.html',
+    'diff': './body/diff.html',
     'auditoria': './body/auditoria_ia.html',
     'evolucao': './body/evolucao.html',
     'receitas': './body/receitas.html',
