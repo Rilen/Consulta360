@@ -244,19 +244,46 @@ async function iniciarMotor(fetchFunc, cacheKey, metaKey, uiPrefix, estimativaPa
 // ─────────────────────────────────────────────────
 
 async function atualizarLabelsMetadados() {
-    const fmt = (ts) => ts ? 'Atualizado em ' + new Date(ts).toLocaleDateString('pt-BR') : 'Status: Não sincronizado';
+    const checkStatus = async (cacheKey, metaKey, elId) => {
+        const el = document.getElementById(elId);
+        if (!el) return;
+        const m = await getMetadata(metaKey);
+        if (m) {
+            el.innerHTML = '<span class="text-emerald-600 font-medium"><i data-lucide="check-circle" class="w-3 h-3 inline"></i> Baixado neste PC em ' + new Date(m.timestamp).toLocaleDateString('pt-BR') + '</span>';
+            if (window.lucide) window.lucide.createIcons();
+            return;
+        }
+        
+        el.textContent = 'Verificando a rede...';
+        
+        try {
+            const resp = await fetch(`./data/${cacheKey}.json`, { method: 'HEAD', cache: 'no-store' });
+            if (resp.ok) {
+                const lastMod = resp.headers.get('Last-Modified');
+                const dt = lastMod ? new Date(lastMod).toLocaleDateString('pt-BR') : 'hoje';
+                el.innerHTML = `<span class="text-blue-600 font-medium"><i data-lucide="server" class="w-3 h-3 inline"></i> No Servidor da Rede (desde ${dt}) - Rápido</span>`;
+                if (window.lucide) window.lucide.createIcons();
+            } else {
+                el.innerHTML = '<span class="text-slate-500"><i data-lucide="cloud-off" class="w-3 h-3 inline"></i> Nuvem Oficial (Download inicial demorado)</span>';
+                if (window.lucide) window.lucide.createIcons();
+            }
+        } catch(e) {
+            el.innerHTML = '<span class="text-slate-500"><i data-lucide="cloud-off" class="w-3 h-3 inline"></i> Nuvem Oficial (Download inicial demorado)</span>';
+            if (window.lucide) window.lucide.createIcons();
+        }
+    };
 
     const mf = document.getElementById('syncMesFolha')?.value, bf = document.getElementById('syncBaseFolha')?.value;
-    if (mf && bf) { const m = await getMetadata(`meta_folha_${bf}_${mf}`); const el = document.getElementById('lblSyncFolha'); if (el) el.textContent = m ? fmt(m.timestamp) : 'Status: Não sincronizado'; }
+    if (mf && bf) checkStatus(`FolhaPagamento_${bf}_${mf}`, `meta_folha_${bf}_${mf}`, 'lblSyncFolha');
 
     const ms = document.getElementById('syncMesServidor')?.value, bs = document.getElementById('syncBaseServidor')?.value;
-    if (ms && bs) { const m = await getMetadata(`meta_servidor_${bs}_${ms}`); const el = document.getElementById('lblSyncServidor'); if (el) el.textContent = m ? fmt(m.timestamp) : 'Status: Não sincronizado'; }
+    if (ms && bs) checkStatus(`Servidor_${bs}_${ms}`, `meta_servidor_${bs}_${ms}`, 'lblSyncServidor');
 
     const ar = document.getElementById('syncAnoReceitas')?.value, br = document.getElementById('syncBaseReceitas')?.value;
-    if (ar && br) { const m = await getMetadata(`meta_receitas_${ar}_${br}`); const el = document.getElementById('lblSyncReceitas'); if (el) el.textContent = m ? fmt(m.timestamp) : 'Status: Não sincronizado'; }
+    if (ar && br) checkStatus(`receitas_${ar}_${br}`, `meta_receitas_${ar}_${br}`, 'lblSyncReceitas');
 
     const ad = document.getElementById('syncAnoDespesas')?.value, bd = document.getElementById('syncBaseDespesas')?.value;
-    if (ad && bd) { const m = await getMetadata(`meta_despesas_${ad}_${bd}`); const el = document.getElementById('lblSyncDespesas'); if (el) el.textContent = m ? fmt(m.timestamp) : 'Status: Não sincronizado'; }
+    if (ad && bd) checkStatus(`despesas_${ad}_${bd}`, `meta_despesas_${ad}_${bd}`, 'lblSyncDespesas');
 }
 
 document.body.addEventListener('change', e => { if (e.target.id.startsWith('sync')) atualizarLabelsMetadados(); });
