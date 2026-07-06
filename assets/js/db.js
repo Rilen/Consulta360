@@ -2,7 +2,7 @@
 // BANCO DE DADOS LOCAL: IndexedDB Wrapper
 // ----------------------------------------------------
 const DB_NAME = 'Consulta360_DB';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const STORE_NAME = 'folha_cache';
 
 function initDB() {
