@@ -42,6 +42,9 @@ async function carregarDadosDespesas() {
 
     try {
         let rawData = await getCache(cacheKey);
+        if (typeof rawData === 'string') {
+            try { rawData = JSON.parse(rawData); } catch (e) {}
+        }
         const metaKey = `meta_despesas_${exercicio}_${entidade}`;
         const meta = await getMetadata(metaKey);
 
