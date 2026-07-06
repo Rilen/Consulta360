@@ -1,4 +1,4 @@
-const CACHE_NAME = 'consulta360-v1';
+const CACHE_NAME = 'consulta360-v2';
 const ASSETS = [
   './',
   './index.html',
@@ -17,6 +17,9 @@ const ASSETS = [
   './assets/js/layout.js',
   './assets/js/receitas.js',
   './assets/js/router.js',
+  './assets/js/dashboard.js',
+  './assets/js/diff.js',
+  './assets/js/comparacao.js',
   './components/footer/npa.js',
   './components/footer/versao.js',
   './components/header/logo.js',
