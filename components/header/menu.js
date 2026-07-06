@@ -8,8 +8,9 @@ function getMenuHtml(currentRoute) {
     const isReceitas = currentRoute === 'receitas';
     const isDespesas = currentRoute === 'despesas';
     const isConfig = currentRoute === 'config';
+    const isComparacao = currentRoute === 'comparacao';
     
-    const isBI = isGraficos || currentRoute === 'dashboard' || currentRoute === 'diff' || isAuditoria || isEvolucao;
+    const isBI = isGraficos || currentRoute === 'dashboard' || currentRoute === 'diff' || isAuditoria || isEvolucao || isComparacao;
 
     return `
     <div class="flex items-center justify-center md:justify-end w-full">
@@ -51,6 +52,10 @@ function getMenuHtml(currentRoute) {
             
             <a href="#" data-route="evolucao" class="px-4 py-2.5 text-sm text-slate-200 hover:bg-white/10 hover:text-white flex items-center gap-3 transition-colors ${isEvolucao ? 'bg-white/10 text-white' : ''}">
               <i data-lucide="trending-up" class="w-4 h-4 text-amber-400"></i> Evolução
+            </a>
+            
+            <a href="#" data-route="comparacao" class="px-4 py-2.5 text-sm text-slate-200 hover:bg-white/10 hover:text-white flex items-center gap-3 transition-colors ${isComparacao ? 'bg-white/10 text-white' : ''}">
+              <i data-lucide="scale" class="w-4 h-4 text-orange-400"></i> Comparação Salarial
             </a>
             
           </div>

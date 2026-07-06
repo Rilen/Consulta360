@@ -1,0 +1,151 @@
+<!-- Módulo de Comparação Salarial (BI) -->
+<div class="space-y-6 fade-in max-w-[1600px] mx-auto">
+    <!-- Header -->
+    <div class="flex items-center gap-3 mb-2">
+        <div class="w-10 h-10 rounded-full bg-orange-500/20 flex items-center justify-center text-orange-600 shadow-inner">
+            <i data-lucide="scale" class="w-5 h-5"></i>
+        </div>
+        <div>
+            <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Comparação Salarial</h1>
+            <p class="text-sm text-slate-500">Agrupamento e análise de remunerações por cargo (Média, Teto e Piso)</p>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <section class="ag-card rounded-2xl p-6">
+        <div class="flex items-center justify-between mb-5">
+            <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                <i data-lucide="filter" class="w-4 h-4"></i> Filtros de Consulta
+            </h2>
+            <div id="statusCacheComparacao" class="hidden items-center gap-2 text-xs font-medium text-emerald-600 px-3 py-1 bg-emerald-50 border border-emerald-100 rounded-full">
+                <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i> Cache Ativo
+            </div>
+        </div>
+
+        <form id="form-comparacao" onsubmit="return false" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 items-end">
+            <div class="space-y-1.5">
+                <label class="text-[13px] font-medium text-slate-600">Entidade (Base de Dados)</label>
+                <div class="relative">
+                    <select id="entidadeComparacao" class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all appearance-none cursor-pointer">
+                        <option value="PM RIO DAS OSTRAS">PM RIO DAS OSTRAS</option>
+                        <option value="PM RIO DAS OSTRAS - EFETIVOS E COMISSIONADOS">PM RIO DAS OSTRAS - EFETIVOS E COMISSIONADOS</option>
+                        <option value="SAAE">SAAE - RIO DAS OSTRAS</option>
+                        <option value="FUNDO MUNICIPAL DE SAUDE">FUNDO MUNICIPAL DE SAÚDE</option>
+                        <option value="FUNDACAO RIO DAS OSTRAS DE CULTURA">FUNDACAO DE CULTURA</option>
+                    </select>
+                    <i data-lucide="building" class="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+                </div>
+            </div>
+
+            <div class="space-y-1.5">
+                <label class="text-[13px] font-medium text-slate-600">Mês/Ano</label>
+                <div class="relative">
+                    <input type="month" id="mesComparacao" class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all cursor-pointer" value="2026-07">
+                    <i data-lucide="calendar" class="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap justify-start gap-3 mt-2">
+                <button type="submit" id="btnGerarComparacao" class="px-6 py-2.5 bg-orange-600 text-white text-sm font-medium rounded-xl hover:bg-orange-700 active:scale-95 transition-all shadow-sm shadow-orange-600/20 flex items-center gap-2">
+                    <i data-lucide="bar-chart" class="w-4 h-4"></i> Gerar Comparação
+                </button>
+            </div>
+        </form>
+    </section>
+
+    <!-- Estado de Loading -->
+    <div id="loadingComparacao" class="hidden flex-col items-center justify-center py-12">
+        <div class="w-10 h-10 border-4 border-orange-200 border-t-orange-600 rounded-full animate-spin mb-4"></div>
+        <p class="text-sm font-medium text-slate-500">Agrupando servidores por cargo e calculando médias...</p>
+    </div>
+
+    <!-- Alertas -->
+    <div id="alertaErroComparacao" class="hidden items-center gap-3 p-4 mb-6 text-sm text-rose-800 border border-rose-200 rounded-xl bg-rose-50/50">
+        <i data-lucide="alert-circle" class="w-5 h-5 flex-shrink-0 text-rose-500"></i>
+        <div id="msgErroComparacao" class="font-medium">Erro ao carregar os dados.</div>
+    </div>
+
+    <!-- Área de Dados -->
+    <div id="areaComparacao" class="hidden space-y-6 fade-in">
+        
+        <!-- Cards de Top Level -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="ag-card rounded-2xl p-5 relative overflow-hidden group">
+                <div class="absolute right-0 top-0 w-32 h-32 bg-slate-500/10 rounded-full blur-2xl -mr-10 -mt-10 transition-transform group-hover:scale-125"></div>
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600">
+                        <i data-lucide="briefcase" class="w-4 h-4"></i>
+                    </div>
+                    <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider">Cargos Distintos</h3>
+                </div>
+                <div class="text-3xl font-bold text-slate-800" id="cmpTotalCargos">0</div>
+                <p class="text-xs text-slate-400 mt-1">Nomenclaturas diferentes na folha</p>
+            </div>
+            
+            <div class="ag-card rounded-2xl p-5 relative overflow-hidden group">
+                <div class="absolute right-0 top-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl -mr-10 -mt-10 transition-transform group-hover:scale-125"></div>
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
+                        <i data-lucide="trending-up" class="w-4 h-4"></i>
+                    </div>
+                    <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider">Maior Média</h3>
+                </div>
+                <div class="text-lg font-bold text-slate-800 truncate" id="cmpMaiorCargo">-</div>
+                <p class="text-xs font-semibold text-emerald-600 mt-1" id="cmpMaiorMedia">R$ 0,00</p>
+            </div>
+
+            <div class="ag-card rounded-2xl p-5 relative overflow-hidden group">
+                <div class="absolute right-0 top-0 w-32 h-32 bg-rose-500/10 rounded-full blur-2xl -mr-10 -mt-10 transition-transform group-hover:scale-125"></div>
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="w-8 h-8 rounded-full bg-rose-100 flex items-center justify-center text-rose-600">
+                        <i data-lucide="trending-down" class="w-4 h-4"></i>
+                    </div>
+                    <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider">Menor Média</h3>
+                </div>
+                <div class="text-lg font-bold text-slate-800 truncate" id="cmpMenorCargo">-</div>
+                <p class="text-xs font-semibold text-rose-600 mt-1" id="cmpMenorMedia">R$ 0,00</p>
+            </div>
+        </div>
+
+        <!-- Gráfico de Comparação -->
+        <div class="ag-card rounded-2xl p-6">
+            <h3 class="text-sm font-bold text-slate-700 mb-6 flex items-center gap-2">
+                <i data-lucide="bar-chart-horizontal" class="w-4 h-4 text-orange-500"></i> Top 15 Cargos com Maior Média Salarial Bruta
+            </h3>
+            <div class="w-full h-96">
+                <canvas id="chartComparacaoCargos"></canvas>
+            </div>
+        </div>
+
+        <!-- Tabela Completa -->
+        <div class="ag-card rounded-2xl p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-sm font-bold text-slate-700 flex items-center gap-2">
+                    <i data-lucide="list" class="w-4 h-4 text-blue-500"></i> Tabela Detalhada por Cargo
+                </h3>
+                <div class="relative w-64">
+                    <input type="text" id="buscaCargo" placeholder="Buscar cargo..." class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none focus:border-orange-500">
+                    <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                </div>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b border-slate-200 bg-slate-50/50">
+                            <th class="py-3 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Cargo</th>
+                            <th class="py-3 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-center">Vínculos</th>
+                            <th class="py-3 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Menor Bruto</th>
+                            <th class="py-3 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Média Bruta</th>
+                            <th class="py-3 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Maior Bruto</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelaComparacaoBody">
+                        <!-- Renderizado via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
