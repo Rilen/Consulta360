@@ -2,6 +2,17 @@
 
 Todas as mudanças notáveis no projeto **Consulta360** serão documentadas neste arquivo.
 
+## [v0.0.4] - 2026-07-06
+
+### Adicionado
+- **PWA (Progressive Web App):** Manifesto e Service Worker habilitados. A aplicação agora pode ser "Instalada" no Desktop ou Celular, operando em tela cheia com total funcionalidade offline nativa.
+- **Auto-Sync Inteligente (`autosync.js`):** Script em background que interroga diretamente o diretório `/data/` do servidor Nginx (via `autoindex on`) para baixar ativamente as bases de folha atualizadas, sem causar erros de rede falsos (404/403) no console.
+- **Macro-Dashboard Global:** Painel consolidado agrupando todo o histórico acumulado no cache local (IndexedDB) para métricas gerais de custo, ranking de maiores tetos pagos e evolução macro ao longo dos anos.
+- **Máquina do Tempo (Diff Analyzer):** Ferramenta focada no cruzamento de meses para detecção automática de Entradas (nomeações), Saídas (exonerações) e Movimentações Financeiras (aumentos/reduções salariais).
+
+### Modificado
+- **Menu Principal Responsivo:** Agrupamento das ferramentas de Inteligência de Negócio sob o novo Dropdown (Glassmorphism) **"BI"**, prevenindo quebras de linha horizontais (scroll overflow) indesejadas na versão Mobile.
+
 ## [v0.0.3] - 2026-07-03
 
 ### Adicionado
