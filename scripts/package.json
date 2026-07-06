@@ -1,0 +1,15 @@
+{
+  "name": "consulta360-extrator",
+  "version": "1.0.0",
+  "description": "Robô extrator de dados do TransparênciaBR",
+  "main": "extrator.js",
+  "scripts": {
+    "start": "node extrator.js"
+  },
+  "dependencies": {
+    "puppeteer": "^22.0.0",
+    "csv-parser": "^3.0.0",
+    "iconv-lite": "^0.6.3",
+    "fs-extra": "^11.2.0"
+  }
+}

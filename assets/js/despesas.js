@@ -122,16 +122,16 @@ function processarDespesas(rawRows) {
     let mapCredores = {};
 
     rawRows.forEach(row => {
-        const vEmpenhado = parseFloat(String(row.ValorEmpenhado || row.empenhado || '0').replace(',', '.')) || 0;
-        const vLiquidado = parseFloat(String(row.ValorLiquidado || row.liquidado || '0').replace(',', '.')) || 0;
-        const vPago = parseFloat(String(row.ValorPago || row.pago || '0').replace(',', '.')) || 0;
+        const vEmpenhado = parseFloat(String(row.valorEmpenho || row.ValorEmpenhado || row.empenhado || '0').replace(',', '.')) || 0;
+        const vLiquidado = parseFloat(String(row.valorLiquidado || row.ValorLiquidado || row.liquidado || '0').replace(',', '.')) || 0;
+        const vPago = parseFloat(String(row.valorPago || row.ValorPago || row.pago || '0').replace(',', '.')) || 0;
         
         tEmpenhado += vEmpenhado;
         tLiquidado += vLiquidado;
         tPago += vPago;
         
-        const funcStr = row.Funcao || row.funcao || 'Administração Geral';
-        const credorStr = row.Credor || row.credor || 'Diversos';
+        const funcStr = row.funcao || row.Funcao || 'Administração Geral';
+        const credorStr = row.credor || row.Credor || 'Diversos';
 
         if(!mapFuncao[funcStr]) mapFuncao[funcStr] = 0;
         mapFuncao[funcStr] += vPago;
@@ -143,6 +143,10 @@ function processarDespesas(rawRows) {
     document.getElementById('totalEmpenhado').textContent = formatBRL(tEmpenhado);
     document.getElementById('totalLiquidado').textContent = formatBRL(tLiquidado);
     document.getElementById('totalPago').textContent = formatBRL(tPago);
+
+    if (tEmpenhado === 0 && rawRows.length > 0) {
+        document.getElementById('totalEmpenhado').textContent = 'CHAVES: ' + Object.keys(rawRows[0]).join(', ');
+    }
 
     document.getElementById('areaDespesas').classList.remove('hidden');
 

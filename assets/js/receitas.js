@@ -127,11 +127,20 @@ function processarReceitas(rawRows) {
     }
 
     rawRows.forEach(row => {
-        const valStr = row.ValorArrecadado || row.valor || row.Arrecadado || '0';
+        const valStr = row.ValorArrecadadoLiquido || row.ValorArrecadadoBruto || row.ValorArrecadado || row.valor || row.Arrecadado || '0';
         const valor = parseFloat(String(valStr).replace(',', '.')) || 0;
         
-        const mesStr = String(row.Mes || row.mes || '01').padStart(2, '0');
-        const catStr = row.Categoria || row.Rubrica || row.Receita || 'Outras';
+        let mesStr = String(row.Mes || row.mes || '01').toUpperCase();
+        
+        const nomesMeses = {
+            'JANEIRO': '01', 'FEVEREIRO': '02', 'MARÇO': '03', 'MARCO': '03',
+            'ABRIL': '04', 'MAIO': '05', 'JUNHO': '06', 'JULHO': '07',
+            'AGOSTO': '08', 'SETEMBRO': '09', 'OUTUBRO': '10', 'NOVEMBRO': '11', 'DEZEMBRO': '12'
+        };
+        if (nomesMeses[mesStr]) mesStr = nomesMeses[mesStr];
+        else if (!isNaN(mesStr)) mesStr = mesStr.padStart(2, '0');
+
+        const catStr = row.dsRubrica || row.dsOrigem || row.Categoria || row.Rubrica || row.Receita || 'Outras';
 
         totalAno += valor;
         
@@ -147,6 +156,10 @@ function processarReceitas(rawRows) {
     const mediaMes = totalAno / 12;
     document.getElementById('totalArrecadado').textContent = formatBRL(totalAno);
     document.getElementById('mediaArrecadacao').textContent = formatBRL(mediaMes);
+
+    if (totalAno === 0 && rawRows.length > 0) {
+        document.getElementById('totalArrecadado').textContent = 'CHAVES: ' + Object.keys(rawRows[0]).join(', ');
+    }
     
     let maiorFonte = '-';
     let maxVal = 0;

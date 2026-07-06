@@ -15,8 +15,14 @@ if (window.location.hash === '#config' || window.location.hash.includes('config'
 // Deixe vazio para cair no mock local enquanto não tiver proxy.
 const CORS_PROXY = 'https://consulta360-proxy.rilen-lima.workers.dev';
 
-// URL base da API — usada para montar as requisições
-const API_URL = 'https://webapp1-riodasostras.cidade360.cloud/dadosabertos';
+// Função para retornar a URL base da API dependendo da entidade (Prefeitura vs OstrasPrev)
+function getApiUrlForEntidade(entidade) {
+    if (!entidade) return 'https://webapp1-riodasostras.cidade360.cloud/dadosabertos';
+    if (entidade.toUpperCase().includes('OSTRASPREV')) {
+        return 'https://webapp1-riodasostras.cidade360.cloud/dadosabertos_ostrasprev';
+    }
+    return 'https://webapp1-riodasostras.cidade360.cloud/dadosabertos';
+}
 
 function wrapUrl(apiUrl) {
     // Se não tem proxy, retorna a URL direta (vai falhar CORS → cai no mock)
@@ -35,6 +41,7 @@ function initConfigModule() {
         const entidade = document.getElementById('syncBaseFolha').value;
         if (!mesAno) return alert('Selecione o mês.');
         const datas = mesAnoParaDatas(mesAno);
+        const API_URL = getApiUrlForEntidade(entidade);
         const baseUrl = `${API_URL}/FolhaPagamento?dataInicial=${encodeURIComponent(datas.dataInicial)}&dataFinal=${encodeURIComponent(datas.dataFinal)}&nomeBase=${encodeURIComponent(entidade)}`;
         const cacheKey = `FolhaPagamento_${entidade}_${mesAno}`;
         const metaKey = `meta_folha_${entidade}_${mesAno}`;
@@ -57,7 +64,9 @@ function initConfigModule() {
     bindSyncButton('btnSyncReceitas', async () => {
         const ano = document.getElementById('syncAnoReceitas').value;
         const entidade = document.getElementById('syncBaseReceitas').value;
-        const baseUrl = `${API_URL}/Receitas/buscarDadosReceitas/${ano}`;
+        if (!ano) return alert('Selecione o ano.');
+        const API_URL = getApiUrlForEntidade(entidade);
+        const baseUrl = `${API_URL}/Receitas/buscarDadosReceitas/${ano}/PAGE/${encodeURIComponent(entidade)}?unidadeGestora=CONSOLIDADO`;
         const cacheKey = `receitas_${ano}_${entidade}`;
         const metaKey = `meta_receitas_${ano}_${entidade}`;
         await motorSincronizacaoRest(baseUrl, entidade, cacheKey, metaKey, 'Receitas', 20);
@@ -67,7 +76,9 @@ function initConfigModule() {
     bindSyncButton('btnSyncDespesas', async () => {
         const ano = document.getElementById('syncAnoDespesas').value;
         const entidade = document.getElementById('syncBaseDespesas').value;
-        const baseUrl = `${API_URL}/Despesas/buscarDadosDespesas/${ano}`;
+        if (!ano) return alert('Selecione o ano.');
+        const API_URL = getApiUrlForEntidade(entidade);
+        const baseUrl = `${API_URL}/Despesas/buscarDadosDespesas/${ano}/PAGE/${encodeURIComponent(entidade)}?unidadeGestora=CONSOLIDADO`;
         const cacheKey = `despesas_${ano}_${entidade}`;
         const metaKey = `meta_despesas_${ano}_${entidade}`;
         await motorSincronizacaoRest(baseUrl, entidade, cacheKey, metaKey, 'Despesas', 20);
