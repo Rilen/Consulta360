@@ -8,7 +8,7 @@ function renderHeader(currentRoute) {
     headerEl.innerHTML = `
         <div class="max-w-[1600px] mx-auto px-4 md:px-6 h-auto md:h-16 py-4 md:py-0 flex flex-col md:flex-row items-center justify-between gap-4 md:gap-0">
             ${typeof getLogoHtml === 'function' ? getLogoHtml() : ''}
-            <div class="w-full overflow-x-auto pb-2 md:pb-0 scrollbar-hide">
+            <div class="w-full">
                 ${typeof getMenuHtml === 'function' ? getMenuHtml(currentRoute) : ''}
             </div>
         </div>

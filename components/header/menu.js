@@ -12,8 +12,8 @@ function getMenuHtml(currentRoute) {
     const isBI = isGraficos || currentRoute === 'dashboard' || currentRoute === 'diff' || isAuditoria || isEvolucao;
 
     return `
-    <div class="flex items-center justify-start md:justify-end w-full min-w-max">
-      <div class="flex items-center gap-2 md:gap-4 flex-nowrap">
+    <div class="flex items-center justify-center md:justify-end w-full">
+      <div class="flex items-center justify-center md:justify-end gap-2 md:gap-4 flex-wrap">
         <!-- Consulta -->
         ${
           isHome
