@@ -66,7 +66,7 @@ function initConfigModule() {
         const entidade = document.getElementById('syncBaseReceitas').value;
         if (!ano) return alert('Selecione o ano.');
         const API_URL = getApiUrlForEntidade(entidade);
-        const baseUrl = `${API_URL}/Receitas/buscarDadosReceitas/${ano}/PAGE/${encodeURIComponent(entidade)}?unidadeGestora=CONSOLIDADO`;
+        const baseUrl = `${API_URL}/Receitas/buscarDadosReceitas/${ano}`;
         const cacheKey = `receitas_${ano}_${entidade}`;
         const metaKey = `meta_receitas_${ano}_${entidade}`;
         await motorSincronizacaoRest(baseUrl, entidade, cacheKey, metaKey, 'Receitas', 20);
@@ -78,7 +78,7 @@ function initConfigModule() {
         const entidade = document.getElementById('syncBaseDespesas').value;
         if (!ano) return alert('Selecione o ano.');
         const API_URL = getApiUrlForEntidade(entidade);
-        const baseUrl = `${API_URL}/Despesas/buscarDadosDespesas/${ano}/PAGE/${encodeURIComponent(entidade)}?unidadeGestora=CONSOLIDADO`;
+        const baseUrl = `${API_URL}/Despesas/buscarDadosDespesas/${ano}`;
         const cacheKey = `despesas_${ano}_${entidade}`;
         const metaKey = `meta_despesas_${ano}_${entidade}`;
         await motorSincronizacaoRest(baseUrl, entidade, cacheKey, metaKey, 'Despesas', 20);
