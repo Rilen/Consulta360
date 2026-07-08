@@ -275,3 +275,34 @@ body {
         width: 100%;
     }
 }
+
+/* Theme Classes Override */
+body {
+    background-color: #f8f9fa !important;
+    color: #334155 !important;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+.dark body {
+    background-color: #0B0F19 !important;
+    color: #ffffff !important;
+}
+
+.glass-panel, .kpi-card, .ag-card {
+    background: rgba(255, 255, 255, 0.8) !important;
+    color: #334155 !important;
+    border: 1px solid rgba(0, 0, 0, 0.05) !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05) !important;
+}
+
+.dark .glass-panel, .dark .kpi-card, .dark .ag-card {
+    background: rgba(26, 31, 53, 0.6) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+}
+
+.npa-table tbody tr { color: #334155 !important; }
+.dark .npa-table tbody tr { color: #e2e8f0 !important; }
+
+/* Keep sidebar dark always as per NPA Identity */
+.sidebar { background: #003766 !important; color: #fff !important; }

@@ -30,6 +30,16 @@
     };
   </script>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {}
+      }
+    }
+  </script>
+  <script src="./assets/js/theme.js"></script>
+
 
   <!-- Fonte -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
@@ -45,7 +55,7 @@
   <link rel="stylesheet" href="./assets/css/global.css">
 </head>
 
-<body class="text-white antialiased selection:bg-blue-100 selection:text-blue-900 bg-[#0B0F19]">
+<body class="text-slate-800 dark:text-white antialiased selection:bg-blue-100 selection:text-blue-900 bg-slate-50 dark:bg-[#0B0F19]">
 
   <div class="app-container" id="app-root">
     <!-- Sidebar Dinâmica -->
@@ -55,7 +65,7 @@
     <main class="main-content d-flex flex-column min-vh-100 w-100">
       
       <!-- Status Banner (Controlado por JS) -->
-      <div id="status-banner" class="hidden text-white text-xs font-bold uppercase tracking-widest text-center py-2 shadow-inner">
+      <div id="status-banner" class="hidden text-slate-800 dark:text-white text-xs font-bold uppercase tracking-widest text-center py-2 shadow-inner">
         <i id="status-banner-icon" class="bi bi-info-circle w-4 h-4 inline-block mr-2 align-text-bottom"></i>
         <span id="status-banner-text"></span>
       </div>

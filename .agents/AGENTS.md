@@ -47,3 +47,4 @@ O projeto segue estritamente a estrutura modular:
   - Sempre registre usando o **Token Global** (obtido na Administração do Site).
   - Crie pastas distintas: `/opt/runner-projeto1`, `/opt/runner-projeto2`.
   - Crie serviços isolados: `gitea-runner-projeto1.service` e `gitea-runner-projeto2.service`.
+\n## Temas (Modo Claro e Escuro)\n- **Dual Theme Engine:** O projeto utiliza suporte a temas dinâmicos controlados pela classe `.dark` no elemento html via Tailwind CSS. Nunca fixe cores nativas como `bg-[#0B0F19]` no HTML. Use sempre as variantes `dark:`.\n

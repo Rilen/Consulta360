@@ -7,11 +7,11 @@ function getMenuHtml(currentRoute) {
     const isAuditoria = currentRoute === 'auditoria';
     const isEvolucao = currentRoute === 'evolucao';
     const isComparacao = currentRoute === 'comparacao';
-    
+
     const isContracheque = currentRoute === 'contracheque';
     const isReceitas = currentRoute === 'receitas';
     const isDespesas = currentRoute === 'despesas';
-    
+
     const isConfig = currentRoute === 'config';
 
     // The Display Name and Role will be injected by app.js on DOMContentLoaded or spaContentReady
@@ -20,7 +20,7 @@ function getMenuHtml(currentRoute) {
     return `
     <aside class="sidebar">
         <div class="logo">
-            <h1><i class="bi bi-shield-lock me-2"></i>SentiGOV</h1>
+            <h1><i class="bi bi-shield-lock me-2"></i>Consulta360</h1>
         </div>
         
         <nav class="nav-menu">
@@ -72,6 +72,11 @@ function getMenuHtml(currentRoute) {
                     <span class="user-name" id="sidebarUserName">Usuário</span>
                     <span class="user-role" id="sidebarUserRole">N/A</span>
                 </div>
+                
+            <button class="btn-theme-toggle mr-2" title="Alternar Tema" onclick="toggleTheme()" style="background: rgba(255, 255, 255, 0.05); border: none; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;">
+                <i id="theme-toggle-icon" class="bi bi-moon-stars-fill text-blue-300"></i>
+            </button>
+
                 <button class="btn-logout" title="Sair" onclick="doLogout()">
                     <i class="bi bi-box-arrow-right"></i>
                 </button>
