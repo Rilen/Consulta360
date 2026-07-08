@@ -27,9 +27,9 @@ function updateThemeIcon() {
     if (!iconEl) return;
     const isDark = document.documentElement.classList.contains('dark');
     if (isDark) {
-        iconEl.className = 'bi bi-moon-stars-fill text-blue-300';
-    } else {
         iconEl.className = 'bi bi-sun-fill text-amber-500';
+    } else {
+        iconEl.className = 'bi bi-moon-stars-fill text-slate-500';
     }
 }
 
