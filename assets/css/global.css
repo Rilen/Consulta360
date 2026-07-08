@@ -456,3 +456,8 @@ body:has(.sidebar.collapsed) .main-content {
 .sidebar.collapsed .sidebar-header h1 {
     display: none;
 }
+
+.sidebar.collapsed .buttons-row {
+    flex-direction: column !important;
+    gap: 8px !important;
+}

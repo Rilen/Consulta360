@@ -52,7 +52,13 @@ async function doLogout() {
         };
         await fetch(`${API_BASE}/auth/logout`, { method: 'POST', headers: AUTH_HEADERS });
     } catch (_) { }
-    sessionStorage.clear();
-    localStorage.clear();
+    sessionStorage.removeItem('sg_token');
+    sessionStorage.removeItem('sg_role');
+    sessionStorage.removeItem('sg_display_name');
+    sessionStorage.removeItem('sg_avatar');
+    localStorage.removeItem('sg_token');
+    localStorage.removeItem('sg_role');
+    localStorage.removeItem('sg_display_name');
+    localStorage.removeItem('sg_avatar');
     window.location.href = 'login.html';
 }

@@ -61,6 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 100);
 
     renderFooter();
+    if (typeof updateThemeIcon === 'function') updateThemeIcon();
 });
 
 // ─────────────────────────────────────────────────────────
