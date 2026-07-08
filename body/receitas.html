@@ -3,7 +3,7 @@
     <!-- Header -->
     <div class="flex items-center gap-3 mb-2">
         <div class="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center text-green-600 shadow-inner">
-            <i data-lucide="dollar-sign" class="w-5 h-5"></i>
+            <i class="bi bi-currency-dollar w-5 h-5"></i>
         </div>
         <div>
             <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Portal de Receitas</h1>
@@ -12,13 +12,13 @@
     </div>
 
     <!-- Filtros -->
-    <section class="ag-card rounded-2xl p-6">
+    <section class="kpi-card p-6 border-accent">
         <div class="flex items-center justify-between mb-5">
             <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
-                <i data-lucide="filter" class="w-4 h-4"></i> Filtros de Consulta
+                <i class="bi bi-filter w-4 h-4"></i> Filtros de Consulta
             </h2>
             <div id="statusCacheReceitas" class="hidden items-center gap-2 text-xs font-medium text-emerald-600 px-3 py-1 bg-emerald-50 border border-emerald-100 rounded-full">
-                <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i> Cache Ativo
+                <i class="bi bi-check-circle w-3.5 h-3.5"></i> Cache Ativo
             </div>
         </div>
 
@@ -33,7 +33,7 @@
                         <option value="2023">2023</option>
                         <option value="2022">2022</option>
                     </select>
-                    <i data-lucide="calendar" class="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+                    <i class="bi bi-calendar w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
                 </div>
             </div>
 
@@ -47,13 +47,13 @@
                         <option value="FUNDO MUNICIPAL DE SAUDE">Fundo M. de Saúde</option>
                         <option value="FUNDACAO RIO DAS OSTRAS DE CULTURA">Fundação de Cultura</option>
                     </select>
-                    <i data-lucide="building" class="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+                    <i class="bi bi-building w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
                 </div>
             </div>
 
             <div class="flex flex-wrap justify-start gap-3 mt-2">
                 <button type="submit" id="btnBuscarReceitas" class="px-6 py-2.5 bg-green-600 text-white text-sm font-medium rounded-xl hover:bg-green-700 active:scale-95 transition-all shadow-sm shadow-green-600/20 flex items-center gap-2">
-                    <i data-lucide="search" class="w-4 h-4"></i> Consultar Receitas
+                    <i class="bi bi-search w-4 h-4"></i> Consultar Receitas
                 </button>
             </div>
         </form>
@@ -67,7 +67,7 @@
 
     <!-- Alertas -->
     <div id="alertaErroReceitas" class="hidden items-center gap-3 p-4 mb-6 text-sm text-rose-800 border border-rose-200 rounded-xl bg-rose-50/50">
-        <i data-lucide="alert-circle" class="w-5 h-5 flex-shrink-0 text-rose-500"></i>
+        <i class="bi bi-alert-circle w-5 h-5 flex-shrink-0 text-rose-500"></i>
         <div id="msgErroReceitas" class="font-medium">Erro ao carregar receitas.</div>
     </div>
 
@@ -75,35 +75,35 @@
     <div id="areaReceitas" class="hidden space-y-6 fade-in">
         <!-- Cards de Top Level -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="ag-card rounded-2xl p-5 relative overflow-hidden group">
+            <div class="kpi-card p-5 border-accent relative overflow-hidden group">
                 <div class="absolute right-0 top-0 w-32 h-32 bg-green-500/10 rounded-full blur-2xl -mr-10 -mt-10 transition-transform group-hover:scale-125"></div>
                 <div class="flex items-center gap-3 mb-2">
                     <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600">
-                        <i data-lucide="wallet" class="w-4 h-4"></i>
+                        <i class="bi bi-wallet w-4 h-4"></i>
                     </div>
                     <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider">Total Arrecadado</h3>
                 </div>
-                <div class="text-3xl font-bold text-slate-800" id="totalArrecadado">R$ 0,00</div>
+                <div class="kpi-value text-[#00bcd4]" id="totalArrecadado">R$ 0,00</div>
                 <p class="text-xs text-slate-400 mt-1">No exercício selecionado</p>
             </div>
             
-            <div class="ag-card rounded-2xl p-5 relative overflow-hidden group">
+            <div class="kpi-card p-5 border-accent relative overflow-hidden group">
                 <div class="absolute right-0 top-0 w-32 h-32 bg-blue-500/10 rounded-full blur-2xl -mr-10 -mt-10 transition-transform group-hover:scale-125"></div>
                 <div class="flex items-center gap-3 mb-2">
                     <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
-                        <i data-lucide="trending-up" class="w-4 h-4"></i>
+                        <i class="bi bi-graph-up-arrow w-4 h-4"></i>
                     </div>
                     <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider">Média Mensal</h3>
                 </div>
-                <div class="text-3xl font-bold text-slate-800" id="mediaArrecadacao">R$ 0,00</div>
+                <div class="kpi-value text-[#00bcd4]" id="mediaArrecadacao">R$ 0,00</div>
                 <p class="text-xs text-slate-400 mt-1">Média de entrada por mês</p>
             </div>
 
-            <div class="ag-card rounded-2xl p-5 relative overflow-hidden group">
+            <div class="kpi-card p-5 border-accent relative overflow-hidden group">
                 <div class="absolute right-0 top-0 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl -mr-10 -mt-10 transition-transform group-hover:scale-125"></div>
                 <div class="flex items-center gap-3 mb-2">
                     <div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600">
-                        <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+                        <i class="bi bi-bar-chart-3 w-4 h-4"></i>
                     </div>
                     <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider">Maior Fonte</h3>
                 </div>
@@ -114,18 +114,18 @@
 
         <!-- Gráficos -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div class="ag-card rounded-2xl p-6">
+            <div class="kpi-card p-6 border-accent">
                 <h3 class="text-sm font-bold text-slate-700 mb-6 flex items-center gap-2">
-                    <i data-lucide="line-chart" class="w-4 h-4 text-green-500"></i> Evolução Mensal de Arrecadação
+                    <i class="bi bi-line-chart w-4 h-4 text-green-500"></i> Evolução Mensal de Arrecadação
                 </h3>
                 <div class="w-full h-72">
                     <canvas id="chartReceitasMensal"></canvas>
                 </div>
             </div>
 
-            <div class="ag-card rounded-2xl p-6">
+            <div class="kpi-card p-6 border-accent">
                 <h3 class="text-sm font-bold text-slate-700 mb-6 flex items-center gap-2">
-                    <i data-lucide="pie-chart" class="w-4 h-4 text-purple-500"></i> Composição das Receitas
+                    <i class="bi bi-pie-chart w-4 h-4 text-purple-500"></i> Composição das Receitas
                 </h3>
                 <div class="w-full h-72">
                     <canvas id="chartReceitasComposicao"></canvas>
@@ -134,12 +134,12 @@
         </div>
 
         <!-- Tabela Sintética -->
-        <div class="ag-card rounded-2xl p-6">
+        <div class="kpi-card p-6 border-accent">
             <h3 class="text-sm font-bold text-slate-700 mb-6 flex items-center gap-2">
-                <i data-lucide="list" class="w-4 h-4 text-blue-500"></i> Detalhamento por Categoria Econômica
+                <i class="bi bi-list w-4 h-4 text-blue-500"></i> Detalhamento por Categoria Econômica
             </h3>
             <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
+                <table class="w-full text-left border-collapse npa-table">
                     <thead>
                         <tr class="border-b border-slate-200 bg-slate-50/50">
                             <th class="py-3 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Categoria / Rubrica</th>

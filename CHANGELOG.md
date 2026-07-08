@@ -2,13 +2,27 @@
 
 Todas as mudancas notaveis no projeto **Consulta360** serao documentadas neste arquivo.
 
+## [v0.0.8] - 2026-07-08
+
+### Adicionado
+- **Repositório SentiGOV**: Inicialização da infraestrutura de arquivos base paralela no Gitea (IdentidadeNPA).
+
+### Modificado
+- **Identidade Visual NPA (Bootstrap+Tailwind)**: O CSS e a marcação HTML de todo o projeto Consulta360 foram refatorados para o Design System da Identidade Corporativa.
+- **Glassmorphism**: Nova classe `.kpi-card` em substituição à `.ag-card`, implementando cantos retos, border-accent e shadow minimalista.
+- **Performance de Ícones**: Remoção total do Lucide (`lucide.createIcons()`) em prol das webfonts injetadas nativamente via Bootstrap Icons.
+
+### Corrigido
+- **Funções perdidas em api.js**: Restauração pontual de `sanitize()` para proteção XSS e de `exportarCSV()` que haviam sido suprimidas em um git restore durante problemas de encoding.
+
 ## [v0.0.7] - 2026-07-08
 
 ### Adicionado
 - **Helper getAllCache()** em db.js: encapsula a listagem completa do IndexedDB, eliminando acesso direto ao IDB em dashboard.js.
 - **Helper listCacheKeys(prefix)** em db.js: filtra chaves por prefixo usando IDBKeyRange, substituindo cursores manuais em módulos.
 - **Helper clearAllCache()** em db.js: encapsula limpeza atômica de olha_cache e metadata em uma única transação.
-- **Helper esolveTimestampLabel(cacheKey, metaKey)** em db.js: elimina bloco de 8 linhas de resolução de timestamp duplicado em home.js, graficos.js e uditoria.js.
+- **Helper 
+esolveTimestampLabel(cacheKey, metaKey)** em db.js: elimina bloco de 8 linhas de resolução de timestamp duplicado em home.js, graficos.js e uditoria.js.
 - **Função parseValorBR(str)** em pi.js: parser canônico de valores monetários BR, extraído de dashboard.js para eliminar lógica paralela.
 - **Helpers indFormOnce() e indOnce()** em layout.js: substituem o anti-pattern cloneNode(true)+replaceChild para prevenção de duplicate event listeners.
 - **Service Worker** agora inclui todos os fragmentos ody/*.html no cache, permitindo navegação offline completa em todas as rotas.

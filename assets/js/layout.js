@@ -82,6 +82,6 @@ function updateStatusBanner(type, message) {
     }
     
     if (typeof lucide !== 'undefined') {
-        lucide.createIcons();
+
     }
 }

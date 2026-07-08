@@ -60,7 +60,7 @@ async function navigateTo(route, pushState = true) {
         
         // Re-renderizar ícones Lucide da nova tela E do header/footer recém renderizados
         if (typeof lucide !== 'undefined') {
-            lucide.createIcons();
+
         }
 
     } catch (error) {

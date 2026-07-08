@@ -222,7 +222,7 @@ function atualizarUI() {
                 </div>
             </div>
             <button onclick="removerPDF(${p.id})" class="flex-shrink-0 p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors" title="Remover">
-                <i data-lucide="x" class="w-4 h-4"></i>
+                <i class="bi bi-x-lg w-4 h-4"></i>
             </button>
         </div>`;
     }).join('');

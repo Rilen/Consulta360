@@ -19,43 +19,43 @@ function getMenuHtml(currentRoute) {
         ${
           isHome
           ? `<div class="px-4 py-1.5 bg-white/20 text-white border border-white/40 rounded-full text-sm font-semibold flex items-center gap-2 shadow-sm backdrop-blur-md">
-              <i data-lucide="database" class="w-4 h-4 text-blue-300"></i> Consulta
+              <i class="bi bi-database w-4 h-4 text-blue-300"></i> Consulta
              </div>`
           : `<a href="#" data-route="home" class="px-4 py-1.5 bg-white/5 text-slate-200 border border-white/10 rounded-full text-sm font-medium flex items-center gap-2 hover:bg-white/15 hover:text-white transition-all">
-              <i data-lucide="database" class="w-4 h-4 text-blue-400"></i> Consulta
+              <i class="bi bi-database w-4 h-4 text-blue-400"></i> Consulta
              </a>`
         }
         
         <!-- BI Dropdown -->
         <div class="relative group">
           <div class="px-4 py-1.5 ${isBI ? 'bg-white/20 text-white border-white/40 shadow-sm' : 'bg-white/5 text-slate-200 border-white/10 hover:bg-white/15 hover:text-white'} border rounded-full text-sm font-medium flex items-center gap-2 cursor-pointer transition-all">
-            <i data-lucide="bar-chart-2" class="w-4 h-4 ${isBI ? 'text-indigo-300' : 'text-indigo-400'}"></i> BI <i data-lucide="chevron-down" class="w-3 h-3 ml-1 opacity-70"></i>
+            <i class="bi bi-bar-chart w-4 h-4 ${isBI ? 'text-indigo-300' : 'text-indigo-400'}"></i> BI <i class="bi bi-chevron-down w-3 h-3 ml-1 opacity-70"></i>
           </div>
           
           <div class="absolute left-0 mt-2 w-56 bg-slate-800/95 backdrop-blur-xl rounded-xl shadow-xl border border-white/10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 flex flex-col overflow-hidden py-1">
             
             <a href="#" data-route="dashboard" class="px-4 py-2.5 text-sm text-slate-200 hover:bg-white/10 hover:text-white flex items-center gap-3 transition-colors ${currentRoute === 'dashboard' ? 'bg-white/10 text-white' : ''}">
-              <i data-lucide="layout-dashboard" class="w-4 h-4 text-cyan-400"></i> Macro-Dashboard
+              <i class="bi bi-grid-1x2 w-4 h-4 text-cyan-400"></i> Macro-Dashboard
             </a>
             
             <a href="#" data-route="graficos" class="px-4 py-2.5 text-sm text-slate-200 hover:bg-white/10 hover:text-white flex items-center gap-3 transition-colors ${isGraficos ? 'bg-white/10 text-white' : ''}">
-              <i data-lucide="pie-chart" class="w-4 h-4 text-indigo-400"></i> Análise de Dados
+              <i class="bi bi-pie-chart w-4 h-4 text-indigo-400"></i> Análise de Dados
             </a>
             
             <a href="#" data-route="diff" class="px-4 py-2.5 text-sm text-slate-200 hover:bg-white/10 hover:text-white flex items-center gap-3 transition-colors ${currentRoute === 'diff' ? 'bg-white/10 text-white' : ''}">
-              <i data-lucide="history" class="w-4 h-4 text-fuchsia-400"></i> Máquina do Tempo
+              <i class="bi bi-clock-history w-4 h-4 text-fuchsia-400"></i> Máquina do Tempo
             </a>
             
             <a href="#" data-route="auditoria" class="px-4 py-2.5 text-sm text-slate-200 hover:bg-white/10 hover:text-white flex items-center gap-3 transition-colors ${isAuditoria ? 'bg-white/10 text-white' : ''}">
-              <i data-lucide="brain" class="w-4 h-4 text-emerald-400"></i> Auditoria IA
+              <i class="bi bi-cpu w-4 h-4 text-emerald-400"></i> Auditoria IA
             </a>
             
             <a href="#" data-route="evolucao" class="px-4 py-2.5 text-sm text-slate-200 hover:bg-white/10 hover:text-white flex items-center gap-3 transition-colors ${isEvolucao ? 'bg-white/10 text-white' : ''}">
-              <i data-lucide="trending-up" class="w-4 h-4 text-amber-400"></i> Evolução
+              <i class="bi bi-graph-up-arrow w-4 h-4 text-amber-400"></i> Evolução
             </a>
             
             <a href="#" data-route="comparacao" class="px-4 py-2.5 text-sm text-slate-200 hover:bg-white/10 hover:text-white flex items-center gap-3 transition-colors ${isComparacao ? 'bg-white/10 text-white' : ''}">
-              <i data-lucide="scale" class="w-4 h-4 text-orange-400"></i> Comparação Salarial
+              <i class="bi bi-bank w-4 h-4 text-orange-400"></i> Comparação Salarial
             </a>
             
           </div>
@@ -65,10 +65,10 @@ function getMenuHtml(currentRoute) {
         ${
           isContracheque
           ? `<div class="px-4 py-1.5 bg-white/20 text-white border border-white/40 rounded-full text-sm font-semibold flex items-center gap-2 shadow-sm backdrop-blur-md">
-              <i data-lucide="file-check" class="w-4 h-4 text-violet-300"></i> Contracheque
+              <i class="bi bi-file-earmark-check w-4 h-4 text-violet-300"></i> Contracheque
              </div>`
           : `<a href="#" data-route="contracheque" class="px-4 py-1.5 bg-white/5 text-slate-200 border border-white/10 rounded-full text-sm font-medium flex items-center gap-2 hover:bg-white/15 hover:text-white transition-all">
-              <i data-lucide="file-check" class="w-4 h-4 text-violet-400"></i> Contracheque
+              <i class="bi bi-file-earmark-check w-4 h-4 text-violet-400"></i> Contracheque
              </a>`
         }
         
@@ -76,10 +76,10 @@ function getMenuHtml(currentRoute) {
         ${
           isReceitas
           ? `<div class="px-4 py-1.5 bg-white/20 text-white border border-white/40 rounded-full text-sm font-semibold flex items-center gap-2 shadow-sm backdrop-blur-md">
-              <i data-lucide="dollar-sign" class="w-4 h-4 text-green-300"></i> Receitas
+              <i class="bi bi-currency-dollar w-4 h-4 text-green-300"></i> Receitas
              </div>`
           : `<a href="#" data-route="receitas" class="px-4 py-1.5 bg-white/5 text-slate-200 border border-white/10 rounded-full text-sm font-medium flex items-center gap-2 hover:bg-white/15 hover:text-white transition-all">
-              <i data-lucide="dollar-sign" class="w-4 h-4 text-green-400"></i> Receitas
+              <i class="bi bi-currency-dollar w-4 h-4 text-green-400"></i> Receitas
              </a>`
         }
 
@@ -87,10 +87,10 @@ function getMenuHtml(currentRoute) {
         ${
           isDespesas
           ? `<div class="px-4 py-1.5 bg-white/20 text-white border border-white/40 rounded-full text-sm font-semibold flex items-center gap-2 shadow-sm backdrop-blur-md">
-              <i data-lucide="shopping-cart" class="w-4 h-4 text-rose-300"></i> Despesas
+              <i class="bi bi-cart w-4 h-4 text-rose-300"></i> Despesas
              </div>`
           : `<a href="#" data-route="despesas" class="px-4 py-1.5 bg-white/5 text-slate-200 border border-white/10 rounded-full text-sm font-medium flex items-center gap-2 hover:bg-white/15 hover:text-white transition-all">
-              <i data-lucide="shopping-cart" class="w-4 h-4 text-rose-400"></i> Despesas
+              <i class="bi bi-cart w-4 h-4 text-rose-400"></i> Despesas
              </a>`
         }
       </div>
@@ -100,10 +100,10 @@ function getMenuHtml(currentRoute) {
         ${
           isConfig
           ? `<div class="px-4 py-1.5 bg-white/20 text-white border border-white/40 rounded-full text-sm font-semibold flex items-center gap-2 shadow-sm backdrop-blur-md">
-              <i data-lucide="settings" class="w-4 h-4 text-slate-300"></i> Sincronização
+              <i class="bi bi-gear w-4 h-4 text-slate-300"></i> Sincronização
              </div>`
           : `<a href="#" data-route="config" class="px-4 py-1.5 bg-white/5 text-slate-200 border border-white/10 rounded-full text-sm font-medium flex items-center gap-2 hover:bg-white/15 hover:text-white transition-all">
-              <i data-lucide="settings" class="w-4 h-4 text-slate-300"></i> Sincronização
+              <i class="bi bi-gear w-4 h-4 text-slate-300"></i> Sincronização
              </a>`
         }
       </div>

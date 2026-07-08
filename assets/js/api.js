@@ -68,3 +68,54 @@ function parseValorBR(str) {
     const val = parseFloat(s);
     return isNaN(val) ? 0 : val;
 }
+
+function sanitize(str) {
+    if (typeof str !== 'string') return str;
+    const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#x27;',
+        "/": '&#x2F;',
+    };
+    const reg = /[&<>"'/]/ig;
+    return str.replace(reg, (match)=>(map[match]));
+}
+
+function exportarCSV(dados, nomeArquivo) {
+    if (!dados || dados.length === 0) return;
+
+    // Extrair cabeçalhos
+    const cabecalhos = Object.keys(dados[0]);
+    let csvContent = cabecalhos.join(';') + '\n';
+
+    // Extrair linhas
+    for (const linha of dados) {
+        const valores = cabecalhos.map(cabecalho => {
+            let valor = linha[cabecalho];
+            if (valor === null || valor === undefined) valor = '';
+            // Se for número, converter ponto para vírgula para abrir no Excel em PT-BR
+            if (typeof valor === 'number') {
+                valor = valor.toString().replace('.', ',');
+            } else {
+                // Escapar aspas duplas dentro de strings e encapsular em aspas duplas
+                valor = `"${String(valor).replace(/"/g, '""')}"`;
+            }
+            return valor;
+        });
+        csvContent += valores.join(';') + '\n';
+    }
+
+    // Adicionar BOM para Excel reconhecer UTF-8
+    const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    
+    const a = document.createElement('a');
+    a.href = url;
+    a.setAttribute('download', `${nomeArquivo}.csv`);
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}

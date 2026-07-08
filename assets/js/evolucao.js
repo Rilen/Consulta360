@@ -83,7 +83,7 @@ async function carregarHistoricoDoIndexedDB() {
     const statusEl = document.getElementById('statusCache');
     if (statusEl) {
         statusEl.classList.remove('hidden'); statusEl.classList.add('flex');
-        statusEl.innerHTML = '<i data-lucide="loader" class="w-3.5 h-3.5 animate-spin"></i> Lendo dados do banco local...';
+        statusEl.innerHTML = '<i class="bi bi-loader w-3.5 h-3.5 animate-spin"></i> Lendo dados do banco local...';
     }
 
     try {
@@ -91,7 +91,7 @@ async function carregarHistoricoDoIndexedDB() {
         if (chaves.length === 0) {
             historicoCargos = historicoCargosMock;
             dadosCarregados = true;
-            if (statusEl) statusEl.innerHTML = '<i data-lucide="server" class="w-3.5 h-3.5"></i> Usando Dataset Histórico (Mock)';
+            if (statusEl) statusEl.innerHTML = '<i class="bi bi-server w-3.5 h-3.5"></i> Usando Dataset Histórico (Mock)';
             return false;
         }
 
@@ -140,20 +140,20 @@ async function carregarHistoricoDoIndexedDB() {
             dadosCarregados = true;
             const totalCargos = Object.keys(resultado).length;
             const totalMeses = chaves.length;
-            if (statusEl) statusEl.innerHTML = `<i data-lucide="database" class="w-3.5 h-3.5"></i> ${totalCargos} cargos reais · ${totalMeses} meses no banco`;
+            if (statusEl) statusEl.innerHTML = `<i class="bi bi-database w-3.5 h-3.5"></i> ${totalCargos} cargos reais · ${totalMeses} meses no banco`;
             if (window.lucide) lucide.createIcons();
             return true;
         }
 
         historicoCargos = historicoCargosMock;
         dadosCarregados = true;
-        if (statusEl) statusEl.innerHTML = '<i data-lucide="server" class="w-3.5 h-3.5"></i> Usando Dataset Histórico (Mock)';
+        if (statusEl) statusEl.innerHTML = '<i class="bi bi-server w-3.5 h-3.5"></i> Usando Dataset Histórico (Mock)';
         return false;
     } catch (e) {
         console.error('Erro ao carregar histórico do IndexedDB:', e);
         historicoCargos = historicoCargosMock;
         dadosCarregados = true;
-        if (statusEl) statusEl.innerHTML = '<i data-lucide="server" class="w-3.5 h-3.5"></i> Usando Dataset Histórico (Mock)';
+        if (statusEl) statusEl.innerHTML = '<i class="bi bi-server w-3.5 h-3.5"></i> Usando Dataset Histórico (Mock)';
         return false;
     }
 }
@@ -483,7 +483,7 @@ function renderizarTabela(anos) {
         if (termoBusca && !cargo.toLowerCase().includes(termoBusca)) continue;
 
         tbodyHtml += `<tr class="hover:bg-slate-50/50 transition-colors">
-            <td class="py-3 px-5 text-sm font-semibold text-slate-700 sticky left-0 bg-white border-r border-slate-100">${cargo}</td>`;
+            <td class="py-3 px-5 text-sm font-semibold text-slate-700 sticky left-0 bg-white border-r border-slate-100">${sanitize(cargo)}</td>`;
 
         anos.forEach(ano => {
             const salario = historicoCargos[cargo]?.[ano];

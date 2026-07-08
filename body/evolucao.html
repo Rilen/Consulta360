@@ -1,21 +1,21 @@
 <!-- Header Interno -->
     <div class="flex flex-col gap-1 mb-2">
       <h2 class="text-2xl font-black text-slate-800 flex items-center gap-3">
-        <i data-lucide="bar-chart-2" class="w-7 h-7 text-amber-500"></i> 
+        <i class="bi bi-bar-chart w-7 h-7 text-amber-500"></i> 
         Evolução Salarial & Poder de Compra
       </h2>
       <p class="text-sm text-slate-500 max-w-3xl">Análise histórica do impacto inflacionário e da proporção da folha em relação ao Salário Mínimo Nacional.</p>
     </div>
 
     <!-- Filtros Inteligentes -->
-    <section class="ag-card rounded-2xl p-6 fade-in">
+    <section class="kpi-card p-6 border-accent fade-in">
       <div class="flex items-center justify-between mb-5">
         <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
-          <i data-lucide="filter" class="w-4 h-4"></i> Controles Temporais
+          <i class="bi bi-filter w-4 h-4"></i> Controles Temporais
         </h2>
         <div id="statusCache"
           class="items-center gap-2 text-xs font-medium text-blue-600 px-3 py-1 bg-blue-50 border border-blue-100 rounded-full flex">
-          <i data-lucide="server" class="w-3.5 h-3.5"></i> Usando Dataset Histórico
+          <i class="bi bi-server w-3.5 h-3.5"></i> Usando Dataset Histórico
         </div>
       </div>
 
@@ -31,8 +31,7 @@
               <option value="2021">2021</option>
               <option value="2022">2022</option>
             </select>
-            <i data-lucide="chevron-down"
-              class="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+            <i class="bi bi-chevron-down w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
           </div>
         </div>
 
@@ -47,8 +46,7 @@
               <option value="2025">2025</option>
               <option value="2026" selected>2026</option>
             </select>
-            <i data-lucide="chevron-down"
-              class="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+            <i class="bi bi-chevron-down w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
           </div>
         </div>
         
@@ -59,15 +57,14 @@
               class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all appearance-none cursor-pointer">
               <option value="PMRO">PMRO - Geral (Média Ponderada)</option>
             </select>
-            <i data-lucide="chevron-down"
-              class="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+            <i class="bi bi-chevron-down w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
           </div>
         </div>
 
         <div class="flex flex-wrap justify-start gap-3 mt-2">
           <button type="submit" id="btnBuscar"
             class="px-6 py-2.5 bg-amber-500 text-white text-sm font-medium rounded-xl hover:bg-amber-600 active:scale-95 transition-all shadow-sm shadow-amber-500/20 flex items-center gap-2">
-            <i data-lucide="history" class="w-4 h-4"></i> Gerar Histórico
+            <i class="bi bi-clock-history w-4 h-4"></i> Gerar Histórico
           </button>
         </div>
       </form>
@@ -80,11 +77,11 @@
       <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
         
         <!-- Defasagem Média -->
-        <div class="ag-card rounded-2xl p-6 flex flex-col justify-center relative overflow-hidden group">
+        <div class="kpi-card p-6 border-accent flex flex-col justify-center relative overflow-hidden group">
           <div class="absolute right-0 top-0 w-32 h-32 bg-rose-500/10 rounded-full blur-2xl -mr-10 -mt-10 transition-transform group-hover:scale-110"></div>
           <div class="flex items-center gap-3 mb-3 relative z-10">
             <div class="w-10 h-10 rounded-full bg-rose-50 flex items-center justify-center">
-              <i data-lucide="trending-down" class="w-5 h-5 text-rose-500"></i>
+              <i class="bi bi-graph-down-arrow w-5 h-5 text-rose-500"></i>
             </div>
             <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider">Índice de Defasagem Média</h3>
           </div>
@@ -93,11 +90,11 @@
         </div>
 
         <!-- Custo Superávit/Déficit -->
-        <div class="ag-card rounded-2xl p-6 flex flex-col justify-center relative overflow-hidden group">
+        <div class="kpi-card p-6 border-accent flex flex-col justify-center relative overflow-hidden group">
           <div class="absolute right-0 top-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl -mr-10 -mt-10 transition-transform group-hover:scale-110"></div>
           <div class="flex items-center gap-3 mb-3 relative z-10">
             <div class="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center">
-              <i data-lucide="piggy-bank" class="w-5 h-5 text-emerald-600"></i>
+              <i class="bi bi-piggy-bank w-5 h-5 text-emerald-600"></i>
             </div>
             <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider">Custo de Ajuste Global</h3>
           </div>
@@ -106,11 +103,11 @@
         </div>
 
         <!-- Teto vs Piso -->
-        <div class="ag-card rounded-2xl p-6 flex flex-col justify-center relative overflow-hidden group">
+        <div class="kpi-card p-6 border-accent flex flex-col justify-center relative overflow-hidden group">
           <div class="absolute right-0 top-0 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl -mr-10 -mt-10 transition-transform group-hover:scale-110"></div>
           <div class="flex items-center gap-3 mb-3 relative z-10">
             <div class="w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center">
-              <i data-lucide="scale" class="w-5 h-5 text-amber-600"></i>
+              <i class="bi bi-bank w-5 h-5 text-amber-600"></i>
             </div>
             <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider">Teto vs Piso (Agregado)</h3>
           </div>
@@ -124,9 +121,9 @@
       <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
         <!-- Evolução por Cargo/Ano -->
-        <div class="ag-card rounded-2xl p-6 flex flex-col">
+        <div class="kpi-card p-6 border-accent flex flex-col">
           <h3 class="text-sm font-bold text-slate-700 mb-2 flex items-center gap-2">
-            <i data-lucide="users" class="w-4 h-4 text-amber-500"></i> 
+            <i class="bi bi-people w-4 h-4 text-amber-500"></i> 
             Evolução Salarial por Cargo (Nominal)
           </h3>
           <p class="text-xs text-slate-500 mb-6">Média salarial nominal consolidada ao longo dos anos.</p>
@@ -136,9 +133,9 @@
         </div>
 
         <!-- Poder de Compra vs Salário Mínimo -->
-        <div class="ag-card rounded-2xl p-6 flex flex-col">
+        <div class="kpi-card p-6 border-accent flex flex-col">
           <h3 class="text-sm font-bold text-slate-700 mb-2 flex items-center gap-2">
-            <i data-lucide="area-chart" class="w-4 h-4 text-emerald-500"></i> 
+            <i class="bi bi-activity w-4 h-4 text-emerald-500"></i> 
             Poder de Compra vs Indexador (SM)
           </h3>
           <p class="text-xs text-slate-500 mb-6">Proporção de crescimento municipal contra a curva do Salário Mínimo.</p>
@@ -150,24 +147,24 @@
       </section>
 
       <!-- Tabela de Proporção -->
-      <section class="ag-card rounded-2xl p-6 overflow-hidden">
+      <section class="kpi-card p-6 border-accent overflow-hidden">
         <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
           <h3 class="text-sm font-bold text-slate-700 flex items-center gap-2">
-            <i data-lucide="table" class="w-4 h-4 text-blue-500"></i>
+            <i class="bi bi-table w-4 h-4 text-blue-500"></i>
             Proporção em Quantidade de Salários Mínimos
           </h3>
           <div class="flex items-center gap-3">
             <div class="relative">
               <input type="text" id="buscaCargoTabela" placeholder="Buscar cargo..."
                 class="w-56 bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-4 py-2 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
-              <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+              <i class="bi bi-search w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
             </div>
             <span class="px-3 py-1 bg-slate-100 text-slate-500 text-[10px] font-bold rounded-md uppercase tracking-wider">Histórico</span>
           </div>
         </div>
         
         <div class="overflow-x-auto">
-          <table class="w-full text-left border-collapse">
+          <table class="w-full text-left border-collapse npa-table">
             <thead class="bg-slate-50 border-y border-slate-100">
               <tr id="table-head">
                 <!-- Injetado via JS -->

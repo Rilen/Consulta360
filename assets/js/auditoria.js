@@ -153,7 +153,7 @@ function processarEngineIA(rawRows, labelMMSY) {
         chatContainer.innerHTML = `
             <div class="flex items-start gap-3 fade-in">
                 <div class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center flex-shrink-0">
-                    <i data-lucide="bot" class="w-4 h-4 text-white"></i>
+                    <i class="bi bi-robot w-4 h-4 text-white"></i>
                 </div>
                 <div class="bg-slate-800/80 rounded-2xl rounded-tl-sm p-4 text-sm text-slate-200 border border-white/5 shadow-md">
                     Processamento concluído. Analisei ${dadosUnificados.length.toLocaleString('pt-BR')} servidores consolidados nesta matriz. Como posso ajudar nas inferências?
@@ -164,7 +164,7 @@ function processarEngineIA(rawRows, labelMMSY) {
 
     document.getElementById('aiDashboard').classList.remove('hidden');
     setUiLoadingAuditoria(false);
-    lucide.createIcons();
+
 }
 
 function renderizarRadarAnomalias(anomalias) {
@@ -181,8 +181,8 @@ function renderizarRadarAnomalias(anomalias) {
     container.innerHTML = anomalias.map(a => `
         <div class="flex items-center justify-between p-3 border-b border-white/5 hover:bg-white/5 transition-colors">
             <div>
-                <div class="text-xs font-bold text-slate-200">${a.nome}</div>
-                <div class="text-[11px] text-slate-400 mt-0.5">${a.tipo}</div>
+                <div class="text-xs font-bold text-slate-200">${sanitize(a.nome)}</div>
+                <div class="text-[11px] text-slate-400 mt-0.5">${sanitize(a.tipo)}</div>
             </div>
             <div class="text-right">
                 <span class="inline-block px-2 py-0.5 text-[10px] font-bold uppercase rounded ${a.risk === 'critico' ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'} mb-1">${a.risk}</span>
@@ -280,7 +280,7 @@ function enviarPrompt(tipo) {
                 ${pergunta}
             </div>
             <div class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center flex-shrink-0">
-                <i data-lucide="user" class="w-4 h-4 text-slate-300"></i>
+                <i class="bi bi-person w-4 h-4 text-slate-300"></i>
             </div>
         </div>
     `;
@@ -288,7 +288,7 @@ function enviarPrompt(tipo) {
     const respostaHtml = `
         <div class="flex items-start gap-3 fade-in mt-4">
             <div class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center flex-shrink-0">
-                <i data-lucide="bot" class="w-4 h-4 text-white"></i>
+                <i class="bi bi-robot w-4 h-4 text-white"></i>
             </div>
             <div class="bg-slate-800/80 rounded-2xl rounded-tl-sm p-4 text-sm text-slate-200 border border-white/5 shadow-md">
                 ${resposta}
@@ -298,7 +298,7 @@ function enviarPrompt(tipo) {
 
     chatContainer.innerHTML += perguntaHtml + respostaHtml;
     chatContainer.scrollTop = chatContainer.scrollHeight;
-    lucide.createIcons();
+
 }
 window.enviarPrompt = enviarPrompt;
 

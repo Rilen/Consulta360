@@ -57,7 +57,7 @@ function mostrarErroDiff(msg) {
 async function gerarDiff() {
     mostrarErroDiff('');
     const btn = document.getElementById('btnGerarDiff');
-    if (btn) btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Processando...';
+    if (btn) btn.innerHTML = '<i class="bi bi-loader-2 w-4 h-4 animate-spin"></i> Processando...';
     if (window.lucide) window.lucide.createIcons();
 
     const valA = document.getElementById('diffMesA')?.value;
@@ -66,7 +66,7 @@ async function gerarDiff() {
 
     if (!valA || !valB || !base) {
         mostrarErroDiff('Preencha os meses e a base para comparar.');
-        if (btn) btn.innerHTML = '<i data-lucide="play" class="w-4 h-4"></i> Comparar Folhas';
+        if (btn) btn.innerHTML = '<i class="bi bi-play w-4 h-4"></i> Comparar Folhas';
         return;
     }
 
@@ -79,7 +79,7 @@ async function gerarDiff() {
 
         if (!rawA || !rawB) {
             mostrarErroDiff('Um ou ambos os meses selecionados não estão sincronizados localmente. Por favor, vá ao Painel de Sincronização e baixe-os primeiro.');
-            if (btn) btn.innerHTML = '<i data-lucide="play" class="w-4 h-4"></i> Comparar Folhas';
+            if (btn) btn.innerHTML = '<i class="bi bi-play w-4 h-4"></i> Comparar Folhas';
             return;
         }
 
@@ -95,7 +95,7 @@ async function gerarDiff() {
         console.error(e);
     }
 
-    if (btn) btn.innerHTML = '<i data-lucide="play" class="w-4 h-4"></i> Comparar Folhas';
+    if (btn) btn.innerHTML = '<i class="bi bi-play w-4 h-4"></i> Comparar Folhas';
     if (window.lucide) window.lucide.createIcons();
 }
 
@@ -246,7 +246,7 @@ function renderDiffTable() {
 
             return `
                 <tr class="hover:bg-slate-50 transition-colors">
-                    <td class="py-3 px-4 text-sm font-medium text-slate-700">${r.nome}</td>
+                    <td class="py-3 px-4 text-sm font-medium text-slate-700">${sanitize(r.nome)}</td>
                     <td class="py-3 px-4">${badge}</td>
                     <td class="py-3 px-4 text-sm text-right text-slate-500">${r.valA === 0 ? '-' : formatarMoeda(r.valA)}</td>
                     <td class="py-3 px-4 text-sm text-right text-slate-500">${r.valB === 0 ? '-' : formatarMoeda(r.valB)}</td>

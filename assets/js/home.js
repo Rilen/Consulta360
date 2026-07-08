@@ -100,10 +100,10 @@ function showOfflineToast(msg, type = 'warning') {
     
     if (type === 'warning') {
         toast.className = 'fixed bottom-6 right-6 z-50 p-4 rounded-xl text-sm font-medium shadow-xl flex items-center gap-3 bg-amber-500 text-white shadow-amber-500/20 transition-all transform translate-y-0 opacity-100';
-        toast.innerHTML = `<i data-lucide="wifi-off" class="w-5 h-5"></i> ${msg}`;
+        toast.innerHTML = `<i class="bi bi-wifi-off w-5 h-5"></i> ${msg}`;
     } else {
         toast.className = 'fixed bottom-6 right-6 z-50 p-4 rounded-xl text-sm font-medium shadow-xl flex items-center gap-3 bg-blue-600 text-white shadow-blue-600/20 transition-all transform translate-y-0 opacity-100';
-        toast.innerHTML = `<i data-lucide="database" class="w-5 h-5"></i> ${msg}`;
+        toast.innerHTML = `<i class="bi bi-database w-5 h-5"></i> ${msg}`;
     }
     
     if (window.lucide) lucide.createIcons();

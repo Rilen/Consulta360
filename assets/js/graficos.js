@@ -353,7 +353,7 @@ function abrirModalVinculos(tipo) {
 function abrirModalVinculosCustom(lista, titulo) {
     const modalTitulo = document.getElementById('modalVinculosTitulo');
     if (modalTitulo) {
-        modalTitulo.innerHTML = `<i data-lucide="list" class="w-5 h-5 text-purple-500"></i> ${titulo} (${lista.length})`;
+        modalTitulo.innerHTML = `<i class="bi bi-list w-5 h-5 text-purple-500"></i> ${titulo} (${lista.length})`;
     }
     const tbody = document.getElementById('modalVinculosBody');
     if (tbody) {
@@ -371,7 +371,7 @@ function abrirModalVinculosCustom(lista, titulo) {
     if (modal) {
         modal.classList.remove('hidden');
     }
-    lucide.createIcons();
+
 }
 
 window.abrirModalVinculos = abrirModalVinculos;

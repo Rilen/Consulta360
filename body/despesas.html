@@ -3,7 +3,7 @@
     <!-- Header -->
     <div class="flex items-center gap-3 mb-2">
         <div class="w-10 h-10 rounded-full bg-rose-500/20 flex items-center justify-center text-rose-600 shadow-inner">
-            <i data-lucide="shopping-cart" class="w-5 h-5"></i>
+            <i class="bi bi-cart w-5 h-5"></i>
         </div>
         <div>
             <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Portal de Despesas</h1>
@@ -12,13 +12,13 @@
     </div>
 
     <!-- Filtros -->
-    <section class="ag-card rounded-2xl p-6">
+    <section class="kpi-card p-6 border-accent">
         <div class="flex items-center justify-between mb-5">
             <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
-                <i data-lucide="filter" class="w-4 h-4"></i> Parâmetros
+                <i class="bi bi-filter w-4 h-4"></i> Parâmetros
             </h2>
             <div id="statusCacheDespesas" class="hidden items-center gap-2 text-xs font-medium text-emerald-600 px-3 py-1 bg-emerald-50 border border-emerald-100 rounded-full">
-                <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i> Cache Ativo
+                <i class="bi bi-check-circle w-3.5 h-3.5"></i> Cache Ativo
             </div>
         </div>
 
@@ -32,7 +32,7 @@
                         <option value="2024">2024</option>
                         <option value="2023">2023</option>
                     </select>
-                    <i data-lucide="calendar" class="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+                    <i class="bi bi-calendar w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
                 </div>
             </div>
 
@@ -45,13 +45,13 @@
                         <option value="CÂMARA MUNICIPAL">Câmara Municipal</option>
                         <option value="FUNDO MUNICIPAL DE SAUDE">Fundo M. de Saúde</option>
                     </select>
-                    <i data-lucide="building" class="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+                    <i class="bi bi-building w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
                 </div>
             </div>
 
             <div class="flex flex-wrap justify-start gap-3 mt-2">
                 <button type="submit" id="btnBuscarDespesas" class="px-6 py-2.5 bg-rose-600 text-white text-sm font-medium rounded-xl hover:bg-rose-700 active:scale-95 transition-all shadow-sm shadow-rose-600/20 flex items-center gap-2">
-                    <i data-lucide="search" class="w-4 h-4"></i> Consultar Despesas
+                    <i class="bi bi-search w-4 h-4"></i> Consultar Despesas
                 </button>
             </div>
         </form>
@@ -65,7 +65,7 @@
 
     <!-- Erro -->
     <div id="alertaErroDespesas" class="hidden items-center gap-3 p-4 mb-6 text-sm text-rose-800 border border-rose-200 rounded-xl bg-rose-50/50">
-        <i data-lucide="alert-circle" class="w-5 h-5 flex-shrink-0 text-rose-500"></i>
+        <i class="bi bi-alert-circle w-5 h-5 flex-shrink-0 text-rose-500"></i>
         <div id="msgErroDespesas" class="font-medium">Erro ao carregar despesas.</div>
     </div>
 
@@ -73,54 +73,54 @@
     <div id="areaDespesas" class="hidden space-y-6 fade-in">
         <!-- Métricas -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="ag-card rounded-2xl p-5 relative overflow-hidden">
+            <div class="kpi-card p-5 border-accent relative overflow-hidden">
                 <div class="absolute right-0 top-0 w-32 h-32 bg-rose-500/10 rounded-full blur-2xl -mr-10 -mt-10"></div>
                 <div class="flex items-center gap-3 mb-2">
                     <div class="w-8 h-8 rounded-full bg-rose-100 flex items-center justify-center text-rose-600">
-                        <i data-lucide="credit-card" class="w-4 h-4"></i>
+                        <i class="bi bi-credit-card w-4 h-4"></i>
                     </div>
                     <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider">Total Empenhado</h3>
                 </div>
-                <div class="text-3xl font-bold text-slate-800" id="totalEmpenhado">R$ 0,00</div>
+                <div class="kpi-value text-[#00bcd4]" id="totalEmpenhado">R$ 0,00</div>
             </div>
             
-            <div class="ag-card rounded-2xl p-5 relative overflow-hidden">
+            <div class="kpi-card p-5 border-accent relative overflow-hidden">
                 <div class="absolute right-0 top-0 w-32 h-32 bg-orange-500/10 rounded-full blur-2xl -mr-10 -mt-10"></div>
                 <div class="flex items-center gap-3 mb-2">
                     <div class="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center text-orange-600">
-                        <i data-lucide="check-circle" class="w-4 h-4"></i>
+                        <i class="bi bi-check-circle w-4 h-4"></i>
                     </div>
                     <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider">Total Liquidado</h3>
                 </div>
-                <div class="text-3xl font-bold text-slate-800" id="totalLiquidado">R$ 0,00</div>
+                <div class="kpi-value text-[#00bcd4]" id="totalLiquidado">R$ 0,00</div>
             </div>
 
-            <div class="ag-card rounded-2xl p-5 relative overflow-hidden">
+            <div class="kpi-card p-5 border-accent relative overflow-hidden">
                 <div class="absolute right-0 top-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl -mr-10 -mt-10"></div>
                 <div class="flex items-center gap-3 mb-2">
                     <div class="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
-                        <i data-lucide="dollar-sign" class="w-4 h-4"></i>
+                        <i class="bi bi-currency-dollar w-4 h-4"></i>
                     </div>
                     <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider">Total Pago</h3>
                 </div>
-                <div class="text-3xl font-bold text-emerald-600" id="totalPago">R$ 0,00</div>
+                <div class="kpi-value text-[#00bcd4]" id="totalPago">R$ 0,00</div>
             </div>
         </div>
 
         <!-- Gráficos -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div class="ag-card rounded-2xl p-6">
+            <div class="kpi-card p-6 border-accent">
                 <h3 class="text-sm font-bold text-slate-700 mb-6 flex items-center gap-2">
-                    <i data-lucide="bar-chart-2" class="w-4 h-4 text-rose-500"></i> Execução Orçamentária
+                    <i class="bi bi-bar-chart w-4 h-4 text-rose-500"></i> Execução Orçamentária
                 </h3>
                 <div class="w-full h-72">
                     <canvas id="chartDespesasFases"></canvas>
                 </div>
             </div>
 
-            <div class="ag-card rounded-2xl p-6">
+            <div class="kpi-card p-6 border-accent">
                 <h3 class="text-sm font-bold text-slate-700 mb-6 flex items-center gap-2">
-                    <i data-lucide="pie-chart" class="w-4 h-4 text-orange-500"></i> Despesas por Função
+                    <i class="bi bi-pie-chart w-4 h-4 text-orange-500"></i> Despesas por Função
                 </h3>
                 <div class="w-full h-72">
                     <canvas id="chartDespesasFuncao"></canvas>
@@ -128,12 +128,12 @@
             </div>
         </div>
 
-        <div class="ag-card rounded-2xl p-6">
+        <div class="kpi-card p-6 border-accent">
             <h3 class="text-sm font-bold text-slate-700 mb-6 flex items-center gap-2">
-                <i data-lucide="list" class="w-4 h-4 text-blue-500"></i> Top Fornecedores / Credores
+                <i class="bi bi-list w-4 h-4 text-blue-500"></i> Top Fornecedores / Credores
             </h3>
             <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
+                <table class="w-full text-left border-collapse npa-table">
                     <thead>
                         <tr class="border-b border-slate-200 bg-slate-50/50">
                             <th class="py-3 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Credor</th>

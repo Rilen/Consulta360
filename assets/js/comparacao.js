@@ -196,8 +196,8 @@ function renderizarTabelaCargos(listaCargos) {
     let html = '';
     listaCargos.forEach(c => {
         html += `
-            <tr class="hover:bg-slate-50 transition-colors cargo-row" data-nome="${c.nome}">
-                <td class="py-3 px-4 text-xs font-medium text-slate-700 max-w-[200px] truncate" title="${c.nome}">${c.nome}</td>
+            <tr class="hover:bg-slate-50 transition-colors cargo-row" data-nome="${sanitize(c.nome)}">
+                <td class="py-3 px-4 text-xs font-medium text-slate-700 max-w-[200px] truncate" title="${c.nome}">${sanitize(c.nome)}</td>
                 <td class="py-3 px-4 text-xs text-center"><span class="bg-slate-100 text-slate-600 px-2 py-1 rounded font-bold">${c.quantidade}</span></td>
                 <td class="py-3 px-4 text-xs font-medium text-slate-500 text-right">${formatBRL(c.menorBruto)}</td>
                 <td class="py-3 px-4 text-xs font-bold text-orange-600 text-right bg-orange-50/30">${formatBRL(c.mediaBruto)}</td>
