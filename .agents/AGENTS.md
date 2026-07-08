@@ -42,3 +42,8 @@ O projeto segue estritamente a estrutura modular:
 
 ## CI/CD e Gitea Actions
 - **Automação de Deploy:** O arquivo de workflow `.gitea/workflows/ci-cd.yaml` é inteligente e agnóstico. Ao clonar, renomear ou criar novos projetos a partir dessa base, mantenha a extração do nome do repositório via `${{ github.repository }}`. Isso garante que a action continue funcionando e crie a subpasta corretamente no Nginx de Homologação, independentemente do nome do projeto.
+
+- **Múltiplos Runners (Paralelismo):** Para executar deploys em paralelo sem conflitos no servidor Linux, NUNCA utilize a mesma pasta e o mesmo serviço Systemd. 
+  - Sempre registre usando o **Token Global** (obtido na Administração do Site).
+  - Crie pastas distintas: `/opt/runner-projeto1`, `/opt/runner-projeto2`.
+  - Crie serviços isolados: `gitea-runner-projeto1.service` e `gitea-runner-projeto2.service`.
