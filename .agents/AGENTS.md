@@ -39,3 +39,6 @@ O projeto segue estritamente a estrutura modular:
 - **Versionamento:** Sempre que o usuário solicitar "finalizar sessão" ou equivalente, você DEVE incrementar a versão do sistema (ex: v0.0.1 -> v0.0.2).
 - **Atualização:** O número da versão deve ser substituído no rodapé (`<footer>`) de todas as páginas HTML (`index.html`, `graficos.html`, `auditoria_ia.html` e `changelog.html`).
 - **Changelog:** Você deve registrar automaticamente TODAS as mudanças e melhorias da sessão no arquivo `CHANGELOG.md` e espelhar o conteúdo visualmente no arquivo `changelog.html` sempre que a sessão for finalizada.
+
+## CI/CD e Gitea Actions
+- **Automação de Deploy:** O arquivo de workflow `.gitea/workflows/ci-cd.yaml` é inteligente e agnóstico. Ao clonar, renomear ou criar novos projetos a partir dessa base, mantenha a extração do nome do repositório via `${{ github.repository }}`. Isso garante que a action continue funcionando e crie a subpasta corretamente no Nginx de Homologação, independentemente do nome do projeto.
