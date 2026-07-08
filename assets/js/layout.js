@@ -36,6 +36,27 @@ document.addEventListener('DOMContentLoaded', () => {
     renderFooter();
 });
 
+// ─────────────────────────────────────────────────────────
+// Helper: Vincula handler a um formulário evitando duplicação.
+// Substitui o anti-pattern: form.cloneNode(true) + replaceChild.
+// Uso: bindFormOnce('meu-form-id', handleSubmit)
+// ─────────────────────────────────────────────────────────
+function bindFormOnce(formId, submitHandler) {
+    const form = document.getElementById(formId);
+    if (!form || form.dataset.bound === 'true') return;
+    form.dataset.bound = 'true';
+    form.addEventListener('submit', submitHandler);
+}
+
+// Helper genérico para bindar um evento uma única vez em qualquer elemento.
+// Uso: bindOnce('meu-btn-id', 'click', handler)
+function bindOnce(elementId, eventName, handler) {
+    const el = document.getElementById(elementId);
+    if (!el || el.dataset.bound === 'true') return;
+    el.dataset.bound = 'true';
+    el.addEventListener(eventName, handler);
+}
+
 function updateStatusBanner(type, message) {
     const banner = document.getElementById('status-banner');
     const icon = document.getElementById('status-banner-icon');

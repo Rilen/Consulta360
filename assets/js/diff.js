@@ -30,6 +30,13 @@ function initDiff() {
         let dB = new Date(hoje.getFullYear(), hoje.getMonth() - 1, 1);
         mesB.value = `${dB.getFullYear()}-${String(dB.getMonth()+1).padStart(2, '0')}`;
     }
+
+    // Vincula o botão de comparar via ID (substitui onclick string frágil)
+    const btnGerar = document.getElementById('btnGerarDiff');
+    if (btnGerar && !btnGerar.dataset.bound) {
+        btnGerar.dataset.bound = 'true';
+        btnGerar.addEventListener('click', gerarDiff);
+    }
 }
 
 function mostrarErroDiff(msg) {
@@ -49,7 +56,7 @@ function mostrarErroDiff(msg) {
 
 async function gerarDiff() {
     mostrarErroDiff('');
-    const btn = document.querySelector('button[onclick="gerarDiff()"]');
+    const btn = document.getElementById('btnGerarDiff');
     if (btn) btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Processando...';
     if (window.lucide) window.lucide.createIcons();
 

@@ -50,3 +50,21 @@ function parsePlainText(text) {
         return obj;
     });
 }
+
+// Converte string de valor monetário brasileiro para número (float).
+// Suporta: "1.234,56" → 1234.56 | "1234,56" → 1234.56 | 1234 → 1234
+// Extraído de dashboard.js para ser a função canônica de parsing de valores.
+function parseValorBR(str) {
+    if (!str) return 0;
+    if (typeof str === 'number') return str;
+    let s = str.toString().replace('R$', '').trim();
+    if (s.includes(',') && s.includes('.')) {
+        // Formato BR: 1.234,56
+        s = s.replace(/\./g, '').replace(',', '.');
+    } else if (s.includes(',')) {
+        // Formato sem milhar: 1234,56
+        s = s.replace(',', '.');
+    }
+    const val = parseFloat(s);
+    return isNaN(val) ? 0 : val;
+}

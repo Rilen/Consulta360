@@ -89,9 +89,7 @@ function initConfigModule() {
     bindSyncButton('btnLimparTudo', async () => {
         if (!confirm('Apagar todos os dados locais?')) return;
         try {
-            const db = await initDB();
-            db.transaction(STORE_NAME, 'readwrite').objectStore(STORE_NAME).clear();
-            db.transaction('metadata', 'readwrite').objectStore('metadata').clear();
+            await clearAllCache(); // encapsulado em db.js
             alert('Cache limpo.');
             atualizarLabelsMetadados();
         } catch (e) { alert('Erro: ' + e.message); }

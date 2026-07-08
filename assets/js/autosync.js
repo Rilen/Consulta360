@@ -30,13 +30,19 @@ async function iniciarAutoSync() {
             // Só sincronizar arquivos que comecem com FolhaPagamento (evitar lixo)
             if (!cacheKey.startsWith('FolhaPagamento_')) continue;
 
-            const metaKey = 'meta_' + cacheKey.replace('FolhaPagamento_', 'folha_');
+            // CORREÇÃO: metaKey deve seguir o mesmo padrão de config.js: meta_folha_<entidade>_<mesAno>
+            // Ex: FolhaPagamento_PM RIO DAS OSTRAS_2026-06 → meta_folha_PM RIO DAS OSTRAS_2026-06
+            const metaKey = 'meta_folha_' + cacheKey.substring('FolhaPagamento_'.length);
 
             // 1. Já temos localmente no PC?
             const localMeta = await getMetadata(metaKey);
             if (localMeta) continue; // Pula!
 
             // 2. Não temos! Como o Nginx listou que o arquivo existe, vamos baixar com 100% de certeza que não dará 404.
+            if (typeof updateStatusBanner === 'function') {
+                updateStatusBanner('info', `Auto-Sync: Baixando ${cacheKey.replace('FolhaPagamento_', '')}...`);
+            }
+
             const dataResp = await fetch(`./data/${fileName}`, { cache: 'no-store' });
             if (dataResp.ok) {
                 const data = await dataResp.json();
@@ -52,11 +58,17 @@ async function iniciarAutoSync() {
             await new Promise(r => setTimeout(r, 500));
         }
 
-        if (baixados > 0 && typeof updateStatusBanner === 'function') {
-            updateStatusBanner('success', `Auto-Sync concluiu o download de ${baixados} arquivos recentes da intranet para o seu PC!`);
-            setTimeout(() => updateStatusBanner('', ''), 6000);
+        if (typeof updateStatusBanner === 'function') {
+            if (baixados > 0) {
+                updateStatusBanner('success', `Auto-Sync concluiu o download de ${baixados} arquivos recentes da intranet para o seu PC!`);
+                setTimeout(() => updateStatusBanner('', ''), 6000);
+            } else {
+                // Limpa o banner de "baixando" se não houve novidades
+                updateStatusBanner('', '');
+            }
         }
     } catch(e) {
         // Silencioso, falhou ao ler o diretório.
+        if (typeof updateStatusBanner === 'function') updateStatusBanner('', '');
     }
 }

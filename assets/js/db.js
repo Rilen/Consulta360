@@ -66,6 +66,49 @@ async function removeCache(id) {
   });
 }
 
+// Retorna todos os registros do cache (sem filtro)
+async function getAllCache() {
+  const db = await initDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, 'readonly');
+    const store = tx.objectStore(STORE_NAME);
+    const req = store.getAll();
+    req.onsuccess = () => resolve(req.result || []);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+// Retorna apenas as chaves do cache, opcionalmente filtradas por prefixo
+async function listCacheKeys(prefix = '') {
+  const db = await initDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, 'readonly');
+    const store = tx.objectStore(STORE_NAME);
+    const req = prefix
+      ? store.openCursor(IDBKeyRange.bound(prefix, prefix + '\uffff'))
+      : store.openCursor();
+    const keys = [];
+    req.onsuccess = (e) => {
+      const cursor = e.target.result;
+      if (cursor) { keys.push(cursor.key); cursor.continue(); }
+      else { resolve(keys); }
+    };
+    req.onerror = () => reject(req.error);
+  });
+}
+
+// Limpa todo o cache e metadados de forma encapsulada
+async function clearAllCache() {
+  const db = await initDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction([STORE_NAME, 'metadata'], 'readwrite');
+    tx.objectStore(STORE_NAME).clear();
+    tx.objectStore('metadata').clear();
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
 // ----------------------------------------------------
 // Metadados (Para Sincronização em Massa)
 // ----------------------------------------------------
@@ -90,4 +133,22 @@ async function getMetadata(key) {
     req.onsuccess = () => resolve(req.result || null);
     req.onerror = () => reject(req.error);
   });
+}
+
+// ----------------------------------------------------
+// Helper: Resolve o label de data/hora de um cache
+// Elimina bloco duplicado em home.js, graficos.js, auditoria.js
+// ----------------------------------------------------
+async function resolveTimestampLabel(cacheKey, metaKey) {
+  const meta = await getMetadata(metaKey);
+  if (meta && meta.timestamp) {
+    const d = new Date(meta.timestamp);
+    return `${d.toLocaleDateString('pt-BR')} às ${d.toLocaleTimeString('pt-BR')}`;
+  }
+  const rawObj = await getCacheRaw(cacheKey);
+  if (rawObj && rawObj.timestamp) {
+    const d = new Date(rawObj.timestamp);
+    return `${d.toLocaleDateString('pt-BR')} às ${d.toLocaleTimeString('pt-BR')}`;
+  }
+  return 'Data desconhecida';
 }

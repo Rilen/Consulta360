@@ -2,7 +2,14 @@ let chartEvolucaoGlobalInstance = null;
 
 document.addEventListener('routeChanged', (e) => {
     if (e.detail.route === 'dashboard') {
-        setTimeout(loadDashboardData, 100);
+        setTimeout(() => {
+            const btn = document.getElementById('btnRefreshDashboard');
+            if (btn && !btn.dataset.bound) {
+                btn.dataset.bound = 'true';
+                btn.addEventListener('click', loadDashboardData);
+            }
+            loadDashboardData();
+        }, 100);
     }
 });
 
@@ -11,27 +18,18 @@ if (window.location.hash === '#dashboard') {
 }
 
 async function loadDashboardData() {
-    const btn = document.querySelector('button[onclick="loadDashboardData()"]');
+    const btn = document.getElementById('btnRefreshDashboard');
     if (btn) btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Processando...';
     if (window.lucide) window.lucide.createIcons();
 
     try {
-        const db = await initDB();
-        const tx = db.transaction('folha_cache', 'readonly');
-        const store = tx.objectStore('folha_cache');
-        const req = store.getAll();
-
-        req.onsuccess = () => {
-            processarDadosDashboard(req.result);
-            if (btn) btn.innerHTML = '<i data-lucide="refresh-cw" class="w-4 h-4"></i> Atualizar Dados';
-            if (window.lucide) window.lucide.createIcons();
-        };
-        req.onerror = () => {
-            console.error("Erro ao ler IndexedDB");
-            if (btn) btn.innerHTML = '<i data-lucide="refresh-cw" class="w-4 h-4"></i> Atualizar Dados';
-        };
+        const allCaches = await getAllCache(); // usa wrapper encapsulado de db.js
+        processarDadosDashboard(allCaches);
+        if (btn) btn.innerHTML = '<i data-lucide="refresh-cw" class="w-4 h-4"></i> Atualizar Dados';
+        if (window.lucide) window.lucide.createIcons();
     } catch (e) {
         console.error("Erro no Dashboard:", e);
+        if (btn) btn.innerHTML = '<i data-lucide="refresh-cw" class="w-4 h-4"></i> Atualizar Dados';
     }
 }
 
@@ -71,8 +69,8 @@ function processarDadosDashboard(allCaches) {
             
             if (ident) unicos.add(ident);
 
-            const liquido = parseValorLocal(reg.ValorLiquido || reg.Liquido || 0);
-            const vencimento = parseValorLocal(reg.VencimentosTotais || reg.Vencimento || 0);
+            const liquido = parseValorBR(reg.ValorLiquido || reg.Liquido || 0);
+            const vencimento = parseValorBR(reg.VencimentosTotais || reg.Vencimento || 0);
             
             custoMes += vencimento;
             custoTotal += vencimento;
@@ -191,19 +189,8 @@ function renderChartEvolucaoGlobal(custosPorMes) {
     });
 }
 
-function parseValorLocal(str) {
-    if (!str) return 0;
-    if (typeof str === 'number') return str;
-    let s = str.toString().replace('R$', '').trim();
-    if (s.includes(',') && s.includes('.')) {
-        s = s.replace(/\./g, '').replace(',', '.');
-    } else if (s.includes(',')) {
-        s = s.replace(',', '.');
-    }
-    const val = parseFloat(s);
-    return isNaN(val) ? 0 : val;
-}
-
+// parseValorLocal foi consolidada em parseValorBR (api.js) — função canônica de parsing.
+// formatarMoeda: wrapper local para Intl.NumberFormat
 function formatarMoeda(v) {
     return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }

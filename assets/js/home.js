@@ -135,40 +135,30 @@ async function handleBusca(e) {
         const meta = await getMetadata(metaKey);
         
         if (cached) {
-            textData = typeof cached === 'string' ? cached : JSON.stringify(cached);
+            let textData = typeof cached === 'string' ? cached : JSON.stringify(cached);
             
-            let dataFormatada = 'Data desconhecida';
-            if (meta && meta.timestamp) {
-                const d = new Date(meta.timestamp);
-                dataFormatada = `${d.toLocaleDateString('pt-BR')} às ${d.toLocaleTimeString('pt-BR')}`;
-            } else {
-                // Tenta puxar do timestamp embutido no cache antigo
-                const oldCacheObj = await getCacheRaw(cacheKey);
-                if (oldCacheObj && oldCacheObj.timestamp) {
-                    const d = new Date(oldCacheObj.timestamp);
-                    dataFormatada = `${d.toLocaleDateString('pt-BR')} às ${d.toLocaleTimeString('pt-BR')}`;
-                }
-            }
+            const dataFormatada = await resolveTimestampLabel(cacheKey, metaKey);
             updateStatusBanner('success', `Exibindo dados do Banco Local - Última atualização: ${dataFormatada}`);
+
+            // Restaura mensagem original de loading
+            const msgEl = document.getElementById('loadingMsg');
+            if(msgEl) msgEl.innerText = 'Processando dados da base local...';
+
+            originalData = JSON.parse(textData);
+
+            if (originalData.length === 0) {
+                changeState('semDados');
+                return;
+            }
+
+            aplicarFiltroNome();
+
         } else {
             updateStatusBanner('error', `Base vazia. Vá em Sincronização para baixar os dados.`);
             document.getElementById('alertaCors').classList.remove('hidden');
             document.getElementById('alertaCors').classList.add('flex');
             throw new Error('Dados não encontrados no Banco Local para este período. Por favor, acesse o menu de Sincronização e faça o download.');
         }
-
-        // Restaura mensagem original de loading
-        const msgEl = document.getElementById('loadingMsg');
-        if(msgEl) msgEl.innerText = 'Processando dados da base local...';
-
-        originalData = JSON.parse(textData); // Agora é JSON nativo e não parsePlainText
-        
-        if (originalData.length === 0) {
-            changeState('semDados');
-            return;
-        }
-
-        aplicarFiltroNome();
 
     } catch (err) {
         changeState('erro', err.message);

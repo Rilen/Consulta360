@@ -62,23 +62,12 @@ async function carregarDadosGraficos(forceUpdate = false) {
         let rawData = await getCache(cacheKey);
         if (rawData && typeof rawData === 'string') rawData = JSON.parse(rawData);
         const metaKey = `meta_folha_${nomeBase}_${mesAno}`;
-        const meta = await getMetadata(metaKey);
 
         if (rawData) {
             statusCache.classList.remove('hidden');
             statusCache.classList.add('flex');
             
-            let dataFormatada = 'Data desconhecida';
-            if (meta && meta.timestamp) {
-                const d = new Date(meta.timestamp);
-                dataFormatada = `${d.toLocaleDateString('pt-BR')} às ${d.toLocaleTimeString('pt-BR')}`;
-            } else {
-                const oldCacheObj = await getCacheRaw(cacheKey);
-                if (oldCacheObj && oldCacheObj.timestamp) {
-                    const d = new Date(oldCacheObj.timestamp);
-                    dataFormatada = `${d.toLocaleDateString('pt-BR')} às ${d.toLocaleTimeString('pt-BR')}`;
-                }
-            }
+            const dataFormatada = await resolveTimestampLabel(cacheKey, metaKey);
             updateStatusBanner('success', `Exibindo dados do Banco Local - Última atualização: ${dataFormatada}`);
             
             processarAnalytics(rawData);

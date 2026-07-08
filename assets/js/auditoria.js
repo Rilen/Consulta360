@@ -56,23 +56,12 @@ async function carregarDadosAuditoria() {
         let rawData = await getCache(cacheKey);
         if (rawData && typeof rawData === 'string') rawData = JSON.parse(rawData);
         const metaKey = `meta_folha_${nomeBase}_${mesAno}`;
-        const meta = await getMetadata(metaKey);
 
         if (rawData) {
             statusCache.classList.remove('hidden');
             statusCache.classList.add('flex');
             
-            let dataFormatada = 'Data desconhecida';
-            if (meta && meta.timestamp) {
-                const d = new Date(meta.timestamp);
-                dataFormatada = `${d.toLocaleDateString('pt-BR')} às ${d.toLocaleTimeString('pt-BR')}`;
-            } else {
-                const oldCacheObj = await getCacheRaw(cacheKey);
-                if (oldCacheObj && oldCacheObj.timestamp) {
-                    const d = new Date(oldCacheObj.timestamp);
-                    dataFormatada = `${d.toLocaleDateString('pt-BR')} às ${d.toLocaleTimeString('pt-BR')}`;
-                }
-            }
+            const dataFormatada = await resolveTimestampLabel(cacheKey, metaKey);
             updateStatusBanner('success', `Exibindo dados do Banco Local - Última atualização: ${dataFormatada}`);
             
             processarEngineIA(rawData, mesAnoParaDatas(mesAno).labelMMSY);
@@ -313,9 +302,8 @@ function enviarPrompt(tipo) {
 }
 window.enviarPrompt = enviarPrompt;
 
-function formatBRL(val) {
-    return val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-}
+// formatBRL: usa a função canônica definida em graficos.js (carregado antes no index.html)
+// Não redefina aqui para evitar colisão silenciosa entre módulos.
 
 function setUiLoadingAuditoria(isLoading, msgLoading, msgSub) {
     const btn = document.getElementById('btnBuscar');

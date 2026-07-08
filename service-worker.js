@@ -1,29 +1,49 @@
-const CACHE_NAME = 'consulta360-v2';
+// service-worker.js — PWA Cache Shell
+// ATENÇÃO: Atualize CACHE_NAME a cada deploy (alinhado à versão do app no footer).
+// Versão atual: v0.0.7 → CACHE_NAME = 'consulta360-v7'
+const CACHE_NAME = 'consulta360-v7';
 const ASSETS = [
   './',
   './index.html',
   './favicon.ico',
+  './manifest.json',
   './assets/css/global.css',
+  // ── Scripts de lógica ──
   './assets/js/api.js',
   './assets/js/auditoria.js',
   './assets/js/autosync.js',
+  './assets/js/comparacao.js',
   './assets/js/config.js',
   './assets/js/contracheque.js',
+  './assets/js/dashboard.js',
   './assets/js/db.js',
   './assets/js/despesas.js',
+  './assets/js/diff.js',
   './assets/js/evolucao.js',
   './assets/js/graficos.js',
   './assets/js/home.js',
   './assets/js/layout.js',
   './assets/js/receitas.js',
   './assets/js/router.js',
-  './assets/js/dashboard.js',
-  './assets/js/diff.js',
-  './assets/js/comparacao.js',
+  // ── Componentes ──
   './components/footer/npa.js',
   './components/footer/versao.js',
   './components/header/logo.js',
-  './components/header/menu.js'
+  './components/header/menu.js',
+  // ── Fragmentos HTML (body) — necessário para navegação offline ──
+  './body/auditoria_ia.html',
+  './body/changelog.html',
+  './body/comparacao.html',
+  './body/config.html',
+  './body/contracheque.html',
+  './body/dashboard.html',
+  './body/despesas.html',
+  './body/diff.html',
+  './body/evolucao.html',
+  './body/graficos.html',
+  './body/home.html',
+  './body/info.html',
+  './body/receitas.html',
 ];
 
 self.addEventListener('install', (e) => {
@@ -56,7 +76,7 @@ self.addEventListener('fetch', (e) => {
     caches.match(e.request).then((response) => {
       return response || fetch(e.request).then((fetchRes) => {
         return caches.open(CACHE_NAME).then((cache) => {
-          // Opcional: fazer cache de novos assets que passarem por aqui
+          // Cache de novos assets que passarem por aqui (GET apenas)
           if (e.request.url.startsWith('http') && e.request.method === 'GET') {
             cache.put(e.request, fetchRes.clone());
           }
