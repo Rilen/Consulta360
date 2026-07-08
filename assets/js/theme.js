@@ -37,9 +37,6 @@ function updateThemeIcon() {
 document.addEventListener('DOMContentLoaded', updateThemeIcon);
 document.addEventListener('spaContentReady', updateThemeIcon);
 
-    }
-}
-
 function openSidebarMobile() {
     const sidebar = document.querySelector('.sidebar');
     if (sidebar) sidebar.classList.toggle('open');
