@@ -306,3 +306,71 @@ body {
 
 /* Keep sidebar dark always as per NPA Identity */
 .sidebar { background: #003766 !important; color: #fff !important; }
+
+/* Sidebar Collapse (Desktop) */
+.sidebar {
+    transition: all 0.3s ease !important;
+}
+.sidebar.collapsed {
+    width: 80px !important;
+}
+.sidebar.collapsed .logo h1,
+.sidebar.collapsed .nav-item span,
+.sidebar.collapsed .nav-item text,
+.sidebar.collapsed .nav-section-title,
+.sidebar.collapsed .user-info,
+.sidebar.collapsed .govtic-text {
+    display: none !important;
+}
+.sidebar.collapsed .nav-item {
+    justify-content: center;
+    padding: 10px 0;
+}
+.sidebar.collapsed .nav-item i {
+    margin: 0 !important;
+    font-size: 1.2rem;
+}
+.sidebar.collapsed .sidebar-user {
+    flex-direction: column;
+    padding: 8px 0;
+}
+.sidebar.collapsed .sidebar-footer {
+    padding: 10px 0;
+}
+.sidebar.collapsed .btn-theme-toggle,
+.sidebar.collapsed .btn-collapse,
+.sidebar.collapsed .btn-logout {
+    margin: 5px auto !important;
+}
+.sidebar.collapsed .logo {
+    padding: 8px 0;
+}
+
+.main-content {
+    transition: all 0.3s ease !important;
+}
+.main-content.expanded {
+    margin-left: 80px !important;
+    width: calc(100% - 80px) !important;
+}
+
+/* Mobile Header */
+.mobile-header {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 20px;
+    background: #003766;
+    color: white;
+    z-index: 1020;
+}
+
+@media (max-width: 768px) {
+    .mobile-header {
+        display: flex;
+    }
+    .main-content.expanded {
+        margin-left: 0 !important;
+        width: 100% !important;
+    }
+}

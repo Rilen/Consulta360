@@ -27,61 +27,75 @@ function getMenuHtml(currentRoute) {
             <div class="nav-section-title">Análises & BI</div>
             
             <a href="#home" class="nav-item ${isHome ? 'active' : ''}">
-                <i class="bi bi-database"></i> Consulta Raw
-            </a>
+                <i class="bi bi-database"></i> <span> Consulta Raw
+            </span></a>
             <a href="#dashboard" class="nav-item ${isDashboard ? 'active' : ''}">
-                <i class="bi bi-grid-1x2"></i> Macro-Dashboard
-            </a>
+                <i class="bi bi-grid-1x2"></i> <span> Macro-Dashboard
+            </span></a>
             <a href="#graficos" class="nav-item ${isGraficos ? 'active' : ''}">
-                <i class="bi bi-pie-chart"></i> Análise de Dados
-            </a>
+                <i class="bi bi-pie-chart"></i> <span> Análise de Dados
+            </span></a>
             <a href="#diff" class="nav-item ${isDiff ? 'active' : ''}">
-                <i class="bi bi-clock-history"></i> Máquina do Tempo
-            </a>
+                <i class="bi bi-clock-history"></i> <span> Máquina do Tempo
+            </span></a>
             <a href="#auditoria" class="nav-item ${isAuditoria ? 'active' : ''}">
-                <i class="bi bi-cpu"></i> Auditoria IA
-            </a>
+                <i class="bi bi-cpu"></i> <span> Auditoria IA
+            </span></a>
             <a href="#evolucao" class="nav-item ${isEvolucao ? 'active' : ''}">
-                <i class="bi bi-graph-up-arrow"></i> Evolução
-            </a>
+                <i class="bi bi-graph-up-arrow"></i> <span> Evolução
+            </span></a>
             <a href="#comparacao" class="nav-item ${isComparacao ? 'active' : ''}">
-                <i class="bi bi-bank"></i> Comparação Salarial
-            </a>
+                <i class="bi bi-bank"></i> <span> Comparação Salarial
+            </span></a>
             
             <div class="nav-section-title mt-2">Financeiro</div>
             <a href="#contracheque" class="nav-item ${isContracheque ? 'active' : ''}">
-                <i class="bi bi-file-earmark-check"></i> Contracheque
-            </a>
+                <i class="bi bi-file-earmark-check"></i> <span> Contracheque
+            </span></a>
             <a href="#receitas" class="nav-item ${isReceitas ? 'active' : ''}">
-                <i class="bi bi-currency-dollar"></i> Receitas
-            </a>
+                <i class="bi bi-currency-dollar"></i> <span> Receitas
+            </span></a>
             <a href="#despesas" class="nav-item ${isDespesas ? 'active' : ''}">
-                <i class="bi bi-cart"></i> Despesas
-            </a>
+                <i class="bi bi-cart"></i> <span> Despesas
+            </span></a>
 
             <div class="nav-section-title mt-2">Sistema</div>
             <a href="#config" class="nav-item ${isConfig ? 'active' : ''}" id="navConfig">
-                <i class="bi bi-gear"></i> Sincronização
-            </a>
+                <i class="bi bi-gear"></i> <span> Sincronização
+            </span></a>
         </nav>
         
+        
         <div class="sidebar-footer">
-            <div class="sidebar-user">
+            <div class="sidebar-user mb-2 flex-wrap justify-center">
                 <div class="avatar" id="sidebarAvatarLetter">U</div>
                 <div class="user-info">
                     <span class="user-name" id="sidebarUserName">Usuário</span>
                     <span class="user-role" id="sidebarUserRole">N/A</span>
                 </div>
                 
-            <button class="btn-theme-toggle mr-2" title="Alternar Tema" onclick="toggleTheme()" style="background: rgba(255, 255, 255, 0.05); border: none; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;">
-                <i id="theme-toggle-icon" class="bi bi-moon-stars-fill text-blue-300"></i>
-            </button>
+                <div class="d-flex align-items-center w-100 justify-content-center mt-2 gap-2 buttons-row">
+                    <button class="btn-theme-toggle" title="Alternar Tema" onclick="toggleTheme()" style="background: rgba(255, 255, 255, 0.05); border: none; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;">
+                        <i id="theme-toggle-icon" class="bi bi-sun-fill text-amber-500"></i>
+                    </button>
 
-                <button class="btn-logout" title="Sair" onclick="doLogout()">
-                    <i class="bi bi-box-arrow-right"></i>
-                </button>
+                    <button class="btn-collapse" title="Recolher Menu" onclick="toggleSidebar()" style="background: rgba(255, 255, 255, 0.05); border: none; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.7); cursor: pointer; transition: all 0.2s;">
+                        <i class="bi bi-chevron-double-left"></i>
+                    </button>
+
+                    <button class="btn-logout" title="Sair" onclick="doLogout()">
+                        <i class="bi bi-box-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="text-center mt-3 pt-2 border-top border-secondary govtic-text" style="opacity: 0.6;">
+                <p class="mb-0" style="font-size: 0.65rem; color: #fff;">
+                    <i class="bi bi-building me-1"></i>Desenvolvido por NPA/GOVTIC
+                </p>
+                <img src="https://cloud.riodasostras.rj.gov.br/index.php/apps/files_sharing/publicpreview/C7Xm2pmQKnNgsZW?x=1910&y=595&a=true&file=logo_branca.png&scalingup=0" height="15" alt="GOVTIC Logo" class="mt-1 opacity-75">
             </div>
         </div>
     </aside>
+
     `;
 }

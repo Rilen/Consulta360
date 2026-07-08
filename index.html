@@ -62,7 +62,18 @@
     <div id="sidebar-container"></div>
 
     <!-- Conteúdo Principal -->
-    <main class="main-content d-flex flex-column min-vh-100 w-100">
+    <main
+    <!-- Mobile Header -->
+    <div class="mobile-header">
+      <div class="d-flex align-items-center">
+        <i class="bi bi-shield-lock me-2 text-xl"></i>
+        <span class="font-bold">GOVTIC</span>
+      </div>
+      <button onclick="openSidebarMobile()" style="background:none; border:none; color:white;">
+        <i class="bi bi-list" style="font-size: 1.8rem;"></i>
+      </button>
+    </div>
+ class="main-content d-flex flex-column min-vh-100 w-100">
       
       <!-- Status Banner (Controlado por JS) -->
       <div id="status-banner" class="hidden text-slate-800 dark:text-white text-xs font-bold uppercase tracking-widest text-center py-2 shadow-inner">

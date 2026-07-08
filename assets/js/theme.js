@@ -36,3 +36,15 @@ function updateThemeIcon() {
 // Update icon on full load or SPA ready
 document.addEventListener('DOMContentLoaded', updateThemeIcon);
 document.addEventListener('spaContentReady', updateThemeIcon);
+
+function toggleSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const mainContent = document.querySelector('.main-content');
+    if (sidebar) sidebar.classList.toggle('collapsed');
+    if (mainContent) mainContent.classList.toggle('expanded');
+}
+
+function openSidebarMobile() {
+    const sidebar = document.querySelector('.sidebar');
+    if (sidebar) sidebar.classList.toggle('open');
+}
