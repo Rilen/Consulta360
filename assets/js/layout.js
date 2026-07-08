@@ -1,3 +1,18 @@
+
+// --- Proteção de Rota (lê sessionStorage primeiro, depois localStorage como fallback) ---
+const SESSION_TOKEN = sessionStorage.getItem('sg_token') || localStorage.getItem('sg_token');
+const USER_ROLE = sessionStorage.getItem('sg_role') || localStorage.getItem('sg_role');
+const DISPLAY_NAME = sessionStorage.getItem('sg_display_name') || localStorage.getItem('sg_display_name');
+
+if (!SESSION_TOKEN) {
+    window.location.href = 'login.html';
+}
+
+const AUTH_HEADERS = {
+    'Content-Type': 'application/json',
+    'X-Session-Token': SESSION_TOKEN
+};
+
 // assets/js/layout.js
 // Responsável por montar as peças do layout (Header e Footer) usando os componentes puros.
 
@@ -26,6 +41,25 @@ function renderFooter() {
 document.addEventListener('DOMContentLoaded', () => {
     const route = window.location.hash.replace('#', '') || 'home';
     renderSidebar(route);
+    // Injeta os dados do usuário logado na sidebar
+    setTimeout(() => {
+        const sidebarNameEl = document.getElementById('sidebarUserName');
+        const sidebarRoleEl = document.getElementById('sidebarUserRole');
+        const sidebarAvatarEl = document.getElementById('sidebarAvatarLetter');
+        if (sidebarNameEl) sidebarNameEl.textContent = DISPLAY_NAME || 'Usuário';
+        if (sidebarAvatarEl) sidebarAvatarEl.textContent = (DISPLAY_NAME || 'U')[0].toUpperCase();
+        
+        if (USER_ROLE === 'admin') {
+            if (sidebarRoleEl) sidebarRoleEl.textContent = 'Super Administrador';
+        } else if (USER_ROLE === 'administrador') {
+            if (sidebarRoleEl) sidebarRoleEl.textContent = 'Administrador';
+        } else if (USER_ROLE === 'moderator') {
+            if (sidebarRoleEl) sidebarRoleEl.textContent = 'Moderador';
+        } else {
+            if (sidebarRoleEl) sidebarRoleEl.textContent = 'Usuário Padrão';
+        }
+    }, 100);
+
     renderFooter();
 });
 

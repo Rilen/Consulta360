@@ -56,3 +56,18 @@ function openSidebarMobile() {
     const sidebar = document.querySelector('.sidebar');
     if (sidebar) sidebar.classList.toggle('open');
 }
+
+async function doLogout() {
+    try {
+        const API_BASE = "/api/v1";
+        const SESSION_TOKEN = sessionStorage.getItem('sg_token') || localStorage.getItem('sg_token');
+        const AUTH_HEADERS = {
+            'Content-Type': 'application/json',
+            'X-Session-Token': SESSION_TOKEN
+        };
+        await fetch(`${API_BASE}/auth/logout`, { method: 'POST', headers: AUTH_HEADERS });
+    } catch (_) { }
+    sessionStorage.clear();
+    localStorage.clear();
+    window.location.href = 'login.html';
+}
