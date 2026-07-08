@@ -40,8 +40,16 @@ document.addEventListener('spaContentReady', updateThemeIcon);
 function toggleSidebar() {
     const sidebar = document.querySelector('.sidebar');
     const mainContent = document.querySelector('.main-content');
+    const icon = document.getElementById('collapseIcon');
     if (sidebar) sidebar.classList.toggle('collapsed');
     if (mainContent) mainContent.classList.toggle('expanded');
+    if (icon) {
+        if (sidebar && sidebar.classList.contains('collapsed')) {
+            icon.className = 'bi bi-list';
+        } else {
+            icon.className = 'bi bi-chevron-double-left';
+        }
+    }
 }
 
 function openSidebarMobile() {

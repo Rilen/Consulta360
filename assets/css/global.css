@@ -374,3 +374,11 @@ body {
         width: 100% !important;
     }
 }
+
+.sidebar.collapsed .govtic-logo-top,
+.sidebar.collapsed .logo-title {
+    display: none !important;
+}
+.sidebar.collapsed .sidebar-header {
+    margin-bottom: 10px !important;
+}

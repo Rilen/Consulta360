@@ -19,8 +19,12 @@ function getMenuHtml(currentRoute) {
 
     return `
     <aside class="sidebar">
-        <div class="logo">
-            <h1><i class="bi bi-shield-lock me-2"></i>Consulta360</h1>
+        <div class="sidebar-header d-flex flex-column align-items-center mb-4 w-100">
+            <img src="https://cloud.riodasostras.rj.gov.br/index.php/apps/files_sharing/publicpreview/C7Xm2pmQKnNgsZW?x=1910&y=595&a=true&file=logo_branca.png&scalingup=0" height="25" alt="GOVTIC Logo" class="mb-3 opacity-90 govtic-logo-top">
+            <h1 class="logo-title text-center w-100 m-0" style="font-size: 1.1rem; font-weight: 800; background: linear-gradient(135deg, #60A5FA, #3B82F6); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;"><i class="bi bi-shield-lock me-2"></i>Consulta360</h1>
+            <button class="btn-collapse w-100 mt-3 d-flex justify-content-center align-items-center" title="Recolher Menu" onclick="toggleSidebar()" style="background: rgba(255, 255, 255, 0.05); border: none; height: 32px; border-radius: 8px; color: rgba(255,255,255,0.7); cursor: pointer; transition: all 0.2s;">
+                <i class="bi bi-chevron-double-left" id="collapseIcon"></i>
+            </button>
         </div>
         
         <nav class="nav-menu">
@@ -79,21 +83,14 @@ function getMenuHtml(currentRoute) {
                         <i id="theme-toggle-icon" class="bi bi-sun-fill text-amber-500"></i>
                     </button>
 
-                    <button class="btn-collapse" title="Recolher Menu" onclick="toggleSidebar()" style="background: rgba(255, 255, 255, 0.05); border: none; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.7); cursor: pointer; transition: all 0.2s;">
-                        <i class="bi bi-chevron-double-left"></i>
-                    </button>
+                    
 
                     <button class="btn-logout" title="Sair" onclick="doLogout()">
                         <i class="bi bi-box-arrow-right"></i>
                     </button>
                 </div>
             </div>
-            <div class="text-center mt-3 pt-2 border-top border-secondary govtic-text" style="opacity: 0.6;">
-                <p class="mb-0" style="font-size: 0.65rem; color: #fff;">
-                    <i class="bi bi-building me-1"></i>Desenvolvido por NPA/GOVTIC
-                </p>
-                <img src="https://cloud.riodasostras.rj.gov.br/index.php/apps/files_sharing/publicpreview/C7Xm2pmQKnNgsZW?x=1910&y=595&a=true&file=logo_branca.png&scalingup=0" height="15" alt="GOVTIC Logo" class="mt-1 opacity-75">
-            </div>
+            
         </div>
     </aside>
 
