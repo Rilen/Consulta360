@@ -112,3 +112,24 @@ function updateStatusBanner(type, message) {
 
     }
 }
+
+function toggleSidebarCollapse() {
+    if (window.innerWidth <= 768) return;
+    const sidebar = document.getElementById('sidebar');
+    if(sidebar) {
+        sidebar.classList.toggle('collapsed');
+        localStorage.setItem('sg_sidebar_collapsed', sidebar.classList.contains('collapsed'));
+    }
+}
+
+(function restoreSidebar() {
+    document.addEventListener('DOMContentLoaded', () => {
+        // Precisa rodar depois que a sidebar for renderizada, então um leve delay ajuda se for o caso
+        setTimeout(() => {
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar && localStorage.getItem('sg_sidebar_collapsed') === 'true') {
+                sidebar.classList.add('collapsed');
+            }
+        }, 50);
+    });
+})();

@@ -382,3 +382,77 @@ body {
 .sidebar.collapsed .sidebar-header {
     margin-bottom: 10px !important;
 }
+
+/* Botões NPA Sidebar Collapse */
+.sidebar-collapse-btn, .sidebar-expand-btn {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 24px;
+    height: 64px;
+    background: #003766;
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.05);
+    border-left: none;
+    border-radius: 0 8px 8px 0;
+    z-index: 1040;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    box-shadow: 2px 0 8px rgba(0,0,0,0.15);
+}
+
+.sidebar-collapse-btn:hover, .sidebar-expand-btn:hover {
+    background: #004b80;
+}
+
+.sidebar-collapse-btn {
+    left: 260px;
+}
+
+.sidebar-expand-btn {
+    left: 80px;
+    opacity: 0;
+    pointer-events: none;
+}
+
+body:has(.sidebar.collapsed) .sidebar-collapse-btn {
+    opacity: 0;
+    pointer-events: none;
+    left: 80px;
+}
+
+body:has(.sidebar.collapsed) .sidebar-expand-btn {
+    opacity: 1;
+    pointer-events: auto;
+    left: 80px;
+}
+
+body:has(.sidebar.collapsed) .main-content {
+    margin-left: 80px !important;
+    width: calc(100% - 80px) !important;
+}
+
+.sidebar {
+    width: 260px;
+    transition: width 0.3s ease, transform 0.3s ease;
+}
+
+.sidebar.collapsed {
+    width: 80px !important;
+}
+
+.sidebar.collapsed .nav-item span {
+    display: none;
+}
+.sidebar.collapsed .nav-section-title {
+    display: none;
+}
+.sidebar.collapsed .sidebar-user .user-info {
+    display: none;
+}
+.sidebar.collapsed .sidebar-header h1 {
+    display: none;
+}

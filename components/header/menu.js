@@ -18,13 +18,11 @@ function getMenuHtml(currentRoute) {
     // as it already looks for #sidebarUserName, #sidebarUserRole, #sidebarAvatarLetter
 
     return `
-    <aside class="sidebar">
+    <aside id="sidebar" class="sidebar">
         <div class="sidebar-header d-flex flex-column align-items-center mb-4 w-100">
             <img src="https://cloud.riodasostras.rj.gov.br/index.php/apps/files_sharing/publicpreview/C7Xm2pmQKnNgsZW?x=1910&y=595&a=true&file=logo_branca.png&scalingup=0" height="25" alt="GOVTIC Logo" class="mb-3 opacity-90 govtic-logo-top">
             <h1 class="logo-title text-center w-100 m-0" style="font-size: 1.1rem; font-weight: 800; background: linear-gradient(135deg, #60A5FA, #3B82F6); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;"><i class="bi bi-shield-lock me-2"></i>Consulta360</h1>
-            <button class="btn-collapse w-100 mt-3 d-flex justify-content-center align-items-center" title="Recolher Menu" onclick="toggleSidebar()" style="background: rgba(255, 255, 255, 0.05); border: none; height: 32px; border-radius: 8px; color: rgba(255,255,255,0.7); cursor: pointer; transition: all 0.2s;">
-                <i class="bi bi-chevron-double-left" id="collapseIcon"></i>
-            </button>
+            
         </div>
         
         <nav class="nav-menu">
@@ -93,6 +91,15 @@ function getMenuHtml(currentRoute) {
             
         </div>
     </aside>
+
+    <!-- Botões de recolher/expandir da barra lateral -->
+    <button class="sidebar-collapse-btn" onclick="toggleSidebarCollapse()" title="Recolher sidebar">
+        <i class="bi bi-chevron-left"></i>
+    </button>
+    <button class="sidebar-expand-btn" onclick="toggleSidebarCollapse()" title="Expandir sidebar">
+        <i class="bi bi-chevron-right"></i>
+    </button>
+
 
     `;
 }
