@@ -1,22 +1,37 @@
 body {
   font-family: 'Inter', sans-serif;
-  background-color: #f8fafc;
+  background-color: #0B0F19;
+  color: #ffffff;
+}
+
+.glass-panel {
+  background: rgba(26, 31, 53, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
 .kpi-card {
-  border: none;
-  border-radius: 6px;
-  background: #ffffff;
-  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  border-radius: 8px;
+  background: rgba(26, 31, 53, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  color: #ffffff;
 }
 
 .kpi-value {
+  font-family: 'Outfit', sans-serif;
   font-size: 2.5rem;
   font-weight: 700;
+  color: #ffffff;
 }
 
 .npa-table th {
-  background-color: #004b80 !important;
+  background-color: rgba(0, 75, 128, 0.8) !important;
+  backdrop-filter: blur(8px);
   color: #ffffff !important;
   font-size: 0.82rem;
   text-transform: uppercase;
@@ -27,7 +42,11 @@ body {
 }
 
 .npa-table tbody tr:hover {
-  background-color: rgba(0, 188, 212, 0.06) !important;
+  background-color: rgba(0, 188, 212, 0.15) !important;
+}
+
+.npa-table tbody tr {
+  color: #e2e8f0;
 }
 
 .border-accent {

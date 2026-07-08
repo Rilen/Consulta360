@@ -17,7 +17,7 @@ GITEA_URL="http://10.0.0.88:3001"
 REPO="rilen.lima/consulta360"
 RUNNER_NAME="consulta360-runner"
 # Token you received from Gitea (replace if you edit the script manually)
-RUNNER_TOKEN="6GmAu7x6CT3OqmYKyQr4vrBl3RnkJGwp8R7jTYhq"
+RUNNER_TOKEN="fEbOsKgsKzJ0nSTpJMxn5eGyM5VOFhiTVkD21deC"
 # ---------------------------------------------------------------
 
 # ==== STEP 1 – Create working directory =============================

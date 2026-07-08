@@ -2,6 +2,15 @@
 
 Todas as mudancas notaveis no projeto **Consulta360** serao documentadas neste arquivo.
 
+## [v0.0.9] - 2026-07-08
+
+### Adicionado
+- **Arquitetura SPA (IdentidadeNPA)**: Implementação do App Shell (`index.html`) com injeção dinâmica de componentes (Sidebar, Footer e Views) via `router.js` em Vanilla JS.
+- **Guia de Contribuição**: Inserção de tutorial corporativo do fluxo de Gitea Actions nativamente no `README.md` dos projetos.
+
+### Modificado
+- **Clean Code (Regras de Ouro)**: Otimização da pasta `.agents` focando estritamente nas instruções da IA, movendo a documentação humana (`ACTION_COMOFAZER.md`) para o escopo global.
+
 ## [v0.0.8] - 2026-07-08
 
 ### Adicionado

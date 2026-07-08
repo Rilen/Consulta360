@@ -1,7 +1,7 @@
 // service-worker.js — PWA Cache Shell
 // ATENÇÃO: Atualize CACHE_NAME a cada deploy (alinhado à versão do app no footer).
-// Versão atual: v0.0.8 → CACHE_NAME = 'consulta360-v8'
-const CACHE_NAME = 'consulta360-v8';
+// Versão atual: v0.0.9 → CACHE_NAME = 'consulta360-v9'
+const CACHE_NAME = 'consulta360-v9';
 const ASSETS = [
   './',
   './index.html',
