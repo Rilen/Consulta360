@@ -23,3 +23,41 @@ Consulta360 é um sistema avançado de transparência, inteligência e auditoria
 ## 🛠️ Deploy Automático (CI/CD)
 
 O pipeline roda via **Gitea Actions** e atualiza os subdiretórios estáticos do servidor Nginx local (`http://10.0.0.88:3005/consulta360/`). Apenas os arquivos HTML/JS/CSS são atualizados, garantindo que o diretório `/data/` de cache colaborativo não seja afetado pelas pipelines de deploy.
+
+
+## Guia Rápido: Como Trabalhar com o Gitea e Actions
+
+Este é um guia expresso de como baixar o código, trabalhar nele de forma segura e devolver para o servidor Gitea da Prefeitura, de modo que o fluxo de Deploy Contínuo (Gitea Actions) seja ativado corretamente.
+
+### 1. Clonar (Baixar o código pela primeira vez)
+```bash
+git clone http://10.0.0.88:3001/rilen.lima/NOME_DO_REPOSITORIO.git
+```
+
+### 2. Puxar Atualizações (Sincronizar com o Servidor)
+Antes de começar o dia de trabalho, garanta que seu código local está atualizado:
+```bash
+git pull origin main
+```
+
+### 3. A Regra de Ouro: Nunca trabalhe na `main`
+Crie sempre uma ramificação (Branch) para a sua nova funcionalidade ou correção:
+```bash
+git checkout -b feature/minha-alteracao
+```
+
+### 4. Commit (Salvar o trabalho)
+```bash
+git add .
+git commit -m "feat: adiciona nova funcionalidade X"
+```
+
+### 5. Push (Enviar para o Gitea e Acionar o Deploy)
+```bash
+git push -u origin feature/minha-alteracao
+```
+
+#### 🔄 O que acontece agora?
+1. Acesse a interface web do Gitea (`http://10.0.0.88:3001`).
+2. Aparecerá um botão verde de **"New Pull Request"**. Clique nele.
+3. Ao aprovar e fazer o **Merge** dessa branch na `main`, o **Gitea Actions** acordará automaticamente e fará o deploy no `nginx-homologacao`.
