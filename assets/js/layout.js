@@ -1,18 +1,11 @@
 // assets/js/layout.js
 // Responsável por montar as peças do layout (Header e Footer) usando os componentes puros.
 
-function renderHeader(currentRoute) {
-    const headerEl = document.getElementById('app-header');
-    if (!headerEl) return;
+function renderSidebar(currentRoute) {
+    const sidebarEl = document.getElementById('sidebar-container');
+    if (!sidebarEl) return;
 
-    headerEl.innerHTML = `
-        <div class="max-w-[1600px] mx-auto px-4 md:px-6 h-auto md:h-16 py-4 md:py-0 flex flex-col md:flex-row items-center justify-between gap-4 md:gap-0">
-            ${typeof getLogoHtml === 'function' ? getLogoHtml() : ''}
-            <div class="w-full">
-                ${typeof getMenuHtml === 'function' ? getMenuHtml(currentRoute) : ''}
-            </div>
-        </div>
-    `;
+    sidebarEl.innerHTML = typeof getMenuHtml === 'function' ? getMenuHtml(currentRoute) : '';
 }
 
 function renderFooter() {
@@ -32,7 +25,7 @@ function renderFooter() {
 // Inicializar renderização básica caso a rota não mande o evento a tempo
 document.addEventListener('DOMContentLoaded', () => {
     const route = window.location.hash.replace('#', '') || 'home';
-    renderHeader(route);
+    renderSidebar(route);
     renderFooter();
 });
 

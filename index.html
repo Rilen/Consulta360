@@ -45,27 +45,34 @@
   <link rel="stylesheet" href="./assets/css/global.css">
 </head>
 
-<body class="text-white antialiased selection:bg-blue-100 selection:text-blue-900 flex flex-col min-h-screen bg-[#0B0F19]">
+<body class="text-white antialiased selection:bg-blue-100 selection:text-blue-900 bg-[#0B0F19]">
 
-  <!-- Header Dinâmico -->
-  <header id="app-header" class="sticky top-0 z-50 bg-[#004b80] border-b border-[#003860] shadow-md transition-all"></header>
+  <div class="app-container" id="app-root">
+    <!-- Sidebar Dinâmica -->
+    <div id="sidebar-container"></div>
 
-  <!-- Status Banner (Controlado por JS) -->
-  <div id="status-banner" class="hidden text-white text-xs font-bold uppercase tracking-widest text-center py-2 shadow-inner">
-    <i id="status-banner-icon" class="bi bi-info-circle w-4 h-4 inline-block mr-2 align-text-bottom"></i>
-    <span id="status-banner-text"></span>
+    <!-- Conteúdo Principal -->
+    <main class="main-content d-flex flex-column min-vh-100 w-100">
+      
+      <!-- Status Banner (Controlado por JS) -->
+      <div id="status-banner" class="hidden text-white text-xs font-bold uppercase tracking-widest text-center py-2 shadow-inner">
+        <i id="status-banner-icon" class="bi bi-info-circle w-4 h-4 inline-block mr-2 align-text-bottom"></i>
+        <span id="status-banner-text"></span>
+      </div>
+
+      <!-- Corpo Dinâmico (Router injeta aqui) -->
+      <div id="app-body" class="mt-8 p-6 max-w-[1600px] mx-auto space-y-6 flex-grow-1 w-full">
+        <!-- Conteúdo será carregado dinamicamente via router.js -->
+        <div class="flex items-center justify-center h-64">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        </div>
+      </div>
+
+      <!-- Footer Dinâmico -->
+      <footer id="app-footer" class="mt-8 mb-6 max-w-[1600px] mx-auto px-6 w-full"></footer>
+      
+    </main>
   </div>
-
-  <!-- Corpo Dinâmico (Router injeta aqui) -->
-  <main id="app-body" class="mt-8 p-6 max-w-[1600px] mx-auto space-y-6 flex-1 w-full">
-    <!-- Conteúdo será carregado dinamicamente via router.js -->
-    <div class="flex items-center justify-center h-64">
-      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-    </div>
-  </main>
-
-  <!-- Footer Dinâmico -->
-  <footer id="app-footer" class="mt-8 mb-6 max-w-[1600px] mx-auto px-6 w-full"></footer>
 
   <!-- Componentes (Framework Layer) -->
   <script src="./components/header/logo.js?v=15"></script>

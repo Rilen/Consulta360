@@ -1,4 +1,4 @@
-﻿# Changelog
+# Changelog
 
 Todas as mudancas notaveis no projeto **Consulta360** serao documentadas neste arquivo.
 
@@ -14,7 +14,7 @@ Todas as mudancas notaveis no projeto **Consulta360** serao documentadas neste a
 ## [v0.0.8] - 2026-07-08
 
 ### Adicionado
-- **Repositório SentiGOV**: Inicialização da infraestrutura de arquivos base paralela no Gitea (IdentidadeNPA).
+- **Repositório IDENTIDADE**: Inicialização da infraestrutura de arquivos base paralela no Gitea (IdentidadeNPA).
 
 ### Modificado
 - **Identidade Visual NPA (Bootstrap+Tailwind)**: O CSS e a marcação HTML de todo o projeto Consulta360 foram refatorados para o Design System da Identidade Corporativa.

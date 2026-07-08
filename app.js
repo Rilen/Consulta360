@@ -1,4 +1,4 @@
-﻿const API_BASE = "/api/v1";
+const API_BASE = "/api/v1";
 
 // --- Proteção de Rota (lê sessionStorage primeiro, depois localStorage como fallback) ---
 const SESSION_TOKEN = sessionStorage.getItem('sg_token') || localStorage.getItem('sg_token');
@@ -229,7 +229,7 @@ function openSentimentModal(mentionId) {
                 headers: AUTH_HEADERS,
                 body: JSON.stringify({ sentiment, reason })
             });
-            if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
+            if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
             if (res.ok) {
                 wrapper.remove();
                 fetchMentions();
@@ -310,7 +310,7 @@ async function openEmocaoModal(mentionId) {
                 headers: AUTH_HEADERS,
                 body: JSON.stringify({ emocao, reason })
             });
-            if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
+            if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
             if (res.ok) {
                 wrapper.remove();
                 fetchMentions();
@@ -382,7 +382,7 @@ function openReplyModal(mentionId) {
                 method: 'POST', headers: AUTH_HEADERS,
                 body: JSON.stringify({ message })
             });
-            if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
+            if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
             if (res.ok) {
                 const updated = await res.json();
                 _draftsMap[mentionId] = updated;
@@ -437,7 +437,7 @@ function openReplyModal(mentionId) {
                     headers: AUTH_HEADERS,
                     body: JSON.stringify({ message })
                 });
-                if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
+                if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
                 if (res.ok) {
                     wrapper.remove();
                     renderMentions(_allMentions);
@@ -493,7 +493,7 @@ function toggleHideModal(mentionId, isHidden) {
                 method: 'POST',
                 headers: AUTH_HEADERS,
             });
-            if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
+            if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
             if (res.ok) {
                 wrapper.remove();
                 fetchMentions();
@@ -555,7 +555,7 @@ function openDeleteModal(mentionId) {
                 method: 'DELETE',
                 headers: AUTH_HEADERS,
             });
-            if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
+            if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
             if (res.ok) {
                 wrapper.remove();
                 fetchMentions();
@@ -578,9 +578,7 @@ async function doLogout() {
     try {
         await fetchWithTimeout(`${API_BASE}/auth/logout`, { method: 'POST', headers: AUTH_HEADERS });
     } catch (_) { }
-    sessionStorage.clear(); localStorage.clear(); localStorage.clear();
-    localStorage.clear();
-    window.location.href = 'login.html';
+    sessionStorage.clear(); localStorage.clear(); window.location.href = 'login.html';
 }
 
 function toggleCustomDate() {
@@ -668,7 +666,7 @@ async function checkMetaStatus() {
 
     try {
         const res = await fetchWithTimeout(`${API_BASE}/config/meta/status`, { headers: AUTH_HEADERS });
-        if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
+        if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
         const data = await res.json();
         const banner = document.getElementById('metaApiWarning');
         const msgEl = document.getElementById('metaApiWarningMsg');
@@ -802,7 +800,7 @@ async function fetchSummary() {
     const date = getGlobalPeriodDate();
     const params = date ? '?' + new URLSearchParams({ date }).toString() : '';
     const res = await fetchWithTimeout(`${API_BASE}/analytics/summary${params}`, { headers: AUTH_HEADERS });
-    if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
+    if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
     const data = await res.json();
 
     document.getElementById('kpi-pos').textContent = data.positivo ?? 0;
@@ -852,7 +850,7 @@ async function fetchMentions() {
     if (dateParam) queryParams.append('date', dateParam);
 
     const res = await fetchWithTimeout(`${API_BASE}/mentions?${queryParams.toString()}`, { headers: AUTH_HEADERS });
-    if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
+    if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
     _allMentions = await res.json();
 
     // Carrega rascunhos se for moderador/admin
@@ -1009,7 +1007,7 @@ function filterMentions() {
 
 async function fetchTopUsers() {
     const res = await fetchWithTimeout(`${API_BASE}/analytics/top-users?limit=10`, { headers: AUTH_HEADERS });
-    if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
+    if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
     const users = await res.json();
 
     const tbody = document.getElementById('topUsersList');
@@ -1067,7 +1065,7 @@ async function fetchBestPosts() {
     }
     if (!period) params.append('limit', '10');
     const res = await fetchWithTimeout(`${API_BASE}/analytics/best-posts?${params.toString()}`, { headers: AUTH_HEADERS });
-    if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
+    if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
     const posts = await res.json();
 
     const tbody = document.getElementById('bestPostsList');
@@ -1146,7 +1144,7 @@ async function fetchWorstPosts() {
     }
     if (!period) params.append('limit', '10');
     const res = await fetchWithTimeout(`${API_BASE}/analytics/worst-posts?${params.toString()}`, { headers: AUTH_HEADERS });
-    if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
+    if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
     const posts = await res.json();
 
     const tbody = document.getElementById('worstPostsList');
@@ -1223,7 +1221,7 @@ async function fetchEngagementReport() {
         params.append('date', now.toISOString());
     }
     const res = await fetchWithTimeout(`${API_BASE}/analytics/engagement?${params.toString()}`, { headers: AUTH_HEADERS });
-    if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
+    if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
     const reports = await res.json();
     console.log(`Relatório de engajamento recebido: ${reports.length} itens.`);
 
@@ -1271,7 +1269,7 @@ async function fetchEngagementReport() {
 
 async function fetchEngagementSummary() {
     const res = await fetchWithTimeout(`${API_BASE}/analytics/engagement/summary`, { headers: AUTH_HEADERS });
-    if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
+    if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
     const summary = await res.json();
 
     renderEngagementSummaryChart(summary);
@@ -1320,7 +1318,7 @@ function renderEngagementSummaryChart(summary) {
 
 async function fetchWordCloud() {
     const res = await fetchWithTimeout(`${API_BASE}/analytics/wordcloud?limit=50`, { headers: AUTH_HEADERS });
-    if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
+    if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
     const words = await res.json();
 
     const canvas = document.getElementById('wordCloudCanvas');
@@ -1368,7 +1366,7 @@ async function fetchEmotionData() {
     const date = getGlobalPeriodDate();
     const params = date ? '?' + new URLSearchParams({ date }).toString() : '';
     const res = await fetchWithTimeout(`${API_BASE}/analytics/emotion${params}`, { headers: AUTH_HEADERS });
-    if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
+    if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
     const data = await res.json();
     renderEmotionChart(data);
 }
@@ -1483,7 +1481,7 @@ async function fetchHateSpeechData() {
     const date = getGlobalPeriodDate();
     const params = date ? '?' + new URLSearchParams({ date }).toString() : '';
     const res = await fetchWithTimeout(`${API_BASE}/analytics/hate-speech${params}`, { headers: AUTH_HEADERS });
-    if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
+    if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
     const data = await res.json();
     renderHateGauge(data);
 }
@@ -1560,7 +1558,7 @@ function renderHateGauge(data) {
 
 async function fetchTopicRadar() {
     const res = await fetchWithTimeout(`${API_BASE}/analytics/wordcloud?limit=12`, { headers: AUTH_HEADERS });
-    if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
+    if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
     const topics = await res.json();
 
     const canvas = document.getElementById('topicRadarChart');
@@ -1687,7 +1685,7 @@ async function fetchHourlyActivity() {
     const date = getGlobalPeriodDate();
     const params = date ? '?' + new URLSearchParams({ date }).toString() : '';
     const res = await fetchWithTimeout(`${API_BASE}/analytics/hourly${params}`, { headers: AUTH_HEADERS });
-    if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
+    if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
     const data = await res.json();
 
     const canvas = document.getElementById('hourlyChart');
@@ -1762,7 +1760,7 @@ async function fetchWeekdayActivity() {
     const date = getGlobalPeriodDate();
     const params = date ? '?' + new URLSearchParams({ date }).toString() : '';
     const res = await fetchWithTimeout(`${API_BASE}/analytics/weekday${params}`, { headers: AUTH_HEADERS });
-    if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
+    if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
     const data = await res.json();
 
     const canvas = document.getElementById('weekdayChart');
@@ -1835,7 +1833,7 @@ async function fetchSentimentTimeline() {
     const date = getGlobalPeriodDate();
     const params = date ? '?' + new URLSearchParams({ date }).toString() : '';
     const res = await fetchWithTimeout(`${API_BASE}/analytics/sentiment-timeline${params}`, { headers: AUTH_HEADERS });
-    if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
+    if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
     const data = await res.json();
 
     const canvas = document.getElementById('sentimentTimelineChart');
@@ -1946,7 +1944,7 @@ async function fetchDailyMentions() {
     const date = getGlobalPeriodDate();
     const params = date ? '?' + new URLSearchParams({ date }).toString() : '';
     const res = await fetchWithTimeout(`${API_BASE}/analytics/daily-top-post${params}`, { headers: AUTH_HEADERS });
-    if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
+    if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
     if (!res.ok) return;
     const data = await res.json();
 
@@ -2073,7 +2071,7 @@ async function fetchLocalitiesCount() {
     const date = getGlobalPeriodDate();
     const params = date ? '?' + new URLSearchParams({ date }).toString() : '';
     const res = await fetchWithTimeout(`${API_BASE}/localities/counts${params}`, { headers: AUTH_HEADERS });
-    if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
+    if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
     if (!res.ok) return;
     const data = await res.json();
 
@@ -2199,7 +2197,7 @@ async function fetchLocalitiesPolar() {
     const date = getGlobalPeriodDate();
     const params = date ? '?' + new URLSearchParams({ date }).toString() : '';
     const res = await fetchWithTimeout(`${API_BASE}/localities/counts${params}`, { headers: AUTH_HEADERS });
-    if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
+    if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
     if (!res.ok) return;
     const data = await res.json();
 
@@ -2318,7 +2316,7 @@ async function openPostEvaluation(postId) {
 
     try {
         const res = await fetchWithTimeout(`${API_BASE}/analytics/post/${postId}/evaluation`, { headers: AUTH_HEADERS });
-        if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
+        if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
         if (!res.ok) { body.innerHTML = `<div class="alert alert-danger">Erro ao carregar avaliação.</div>`; return; }
         const ev = await res.json();
 
@@ -2486,7 +2484,7 @@ async function fetchTopicDateRadar() {
         const daysMap = { '1d': 1, '1w': 7, '1m': 30, '1y': 365 };
         const limitDays = daysMap[period] || 90;
         const res = await fetchWithTimeout(`${API_BASE}/analytics/topic-date-radar?limit_topics=15&limit_days=${limitDays}`, { headers: AUTH_HEADERS });
-        if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
+        if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
         const data = await res.json();
 
         if (!data || !data.dates || !data.dates.length || !data.topics || !data.topics.length) {
@@ -2558,7 +2556,7 @@ function renderTopicDateRadar(data, container) {
 
 async function fetchTopicSentiment() {
     const res = await fetchWithTimeout(`${API_BASE}/analytics/topic-sentiment?limit=15`, { headers: AUTH_HEADERS });
-    if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
+    if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
     const data = await res.json();
 
     const grid = document.getElementById('topicSentimentGrid');
@@ -3114,7 +3112,7 @@ async function generateReport() {
             headers: AUTH_HEADERS,
             body: JSON.stringify(body)
         }, 180000);
-        if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
+        if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
         if (!res.ok) {
             const err = await res.json();
             alert('Erro: ' + (err.detail || 'Falha ao gerar relatório'));
@@ -3161,7 +3159,7 @@ async function generateRaioX() {
             headers: AUTH_HEADERS,
             body: JSON.stringify(body)
         }, 180000); // 3 minutos de timeout
-        if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
+        if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
         if (!res.ok) {
             const err = await res.json();
             alert('Erro: ' + (err.detail || 'Falha ao gerar Raio-X'));
@@ -3200,7 +3198,7 @@ function printReport() {
     const content = container.innerHTML;
     const win = window.open('', '_blank');
     win.document.write(`
-        <html><head><title>Relatório SentiGOV</title>
+        <html><head><title>Relatório IDENTIDADE</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
         <style>
             body{padding:40px;font-family:system-ui,sans-serif;}
@@ -3241,7 +3239,7 @@ async function exportDocx(btn) {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `Relatorio_SentiGOV_${new Date().toISOString().slice(0, 10)}.docx`;
+        a.download = `Relatorio_IDENTIDADE_${new Date().toISOString().slice(0, 10)}.docx`;
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);
@@ -3266,7 +3264,7 @@ async function semanticSearch() {
             headers: AUTH_HEADERS,
             body: JSON.stringify({ query, limit: 8 })
         });
-        if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
+        if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
         if (!res.ok) { resultsDiv.innerHTML = '<span class="text-danger">Erro na busca</span>'; return; }
         const data = await res.json();
 
@@ -3294,7 +3292,7 @@ async function checkReportStatus() {
     const badge = document.getElementById('reportStatusBadge');
     try {
         const res = await fetchWithTimeout(`${API_BASE}/reports/status`, { headers: AUTH_HEADERS });
-        if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
+        if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
         if (!res.ok) { badge.textContent = 'RAG: erro'; return; }
         const data = await res.json();
         const indexOk = data.index_built ? '✅' : '⚠️';
@@ -3432,7 +3430,7 @@ async function refreshEngagement() {
     btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Atualizando...';
     try {
         const res = await fetchWithTimeout(`${API_BASE}/worker/refresh-engagement`, { method: 'POST', headers: AUTH_HEADERS });
-        if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
+        if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
         const data = await res.json();
         btn.innerHTML = `<i class="bi bi-check-lg me-1"></i> ${data.posts_atualizados} atualizados`;
         setTimeout(() => {
@@ -3584,7 +3582,7 @@ async function moderateFromCritical(mentionId) {
                 headers: AUTH_HEADERS,
                 body: JSON.stringify({ sentiment, reason })
             });
-            if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
+            if (res.status === 401) { sessionStorage.clear(); localStorage.clear(); window.location.href = 'login.html'; return; }
             if (res.ok) {
                 wrapper.remove();
                 const res2 = await fetchWithTimeout(`${API_BASE}/mentions/critical?days=7`, { headers: AUTH_HEADERS });
