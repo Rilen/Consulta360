@@ -53,6 +53,15 @@ jobs:
                   root /usr/share/nginx/html;
                   index index.html index.htm;
               }
+              
+              # Proxy Reverso para a API Backend (Python FastAPI)
+              location /api/ {
+                  proxy_pass http://10.0.0.88:8080/api/;
+                  proxy_set_header Host $host;
+                  proxy_set_header X-Real-IP $remote_addr;
+                  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+              }
+
               location ~ ^/([^/]+)/data/ {
                   root /usr/share/nginx/html;
                   dav_methods PUT DELETE;
