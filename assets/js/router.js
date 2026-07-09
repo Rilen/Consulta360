@@ -14,7 +14,8 @@ const routes = {
     'comparacao': './body/comparacao.html',
     'config': './body/config.html',
     'info': './body/info.html',
-    'changelog': './body/changelog.html'
+    'changelog': './body/changelog.html',
+    'logs': './body/logs.html'
 };
 
 document.addEventListener('DOMContentLoaded', () => {

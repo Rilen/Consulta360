@@ -32,6 +32,7 @@ function wrapUrl(apiUrl) {
 
 function initConfigModule() {
     atualizarLabelsMetadados();
+    carregarPreviewLogs();
 
     // ── Folha de Pagamento ──
     bindSyncButton('btnSyncFolha', async () => {
@@ -257,7 +258,12 @@ async function atualizarLabelsMetadados() {
         if (!el) return;
         const m = await getMetadata(metaKey);
         if (m) {
-            el.innerHTML = '<span class="text-emerald-600 font-medium"><i class="bi bi-check-circle w-3 h-3 inline"></i> Baixado neste PC em ' + new Date(m.timestamp).toLocaleDateString('pt-BR') + '</span>';
+            const dias = Math.floor((Date.now() - m.timestamp) / (1000 * 60 * 60 * 24));
+            if (dias > 3) {
+                el.innerHTML = `<span class="text-amber-600 font-medium"><i class="bi bi-exclamation-triangle w-3 h-3 inline"></i> Cache Antigo (Há ${dias} dias). Sincronize.</span>`;
+            } else {
+                el.innerHTML = '<span class="text-emerald-600 font-medium"><i class="bi bi-check-circle w-3 h-3 inline"></i> Baixado neste PC em ' + new Date(m.timestamp).toLocaleDateString('pt-BR') + '</span>';
+            }
             return;
         }
         
@@ -309,4 +315,42 @@ function gerarMockServidor(entidade, mesAno) {
         Entidade: entidade || 'PM RIO DAS OSTRAS',
         MesReferencia: `${mes}/${ano}`,
     }));
+}
+
+// ── Preview de Logs ──
+async function carregarPreviewLogs() {
+    const box = document.getElementById('previewLogsConfig');
+    if (!box) return;
+    try {
+        const resp = await fetch('./data/access_logs.json', { cache: 'no-store' });
+        if (!resp.ok) {
+            box.innerHTML = '<p class="text-[11px] text-slate-400">Nenhum log recente.</p>';
+            return;
+        }
+        const logs = await resp.json();
+        if (!logs || logs.length === 0) {
+            box.innerHTML = '<p class="text-[11px] text-slate-400">Nenhum log recente.</p>';
+            return;
+        }
+        
+        let html = '';
+        const limit = Math.min(logs.length, 5);
+        for (let i = 0; i < limit; i++) {
+            const l = logs[i];
+            const dt = new Date(l.dataHora).toLocaleString('pt-BR');
+            html += `
+                <div class="flex items-center justify-between py-1.5 border-b border-slate-100 last:border-0">
+                    <div class="flex items-center gap-2">
+                        <div class="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
+                        <span class="text-[11px] font-medium text-slate-700">${typeof sanitize === 'function' ? sanitize(l.nome) : l.nome}</span>
+                        <span class="text-[10px] text-slate-400 bg-slate-100 px-1.5 rounded">${typeof sanitize === 'function' ? sanitize(l.role) : l.role}</span>
+                    </div>
+                    <span class="text-[10px] text-slate-400">${dt}</span>
+                </div>
+            `;
+        }
+        box.innerHTML = html;
+    } catch (e) {
+        box.innerHTML = '<p class="text-[11px] text-slate-400">Falha ao carregar logs.</p>';
+    }
 }

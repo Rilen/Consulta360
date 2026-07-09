@@ -31,7 +31,10 @@ export default {
     }
 
     const apiResp = await fetch(target, {
-      headers: { Accept: request.headers.get('Accept') || 'application/json' },
+      headers: { 
+        Accept: request.headers.get('Accept') || 'application/json',
+        'Accept-Encoding': 'gzip, deflate, br'
+      },
       redirect: 'follow',
     });
 

@@ -49,30 +49,20 @@ async function iniciarAutoSync() {
                 if (data && data.length > 0) {
                     await setCache(cacheKey, JSON.stringify(data));
                     
-                    // --- Agregação por CPF assíncrona ---
-                    setTimeout(async () => {
-                        try {
-                            const cpfMap = {};
-                            for (const item of data) {
-                                const cpf = item.cpf || item.CPF || item.Cpf || item.matricula || 'INDEFINIDO';
-                                if (!cpfMap[cpf]) {
-                                    cpfMap[cpf] = { ...item, vinculos: [item] }; 
-                                } else {
-                                    cpfMap[cpf].vinculos.push(item);
-                                    ['bruto', 'liquido', 'desconto', 'valor'].forEach(prop => {
-                                        if (item[prop] !== undefined && !isNaN(Number(item[prop]))) {
-                                            cpfMap[cpf][prop] = (Number(cpfMap[cpf][prop]) || 0) + Number(item[prop]);
-                                        }
-                                    });
-                                }
+                    // --- Agregação por CPF via Web Worker ---
+                    try {
+                        const worker = new Worker('./assets/js/workers/agregadorWorker.js');
+                        worker.onmessage = async (ev) => {
+                            if (ev.data.success && typeof setAgregada === 'function') {
+                                await setAgregada(ev.data.cacheKey, JSON.stringify(ev.data.agregada));
+                                console.log(`[AutoSync Worker] Agregação por CPF concluída: ${ev.data.agregada.length} servidores únicos`);
+                            } else if (!ev.data.success) {
+                                console.error('[AutoSync Worker] Erro na agregação:', ev.data.error);
                             }
-                            const agregada = Object.values(cpfMap);
-                            if (typeof setAgregada === 'function') {
-                                await setAgregada(cacheKey, JSON.stringify(agregada));
-                                console.log(`[AutoSync] Agregação por CPF concluída: ${agregada.length} servidores únicos`);
-                            }
-                        } catch(err) { console.error('Erro na agregação', err); }
-                    }, 50);
+                            worker.terminate();
+                        };
+                        worker.postMessage({ cacheKey: cacheKey, payload: data });
+                    } catch(err) { console.error('Falha ao instanciar o worker de agregação', err); }
 
                     await setMetadata(metaKey, { records: data.length, auto: true });
                     baixados++;

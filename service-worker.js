@@ -1,7 +1,7 @@
 // service-worker.js — PWA Cache Shell
 // ATENÇÃO: Atualize CACHE_NAME a cada deploy (alinhado à versão do app no footer).
-// Versão atual: v0.0.9 → CACHE_NAME = 'consulta360-v9'
-const CACHE_NAME = 'consulta360-v9';
+// Versão atual: v0.0.10 → CACHE_NAME = 'consulta360-v10'
+const CACHE_NAME = 'consulta360-v10';
 const ASSETS = [
   './',
   './index.html',
@@ -25,10 +25,12 @@ const ASSETS = [
   './assets/js/layout.js',
   './assets/js/receitas.js',
   './assets/js/router.js',
+  './assets/js/logger.js',
+  './assets/js/logs.js',
+  './assets/js/workers/agregadorWorker.js',
   // ── Componentes ──
   './components/footer/npa.js',
   './components/footer/versao.js',
-  './components/header/logo.js',
   './components/header/menu.js',
   // ── Fragmentos HTML (body) — necessário para navegação offline ──
   './body/auditoria_ia.html',
@@ -44,6 +46,7 @@ const ASSETS = [
   './body/home.html',
   './body/info.html',
   './body/receitas.html',
+  './body/logs.html',
 ];
 
 self.addEventListener('install', (e) => {

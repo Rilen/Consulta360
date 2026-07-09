@@ -62,6 +62,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     renderFooter();
     if (typeof updateThemeIcon === 'function') updateThemeIcon();
+    
+    // Registrar trilha de auditoria (Logs Colaborativos)
+    if (typeof registrarAcesso === 'function') registrarAcesso();
 });
 
 // ─────────────────────────────────────────────────────────
