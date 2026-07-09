@@ -2,6 +2,19 @@
 
 Todas as mudancas notaveis no projeto **Consulta360** serao documentadas neste arquivo.
 
+## [v0.0.10] - 2026-07-09
+
+### Removido
+- **Clean Code**: Exclusão definitiva do arquivo legado `app.js` (mais de 160 KB e 3700 linhas) que pertencia a um projeto anterior de redes sociais e não era utilizado no Consulta360, mantendo a Separação de Preocupações (SoC) rígida.
+
+### Adicionado
+- **Desduplicação por CPF (IndexedDB V3)**: Criação da objectStore `folha_agregada_cpf`. O sistema agora consolida os valores (renda, descontos) de múltiplas matrículas pertencentes à mesma pessoa logo após a finalização do download pelo Auto-Sync.
+
+### Modificado
+- **Deploy Resiliente (CI/CD)**: Correção na rotina Docker do `ci-cd.yaml` com substituição de comando destrutivo `rm -rf` por `find`, protegendo assim o diretório `/data/` de apagamentos acidentais e mantendo o Cache Colaborativo intacto a cada push.
+- **Nginx Autoindex**: Adicionada tag `autoindex on;` ao servidor central via script de deploy, desbloqueando a funcionalidade de Auto-Sync, que parou de dar falsos erros 403.
+- **AntiGravity UI**: Substituição de blur pesado (`backdrop-filter`) nas classes de cards principais (`.glass-panel`, `.kpi-card`), implementando opacidade premium e efeitos hover nas tabelas e KPIs, resultando num salto de FPS.
+
 ## [v0.0.9] - 2026-07-08
 
 ### Adicionado

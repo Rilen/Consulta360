@@ -40,7 +40,7 @@ jobs:
           
           # OBS: O runner precisa ter permissao ao socket docker do host
           docker exec $CENTRAL_CONTAINER mkdir -p /usr/share/nginx/html/$REPO_NAME
-          docker exec $CENTRAL_CONTAINER sh -c "rm -rf /usr/share/nginx/html/$REPO_NAME/*"
+          docker exec $CENTRAL_CONTAINER sh -c "find /usr/share/nginx/html/$REPO_NAME -mindepth 1 -maxdepth 1 ! -name 'data' -exec rm -rf {} +"
           
           # Como é um projeto HTML estático, copiamos do diretório atual (.) em vez de (out/.)
           docker cp . $CENTRAL_CONTAINER:/usr/share/nginx/html/$REPO_NAME/
@@ -68,6 +68,7 @@ jobs:
                   create_full_put_path on;
                   dav_access user:rw group:rw all:rw;
                   client_max_body_size 50M;
+                  autoindex on;
               }
           }' > default.conf
           docker cp default.conf $CENTRAL_CONTAINER:/etc/nginx/conf.d/default.conf

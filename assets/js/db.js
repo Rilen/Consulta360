@@ -2,8 +2,9 @@
 // BANCO DE DADOS LOCAL: IndexedDB Wrapper
 // ----------------------------------------------------
 const DB_NAME = 'Consulta360_DB';
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 const STORE_NAME = 'folha_cache';
+const STORE_AGREGADA = 'folha_agregada_cpf';
 
 function initDB() {
   return new Promise((resolve, reject) => {
@@ -15,6 +16,9 @@ function initDB() {
       }
       if (!db.objectStoreNames.contains('metadata')) {
         db.createObjectStore('metadata', { keyPath: 'key' });
+      }
+      if (!db.objectStoreNames.contains(STORE_AGREGADA)) {
+        db.createObjectStore(STORE_AGREGADA, { keyPath: 'id' });
       }
     };
     req.onsuccess = function(e) { resolve(e.target.result); };
@@ -58,11 +62,36 @@ async function getCacheRaw(id) {
 async function removeCache(id) {
   const db = await initDB();
   return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, 'readwrite');
-    const store = tx.objectStore(STORE_NAME);
-    store.delete(id);
+    const tx = db.transaction([STORE_NAME, STORE_AGREGADA], 'readwrite');
+    tx.objectStore(STORE_NAME).delete(id);
+    tx.objectStore(STORE_AGREGADA).delete(id);
     tx.oncomplete = () => resolve();
     tx.onerror = () => reject(tx.error);
+  });
+}
+
+// ----------------------------------------------------
+// Agregação por CPF
+// ----------------------------------------------------
+async function setAgregada(id, data) {
+  const db = await initDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_AGREGADA, 'readwrite');
+    const store = tx.objectStore(STORE_AGREGADA);
+    store.put({ id, data, timestamp: Date.now() });
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function getAgregada(id) {
+  const db = await initDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_AGREGADA, 'readonly');
+    const store = tx.objectStore(STORE_AGREGADA);
+    const req = store.get(id);
+    req.onsuccess = () => resolve(req.result ? req.result.data : null);
+    req.onerror = () => reject(req.error);
   });
 }
 
@@ -101,8 +130,9 @@ async function listCacheKeys(prefix = '') {
 async function clearAllCache() {
   const db = await initDB();
   return new Promise((resolve, reject) => {
-    const tx = db.transaction([STORE_NAME, 'metadata'], 'readwrite');
+    const tx = db.transaction([STORE_NAME, STORE_AGREGADA, 'metadata'], 'readwrite');
     tx.objectStore(STORE_NAME).clear();
+    tx.objectStore(STORE_AGREGADA).clear();
     tx.objectStore('metadata').clear();
     tx.oncomplete = () => resolve();
     tx.onerror = () => reject(tx.error);
