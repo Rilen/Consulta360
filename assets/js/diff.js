@@ -108,7 +108,7 @@ function consolidarServidores(lista) {
         
         if (!ident) continue;
 
-        const liq = parseValorLocal(reg.ValorLiquido || reg.Liquido || 0);
+        const liq = parseValorBR(reg.ValorLiquido || reg.Liquido || 0);
 
         if (mapa.has(ident)) {
             const atual = mapa.get(ident);
