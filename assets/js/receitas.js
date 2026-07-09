@@ -8,9 +8,7 @@ document.addEventListener('routeChanged', (e) => {
     }
 });
 
-if (window.location.hash === '#receitas' || window.location.hash.includes('receitas')) {
-    setTimeout(initReceitasModule, 100);
-}
+
 
 function initReceitasModule() {
     const form = document.getElementById('form-receitas');
@@ -128,7 +126,7 @@ function processarReceitas(rawRows) {
 
     rawRows.forEach(row => {
         const valStr = row.ValorArrecadadoLiquido || row.ValorArrecadadoBruto || row.ValorArrecadado || row.valor || row.Arrecadado || '0';
-        const valor = parseFloat(String(valStr).replace(',', '.')) || 0;
+        const valor = parseValorBR(valStr) || 0;
         
         let mesStr = String(row.Mes || row.mes || '01').toUpperCase();
         

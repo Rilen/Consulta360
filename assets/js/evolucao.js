@@ -115,8 +115,7 @@ async function carregarHistoricoDoIndexedDB() {
             for (const row of rows) {
                 const cargo = row.Cargo;
                 if (!cargo) continue;
-                const proventos = parseFloat(row.Proventos) ||
-                    parseFloat(String(row.Proventos || '').replace(',', '.')) || 0;
+                const proventos = parseValorBR(row.Proventos) || 0;
                 if (proventos <= 0) continue;
 
                 if (!agregador[cargo]) agregador[cargo] = {};
@@ -188,9 +187,7 @@ document.addEventListener('routeChanged', (e) => {
     }
 });
 
-if (window.location.hash === '#evolucao') {
-    setTimeout(initEvolucaoModule, 100);
-}
+
 
 async function initEvolucaoModule() {
     const form = document.getElementById('filter-form');

@@ -11,11 +11,6 @@ document.addEventListener('routeChanged', (e) => {
     }
 });
 
-// Tenta inicializar caso seja o load direto inicial
-if (window.location.hash === '#home' || window.location.hash === '') {
-    setTimeout(initHomeModule, 100); // pequeno delay para garantir que o DOM foi injetado pelo router
-}
-
 function initHomeModule() {
     const form = document.getElementById('filter-form');
     if (!form) return;
@@ -253,14 +248,14 @@ function renderStats() {
     if (brutoKey || liquidoKey) {
         currentData.forEach(row => {
             if (brutoKey) {
-                let v = parseFloat(String(row[brutoKey]).replace(/\./g, '').replace(',', '.'));
+                let v = parseValorBR(row[brutoKey]);
                 if(!isNaN(v)) {
                     sumBruto += v;
                     if(v > teto) teto = v;
                 }
             }
             if (liquidoKey) {
-                let v = parseFloat(String(row[liquidoKey]).replace(/\./g, '').replace(',', '.'));
+                let v = parseValorBR(row[liquidoKey]);
                 if(!isNaN(v)) sumLiquido += v;
             }
         });

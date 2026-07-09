@@ -23,9 +23,7 @@ let contadorId = 0;
 document.addEventListener('routeChanged', (e) => {
     if (e.detail.route === 'contracheque') initContrachequeModule();
 });
-if (window.location.hash === '#contracheque' || window.location.hash.includes('contracheque')) {
-    setTimeout(initContrachequeModule, 100);
-}
+
 
 function initContrachequeModule() {
     if (window.lucide) lucide.createIcons();
@@ -520,9 +518,9 @@ function gerarParecer(dadosAPI, entidade) {
     const apiCargos = new Set();
 
     for (const row of dadosAPI) {
-        apiProventos += parseFloat(row.Proventos) || parseFloat(String(row.Proventos || '').replace(',', '.')) || 0;
-        apiDescontos += parseFloat(row.Descontos) || parseFloat(String(row.Descontos || '').replace(',', '.')) || 0;
-        apiLiquido += parseFloat(row.Liquido) || parseFloat(String(row.Liquido || '').replace(',', '.')) || 0;
+        apiProventos += parseValorBR(row.Proventos) || 0;
+        apiDescontos += parseValorBR(row.Descontos) || 0;
+        apiLiquido += parseValorBR(row.Liquido) || 0;
         if (row.Cargo) apiCargos.add(row.Cargo);
     }
 
@@ -700,7 +698,7 @@ function gerarParecer(dadosAPI, entidade) {
         { campo: 'Valor Líquido', pdf: fmtMoeda(soma.liquido), api: fmtMoeda(apiLiquido), ok: liqOk },
     ];
     if (primeiro.salarioBase !== null) {
-        const apiSB = parseFloat(dadosAPI[0]?.SalarioBase) || parseFloat(String(dadosAPI[0]?.SalarioBase || '').replace(',', '.')) || 0;
+        const apiSB = parseValorBR(dadosAPI[0]?.SalarioBase) || 0;
         linhas.push({ campo: 'Salário Base (1º CC)', pdf: fmtMoeda(primeiro.salarioBase), api: fmtMoeda(apiSB), ok: '—' });
     }
 

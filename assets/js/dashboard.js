@@ -13,9 +13,7 @@ document.addEventListener('routeChanged', (e) => {
     }
 });
 
-if (window.location.hash === '#dashboard') {
-    setTimeout(loadDashboardData, 100);
-}
+
 
 async function loadDashboardData() {
     const btn = document.getElementById('btnRefreshDashboard');

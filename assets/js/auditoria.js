@@ -6,9 +6,7 @@ document.addEventListener('routeChanged', (e) => {
     }
 });
 
-if (window.location.hash === '#auditoria' || window.location.hash.includes('auditoria')) {
-    setTimeout(initAuditoriaModule, 100);
-}
+
 
 function initAuditoriaModule() {
     const hoje = new Date();
@@ -101,8 +99,8 @@ function processarEngineIA(rawRows, labelMMSY) {
         const nomeUpper = nomeOriginal.toUpperCase();
         
         let brutoVal = 0; let liquidoVal = 0;
-        if (colBruto && row[colBruto]) brutoVal = parseFloat(String(row[colBruto]).replace(',', '.')) || 0;
-        if (colLiquido && row[colLiquido]) liquidoVal = parseFloat(String(row[colLiquido]).replace(',', '.')) || 0;
+        if (colBruto && row[colBruto]) brutoVal = parseValorBR(row[colBruto]) || 0;
+        if (colLiquido && row[colLiquido]) liquidoVal = parseValorBR(row[colLiquido]) || 0;
 
         if (!unificados[nomeUpper]) {
             unificados[nomeUpper] = { nome: nomeOriginal, vinculos: 0, totalBruto: 0, totalLiquido: 0 };
@@ -152,10 +150,10 @@ function processarEngineIA(rawRows, labelMMSY) {
     if (chatContainer) {
         chatContainer.innerHTML = `
             <div class="flex items-start gap-3 fade-in">
-                <div class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center flex-shrink-0">
+                <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0 shadow-sm">
                     <i class="bi bi-robot w-4 h-4 text-white"></i>
                 </div>
-                <div class="bg-slate-800/80 rounded-2xl rounded-tl-sm p-4 text-sm text-slate-200 border border-white/5 shadow-md">
+                <div class="bg-white rounded-2xl rounded-tl-sm p-4 text-sm text-slate-700 border border-slate-200 shadow-sm">
                     Processamento concluído. Analisei ${dadosUnificados.length.toLocaleString('pt-BR')} servidores consolidados nesta matriz. Como posso ajudar nas inferências?
                 </div>
             </div>
@@ -276,21 +274,21 @@ function enviarPrompt(tipo) {
 
     const perguntaHtml = `
         <div class="flex items-start gap-3 justify-end fade-in">
-            <div class="bg-indigo-600/20 rounded-2xl rounded-tr-sm p-4 text-sm text-indigo-100 border border-indigo-500/20">
+            <div class="bg-indigo-50 rounded-2xl rounded-tr-sm p-4 text-sm text-indigo-900 border border-indigo-100 shadow-sm">
                 ${pergunta}
             </div>
-            <div class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center flex-shrink-0">
-                <i class="bi bi-person w-4 h-4 text-slate-300"></i>
+            <div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0 shadow-sm">
+                <i class="bi bi-person w-4 h-4 text-indigo-600"></i>
             </div>
         </div>
     `;
 
     const respostaHtml = `
         <div class="flex items-start gap-3 fade-in mt-4">
-            <div class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center flex-shrink-0">
+            <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0 shadow-sm">
                 <i class="bi bi-robot w-4 h-4 text-white"></i>
             </div>
-            <div class="bg-slate-800/80 rounded-2xl rounded-tl-sm p-4 text-sm text-slate-200 border border-white/5 shadow-md">
+            <div class="bg-white rounded-2xl rounded-tl-sm p-4 text-sm text-slate-700 border border-slate-200 shadow-sm">
                 ${resposta}
             </div>
         </div>

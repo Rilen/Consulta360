@@ -54,8 +54,8 @@ async function navigateTo(route, pushState = true) {
         // Emitir evento customizado para que os scripts da página saibam que a tela mudou
         document.dispatchEvent(new CustomEvent('routeChanged', { detail: { route } }));
 
-        // Disparar renderização do Header e Footer novamente para atualizar estados visuais
-        if (typeof renderHeader === 'function') renderHeader(route);
+        // Disparar renderização da Sidebar e Footer novamente para atualizar estados visuais
+        if (typeof renderSidebar === 'function') renderSidebar(route);
         if (typeof renderFooter === 'function') renderFooter();
         
         // Re-renderizar ícones Lucide da nova tela E do header/footer recém renderizados

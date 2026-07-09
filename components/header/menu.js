@@ -14,8 +14,14 @@ function getMenuHtml(currentRoute) {
 
     const isConfig = currentRoute === 'config';
 
-    // The Display Name and Role will be injected by app.js on DOMContentLoaded or spaContentReady
-    // as it already looks for #sidebarUserName, #sidebarUserRole, #sidebarAvatarLetter
+    const dispName = sessionStorage.getItem('sg_display_name') || localStorage.getItem('sg_display_name') || 'Usuário';
+    const role = sessionStorage.getItem('sg_role') || localStorage.getItem('sg_role') || 'N/A';
+    const avatar = dispName.charAt(0).toUpperCase();
+
+    let displayRole = 'Usuário Padrão';
+    if (role === 'admin') displayRole = 'Super Administrador';
+    else if (role === 'administrador') displayRole = 'Administrador';
+    else if (role === 'moderator') displayRole = 'Moderador';
 
     return `
     <aside id="sidebar" class="sidebar">
@@ -70,10 +76,10 @@ function getMenuHtml(currentRoute) {
         
         <div class="sidebar-footer">
             <div class="sidebar-user mb-2 flex-wrap justify-center">
-                <div class="avatar" id="sidebarAvatarLetter">U</div>
+                <div class="avatar" id="sidebarAvatarLetter">${avatar}</div>
                 <div class="user-info">
-                    <span class="user-name" id="sidebarUserName">Usuário</span>
-                    <span class="user-role" id="sidebarUserRole">N/A</span>
+                    <span class="user-name" id="sidebarUserName">${dispName}</span>
+                    <span class="user-role" id="sidebarUserRole">${displayRole}</span>
                 </div>
                 
                 <div class="d-flex align-items-center w-100 justify-content-center mt-2 gap-2 buttons-row">

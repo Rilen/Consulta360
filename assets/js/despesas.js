@@ -8,9 +8,7 @@ document.addEventListener('routeChanged', (e) => {
     }
 });
 
-if (window.location.hash === '#despesas' || window.location.hash.includes('despesas')) {
-    setTimeout(initDespesasModule, 100);
-}
+
 
 function initDespesasModule() {
     const form = document.getElementById('form-despesas');
@@ -122,9 +120,9 @@ function processarDespesas(rawRows) {
     let mapCredores = {};
 
     rawRows.forEach(row => {
-        const vEmpenhado = parseFloat(String(row.valorEmpenho || row.ValorEmpenhado || row.empenhado || '0').replace(',', '.')) || 0;
-        const vLiquidado = parseFloat(String(row.valorLiquidado || row.ValorLiquidado || row.liquidado || '0').replace(',', '.')) || 0;
-        const vPago = parseFloat(String(row.valorPago || row.ValorPago || row.pago || '0').replace(',', '.')) || 0;
+        const vEmpenhado = parseValorBR(row.valorEmpenho || row.ValorEmpenhado || row.empenhado || '0') || 0;
+        const vLiquidado = parseValorBR(row.valorLiquidado || row.ValorLiquidado || row.liquidado || '0') || 0;
+        const vPago = parseValorBR(row.valorPago || row.ValorPago || row.pago || '0') || 0;
         
         tEmpenhado += vEmpenhado;
         tLiquidado += vLiquidado;

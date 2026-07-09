@@ -6,9 +6,7 @@
 document.addEventListener('routeChanged', (e) => {
     if (e.detail.route === 'config') initConfigModule();
 });
-if (window.location.hash === '#config' || window.location.hash.includes('config')) {
-    setTimeout(initConfigModule, 100);
-}
+
 
 // ── Proxy CORS ──────────────────────────────────
 // Preencha com a URL do seu Worker após fazer deploy: npx wrangler deploy (pasta worker/)

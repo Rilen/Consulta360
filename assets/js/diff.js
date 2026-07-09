@@ -12,10 +12,6 @@ document.addEventListener('routeChanged', (e) => {
     }
 });
 
-if (window.location.hash === '#diff') {
-    setTimeout(initDiff, 100);
-}
-
 function initDiff() {
     // Configura os inputs type="month" para valores padrão
     const hoje = new Date();

@@ -8,9 +8,7 @@ document.addEventListener('routeChanged', (e) => {
     }
 });
 
-if (window.location.hash === '#graficos' || window.location.hash.includes('graficos')) {
-    setTimeout(initGraficosModule, 100);
-}
+
 
 function initGraficosModule() {
     const hoje = new Date();
@@ -117,10 +115,10 @@ function processarAnalytics(rawRows) {
         let liquidoVal = 0;
 
         if (colBruto && row[colBruto]) {
-            brutoVal = parseFloat(String(row[colBruto]).replace(',', '.')) || 0;
+            brutoVal = parseValorBR(row[colBruto]) || 0;
         }
         if (colLiquido && row[colLiquido]) {
-            liquidoVal = parseFloat(String(row[colLiquido]).replace(',', '.')) || 0;
+            liquidoVal = parseValorBR(row[colLiquido]) || 0;
         }
 
         if (!unificados[nomeUpper]) {

@@ -6,9 +6,7 @@ document.addEventListener('routeChanged', (e) => {
     }
 });
 
-if (window.location.hash === '#comparacao' || window.location.hash.includes('comparacao')) {
-    setTimeout(initComparacaoModule, 100);
-}
+
 
 let chartComparacao = null;
 
@@ -80,7 +78,7 @@ function processarAgrupamentoCargos(folhaData) {
         if (!cargo) cargo = 'NÃO ESPECIFICADO';
 
         const valorBrutoString = String(reg.Bruto || reg.bruto || reg.VencimentosTotais || reg.Proventos || '0');
-        const bruto = parseFloat(valorBrutoString.replace(',', '.')) || 0;
+        const bruto = parseValorBR(valorBrutoString) || 0;
         
         // Ignora quem ganha zero ou negativo no bruto para não distorcer as médias
         if (bruto <= 0) return;
