@@ -1,4 +1,4 @@
-# Changelog
+# Changelog and version
 
 Todas as mudancas notaveis no projeto **Consulta360** serao documentadas neste arquivo.
 
