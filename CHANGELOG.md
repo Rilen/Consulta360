@@ -2,6 +2,15 @@
 
 Todas as mudancas notaveis no projeto **Consulta360** serao documentadas neste arquivo.
 
+## [v0.0.11] - 2026-07-09
+
+### Adicionado
+- **Extrator de Relatórios Oficiais (PDF Inteligente)**: Geração de relatórios com timbre oficial (Nome do Operador e Data/Hora) utilizando a biblioteca `html2pdf.js` nas abas de Contracheque e Auditoria IA.
+- **Dashboard Analítico de Acessos**: Inclusão de 3 KPI Cards na aba de Configurações calculando em tempo real: Acessos Hoje, Cargo Mais Frequente e Pico de Movimento.
+
+### Modificado
+- **Otimização Extrema de Performance (Tailwind CSS CLI)**: Otimização PWA removendo o script via CDN de 3MB. Implementado pipeline CLI com Gitea Actions compilar o `global.css` nativo super leve.
+
 ## [v0.0.10] - 2026-07-09
 
 ### Removido

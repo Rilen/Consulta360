@@ -18,6 +18,40 @@
         </div>
     </div>
 
+    <!-- Métricas (Analytics) -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <!-- Acessos Hoje -->
+        <div class="kpi-card p-5 border-accent flex items-center gap-4">
+            <div class="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center">
+                <i class="bi bi-calendar-check text-blue-600 text-xl"></i>
+            </div>
+            <div>
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Acessos Hoje</p>
+                <h3 class="text-2xl font-black text-slate-800 mt-1" id="metricAcessosHoje">--</h3>
+            </div>
+        </div>
+        <!-- Cargo Frequente -->
+        <div class="kpi-card p-5 border-accent flex items-center gap-4">
+            <div class="w-12 h-12 rounded-full bg-indigo-50 flex items-center justify-center">
+                <i class="bi bi-person-badge text-indigo-600 text-xl"></i>
+            </div>
+            <div>
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Cargo Frequente</p>
+                <h3 class="text-xl font-bold text-slate-800 mt-1" id="metricCargoFreq">--</h3>
+            </div>
+        </div>
+        <!-- Pico de Acesso -->
+        <div class="kpi-card p-5 border-accent flex items-center gap-4">
+            <div class="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center">
+                <i class="bi bi-clock-history text-emerald-600 text-xl"></i>
+            </div>
+            <div>
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Pico de Movimento</p>
+                <h3 class="text-xl font-bold text-slate-800 mt-1" id="metricPicoHora">--</h3>
+            </div>
+        </div>
+    </div>
+
     <!-- Tabela de Logs -->
     <div class="ag-card p-6 border-accent relative overflow-hidden">
         <div class="absolute right-0 top-0 w-32 h-32 bg-slate-500/10 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>

@@ -35,9 +35,62 @@ async function carregarLogs() {
             todosLogs = [];
         }
         renderizarLogsTabela();
+        atualizarMetricasLogs();
     } catch (e) {
         tbody.innerHTML = `<tr><td colspan="3" class="py-8 text-center text-rose-400">Falha ao comunicar com o servidor da rede.</td></tr>`;
     }
+}
+
+function atualizarMetricasLogs() {
+    if (!todosLogs || todosLogs.length === 0) return;
+    
+    const hoje = new Date().toLocaleDateString('pt-BR');
+    let acessosHoje = 0;
+    const cargos = {};
+    const horas = {};
+    
+    todosLogs.forEach(l => {
+        if (!l.dataHora) return;
+        const dt = new Date(l.dataHora);
+        if (dt.toLocaleDateString('pt-BR') === hoje) acessosHoje++;
+        
+        const role = l.role || 'Desconhecido';
+        cargos[role] = (cargos[role] || 0) + 1;
+        
+        const h = dt.getHours();
+        const strH = `${h}h - ${h+1}h`;
+        horas[strH] = (horas[strH] || 0) + 1;
+    });
+    
+    let cargoFreq = '--';
+    let maxC = 0;
+    for (const c in cargos) {
+        if (cargos[c] > maxC && c !== 'Desconhecido' && c !== 'Sem Nível') {
+            maxC = cargos[c];
+            cargoFreq = c;
+        }
+    }
+    // Fallback se todos forem Desconhecidos
+    if (cargoFreq === '--' && Object.keys(cargos).length > 0) {
+        cargoFreq = Object.keys(cargos)[0];
+    }
+    
+    let picoHora = '--';
+    let maxH = 0;
+    for (const h in horas) {
+        if (horas[h] > maxH) {
+            maxH = horas[h];
+            picoHora = h;
+        }
+    }
+    
+    const elHoje = document.getElementById('metricAcessosHoje');
+    const elCargo = document.getElementById('metricCargoFreq');
+    const elPico = document.getElementById('metricPicoHora');
+    
+    if (elHoje) elHoje.innerText = acessosHoje;
+    if (elCargo) elCargo.innerText = typeof sanitize === 'function' ? sanitize(cargoFreq) : cargoFreq;
+    if (elPico) elPico.innerText = picoHora;
 }
 
 function renderizarLogsTabela() {

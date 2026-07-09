@@ -74,12 +74,17 @@
 <section id="resultadoAuditoria" class="hidden space-y-6">
 
   <!-- Status consolidado -->
-  <div id="alertaStatus" class="kpi-card border-accent p-4 flex items-start gap-3">
-    <i id="alertaIcon" data-lucide="check-circle" class="w-6 h-6 flex-shrink-0 mt-0.5"></i>
-    <div>
-      <h3 id="alertaTitulo" class="text-sm font-bold"></h3>
-      <p id="alertaMsg" class="text-xs mt-1"></p>
+  <div id="alertaStatus" class="kpi-card border-accent p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div class="flex items-start gap-3">
+        <i id="alertaIcon" class="bi bi-check-circle w-6 h-6 flex-shrink-0 mt-0.5"></i>
+        <div>
+          <h3 id="alertaTitulo" class="text-sm font-bold"></h3>
+          <p id="alertaMsg" class="text-xs mt-1"></p>
+        </div>
     </div>
+    <button onclick="gerarPDFOficial('resultadoAuditoria', 'Auditoria_Contracheque', 'Auditoria de Contracheque vs API')" class="px-4 py-2 bg-slate-800 text-white text-xs font-medium rounded-xl hover:bg-slate-900 active:scale-95 transition-all flex items-center justify-center gap-2 flex-shrink-0 shadow-sm">
+        <i class="bi bi-filetype-pdf text-red-400 text-sm"></i> Relatório Oficial PDF
+    </button>
   </div>
 
   <!-- Parecer -->

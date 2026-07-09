@@ -19,6 +19,11 @@ jobs:
         run: |
           apk add --no-cache docker-cli
           
+      - name: Build Tailwind CSS
+        run: |
+          npm ci
+          npx tailwindcss -i ./assets/css/input.css -o ./assets/css/global.css --minify
+          
       - name: Injetar Arquivos Direto no Nginx Central via Docker
         run: |
           # No Gitea, usamos a variavel github.repository para compatibilidade

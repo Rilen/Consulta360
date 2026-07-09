@@ -1,0 +1,20 @@
+{
+  "name": "consulta360",
+  "version": "1.0.0",
+  "description": "Consulta360 é um sistema avançado de transparência, inteligência e auditoria de folha de pagamento e dados públicos. O objetivo da aplicação é fornecer uma interface rápida, limpa e autônoma, processando grandes volumes de dados no lado do cliente com arquitetura colaborativa.",
+  "main": "service-worker.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://10.0.0.88:3001/rilen.lima/consulta360.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "tailwindcss": "^3.4.1"
+  }
+}
