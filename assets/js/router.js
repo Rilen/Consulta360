@@ -58,10 +58,7 @@ async function navigateTo(route, pushState = true) {
         if (typeof renderSidebar === 'function') renderSidebar(route);
         if (typeof renderFooter === 'function') renderFooter();
         
-        // Re-renderizar ícones Lucide da nova tela E do header/footer recém renderizados
-        if (typeof lucide !== 'undefined') {
 
-        }
 
     } catch (error) {
         console.error(error);

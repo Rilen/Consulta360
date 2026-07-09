@@ -101,7 +101,6 @@ function showOfflineToast(msg, type = 'warning') {
         toast.innerHTML = `<i class="bi bi-database w-5 h-5"></i> ${msg}`;
     }
     
-    if (window.lucide) lucide.createIcons();
     
     setTimeout(() => {
         toast.classList.add('opacity-0', 'translate-y-4');

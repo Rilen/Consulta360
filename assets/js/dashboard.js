@@ -18,13 +18,11 @@ document.addEventListener('routeChanged', (e) => {
 async function loadDashboardData() {
     const btn = document.getElementById('btnRefreshDashboard');
     if (btn) btn.innerHTML = '<i class="bi bi-loader-2 w-4 h-4 animate-spin"></i> Processando...';
-    if (window.lucide) window.lucide.createIcons();
 
     try {
         const allCaches = await getAllCache(); // usa wrapper encapsulado de db.js
         processarDadosDashboard(allCaches);
         if (btn) btn.innerHTML = '<i class="bi bi-arrow-repeat w-4 h-4"></i> Atualizar Dados';
-        if (window.lucide) window.lucide.createIcons();
     } catch (e) {
         console.error("Erro no Dashboard:", e);
         if (btn) btn.innerHTML = '<i class="bi bi-arrow-repeat w-4 h-4"></i> Atualizar Dados';

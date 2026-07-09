@@ -54,7 +54,6 @@ async function gerarDiff() {
     mostrarErroDiff('');
     const btn = document.getElementById('btnGerarDiff');
     if (btn) btn.innerHTML = '<i class="bi bi-loader-2 w-4 h-4 animate-spin"></i> Processando...';
-    if (window.lucide) window.lucide.createIcons();
 
     const valA = document.getElementById('diffMesA')?.value;
     const valB = document.getElementById('diffMesB')?.value;
@@ -92,7 +91,6 @@ async function gerarDiff() {
     }
 
     if (btn) btn.innerHTML = '<i class="bi bi-play w-4 h-4"></i> Comparar Folhas';
-    if (window.lucide) window.lucide.createIcons();
 }
 
 function consolidarServidores(lista) {

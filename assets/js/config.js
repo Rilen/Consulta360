@@ -258,7 +258,6 @@ async function atualizarLabelsMetadados() {
         const m = await getMetadata(metaKey);
         if (m) {
             el.innerHTML = '<span class="text-emerald-600 font-medium"><i class="bi bi-check-circle w-3 h-3 inline"></i> Baixado neste PC em ' + new Date(m.timestamp).toLocaleDateString('pt-BR') + '</span>';
-            if (window.lucide) window.lucide.createIcons();
             return;
         }
         
@@ -270,14 +269,11 @@ async function atualizarLabelsMetadados() {
                 const lastMod = resp.headers.get('Last-Modified');
                 const dt = lastMod ? new Date(lastMod).toLocaleDateString('pt-BR') : 'hoje';
                 el.innerHTML = `<span class="text-blue-600 font-medium"><i class="bi bi-server w-3 h-3 inline"></i> No Servidor da Rede (desde ${dt}) - Rápido</span>`;
-                if (window.lucide) window.lucide.createIcons();
             } else {
                 el.innerHTML = '<span class="text-slate-500"><i class="bi bi-cloud-off w-3 h-3 inline"></i> Nuvem Oficial (Download inicial demorado)</span>';
-                if (window.lucide) window.lucide.createIcons();
             }
         } catch(e) {
             el.innerHTML = '<span class="text-slate-500"><i class="bi bi-cloud-off w-3 h-3 inline"></i> Nuvem Oficial (Download inicial demorado)</span>';
-            if (window.lucide) window.lucide.createIcons();
         }
     };
 

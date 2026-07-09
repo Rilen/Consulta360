@@ -140,7 +140,6 @@ async function carregarHistoricoDoIndexedDB() {
             const totalCargos = Object.keys(resultado).length;
             const totalMeses = chaves.length;
             if (statusEl) statusEl.innerHTML = `<i class="bi bi-database w-3.5 h-3.5"></i> ${totalCargos} cargos reais · ${totalMeses} meses no banco`;
-            if (window.lucide) lucide.createIcons();
             return true;
         }
 
@@ -194,7 +193,6 @@ async function initEvolucaoModule() {
     if (!form || form.dataset.bound === 'true') return;
     form.dataset.bound = 'true';
 
-    if (window.lucide) lucide.createIcons();
 
     // Campo de busca textual
     const buscaInput = document.getElementById('buscaCargoTabela');
@@ -217,7 +215,6 @@ async function initEvolucaoModule() {
 
     // Carregar dados e fazer render inicial
     await carregarHistoricoDoIndexedDB();
-    if (window.lucide) lucide.createIcons();
     gerarHistorico();
 }
 

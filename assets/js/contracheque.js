@@ -26,7 +26,6 @@ document.addEventListener('routeChanged', (e) => {
 
 
 function initContrachequeModule() {
-    if (window.lucide) lucide.createIcons();
 
     resetarTudo();
 
@@ -237,7 +236,6 @@ function atualizarUI() {
 
     acoes.classList.remove('hidden');
 
-    if (window.lucide) lucide.createIcons();
 }
 
 function removerPDF(id) {
@@ -562,24 +560,21 @@ function gerarParecer(dadosAPI, entidade) {
 
     if (tudoOk) {
         alerta.className = 'ag-card rounded-2xl p-4 flex items-start gap-3 bg-emerald-50 border border-emerald-200';
-        alertaIcon.className = 'w-6 h-6 flex-shrink-0 mt-0.5 text-emerald-600';
-        alertaIcon.setAttribute('data-lucide', 'check-circle');
+        alertaIcon.className = 'bi bi-check-circle w-6 h-6 flex-shrink-0 mt-0.5 text-emerald-600';
         alertaTitulo.className = 'text-sm font-bold text-emerald-800';
         alertaTitulo.textContent = 'Contracheque Válido — Sem Divergências';
         alertaMsg.className = 'text-xs text-emerald-600 mt-1';
         alertaMsg.textContent = `Os dados de ${numPDFs} PDF${numPDFs > 1 ? 's' : ''} conferem com ${numVinculosAPI} registro${numVinculosAPI > 1 ? 's' : ''} da API (${entidade}).`;
     } else if (padraoConsolidacaoParcial) {
         alerta.className = 'ag-card rounded-2xl p-4 flex items-start gap-3 bg-amber-50 border border-amber-200';
-        alertaIcon.className = 'w-6 h-6 flex-shrink-0 mt-0.5 text-amber-600';
-        alertaIcon.setAttribute('data-lucide', 'alert-triangle');
+        alertaIcon.className = 'bi bi-exclamation-triangle w-6 h-6 flex-shrink-0 mt-0.5 text-amber-600';
         alertaTitulo.className = 'text-sm font-bold text-amber-800';
         alertaTitulo.textContent = 'Consolidação Parcial Detectada';
         alertaMsg.className = 'text-xs text-amber-600 mt-1';
         alertaMsg.textContent = `A API somou corretamente os proventos e descontos dos ${numPDFs} contra-cheques, mas o líquido reflete apenas um deles. Diferença no líquido: ${fmtMoeda(difLiquido)}.`;
     } else {
         alerta.className = 'ag-card rounded-2xl p-4 flex items-start gap-3 bg-rose-50 border border-rose-200';
-        alertaIcon.className = 'w-6 h-6 flex-shrink-0 mt-0.5 text-rose-600';
-        alertaIcon.setAttribute('data-lucide', 'alert-triangle');
+        alertaIcon.className = 'bi bi-exclamation-circle w-6 h-6 flex-shrink-0 mt-0.5 text-rose-600';
         alertaTitulo.className = 'text-sm font-bold text-rose-800';
         alertaTitulo.textContent = 'Divergência Detectada';
         alertaMsg.className = 'text-xs text-rose-600 mt-1';
@@ -750,7 +745,6 @@ function gerarParecer(dadosAPI, entidade) {
     document.getElementById('resultadoAuditoria').classList.remove('hidden');
     document.getElementById('estadoSemAPI').classList.add('hidden');
     document.getElementById('resultadoAuditoria').scrollIntoView({ behavior: 'smooth' });
-    if (window.lucide) lucide.createIcons();
 }
 
 // ─────────────────────────────────────────────────

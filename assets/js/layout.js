@@ -98,20 +98,18 @@ function updateStatusBanner(type, message) {
     
     if (type === 'success') {
         banner.classList.add('bg-green-600');
-        icon.setAttribute('data-lucide', 'check-circle');
+        icon.className = 'bi bi-check-circle w-4 h-4 inline-block mr-2 align-text-bottom text-white';
     } else if (type === 'warning') {
         banner.classList.add('bg-amber-600');
-        icon.setAttribute('data-lucide', 'alert-triangle');
+        icon.className = 'bi bi-exclamation-triangle w-4 h-4 inline-block mr-2 align-text-bottom text-white';
     } else if (type === 'error') {
         banner.classList.add('bg-rose-600');
-        icon.setAttribute('data-lucide', 'alert-circle');
+        icon.className = 'bi bi-exclamation-circle w-4 h-4 inline-block mr-2 align-text-bottom text-white';
     } else {
         banner.classList.add('hidden'); // hidden
     }
     
-    if (typeof lucide !== 'undefined') {
-
-    }
+    
 }
 
 function toggleSidebarCollapse() {
