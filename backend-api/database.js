@@ -2,12 +2,12 @@ const Database = require('better-sqlite3');
 const fs = require('fs');
 const path = require('path');
 
-const dbDir = path.join(__dirname, 'data');
+const dbDir = path.dirname(process.env.DATABASE_PATH || path.join(__dirname, 'data', 'database.sqlite'));
 if (!fs.existsSync(dbDir)) {
-    fs.mkdirSync(dbDir);
+    fs.mkdirSync(dbDir, { recursive: true });
 }
 
-const dbPath = path.join(dbDir, 'database.sqlite');
+const dbPath = process.env.DATABASE_PATH || path.join(dbDir, 'database.sqlite');
 const db = new Database(dbPath, { verbose: console.log });
 
 // Enable WAL mode for better performance

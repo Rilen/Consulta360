@@ -1,7 +1,7 @@
 const axios = require('axios');
 const db = require('./database');
 
-const API_BASE_URL = 'https://webapp1-riodasostras.cidade360.cloud/dadosabertos/';
+const API_BASE_URL = process.env.API_EXTERNA_BASE || 'https://webapp1-riodasostras.cidade360.cloud/dadosabertos';
 const PAGE_SIZE = 200;
 
 function isNomeKey(key) {
@@ -46,7 +46,9 @@ function parsePlainText(text) {
 
 async function fetchPage(endpoint, page) {
     try {
-        const url = `${API_BASE_URL}${endpoint}?pagina=${page}&tamanho=${PAGE_SIZE}`;
+        // Ensure the base URL ends with a slash if not present, and the endpoint does not start with one
+        const baseUrl = API_BASE_URL.endsWith('/') ? API_BASE_URL : API_BASE_URL + '/';
+        const url = `${baseUrl}${endpoint}?pagina=${page}&tamanho=${PAGE_SIZE}`;
         console.log(`[SYNC] Fetching ${url}`);
         const response = await axios.get(url, {
             headers: { 'Accept': 'text/plain, application/json' }
