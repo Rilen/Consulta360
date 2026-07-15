@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  api:
+    image: node:20-alpine
+    container_name: consulta360-api
+    restart: always
+    ports:
+      - "3006:3006"
+    volumes:
+      - ./:/usr/src/app
+      # Garantir que os dados persistam se o contêiner for recriado
+      - ./data:/usr/src/app/data
+    working_dir: /usr/src/app
+    command: sh -c "npm install && npm start"
+    environment:
+      - NODE_ENV=production
+      - PORT=3006

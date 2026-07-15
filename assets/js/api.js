@@ -119,3 +119,48 @@ function exportarCSV(dados, nomeArquivo) {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 }
+
+// ----------------------------------------------------
+// INTEGRAÇÃO COM BACKEND HÍBRIDO (Node.js/SQLite)
+// ----------------------------------------------------
+
+async function getStatusReplicador() {
+    try {
+        const res = await fetch('./api/status');
+        if (!res.ok) return null;
+        return await res.json();
+    } catch (e) {
+        console.error("Erro ao buscar status do replicador:", e);
+        return null;
+    }
+}
+
+async function getFolhaAgregada(mesAno, limit = 50, offset = 0, query = '') {
+    try {
+        let url = `./api/folha?limit=${limit}&offset=${offset}`;
+        if (mesAno) url += `&mes_ano=${mesAno}`;
+        if (query) url += `&q=${encodeURIComponent(query)}`;
+        
+        const res = await fetch(url);
+        if (!res.ok) return [];
+        const json = await res.json();
+        return json.success ? json.data : [];
+    } catch (e) {
+        console.error("Erro ao buscar folha agregada do replicador:", e);
+        return [];
+    }
+}
+
+async function getStatsReplicador(mesAno) {
+    try {
+        let url = `./api/stats`;
+        if (mesAno) url += `?mes_ano=${mesAno}`;
+        const res = await fetch(url);
+        if (!res.ok) return null;
+        const json = await res.json();
+        return json.success ? json.data : null;
+    } catch (e) {
+        console.error("Erro ao buscar stats do replicador:", e);
+        return null;
+    }
+}

@@ -1,0 +1,11 @@
+# Exemplo de configuração a ser adicionada no Nginx que atende a porta 3005 (Frontend)
+# Mapeia /consulta360/api/ para o backend rodando no container (porta 3006)
+
+location /consulta360/api/ {
+    proxy_pass http://10.0.0.88:3006/api/;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection 'upgrade';
+    proxy_set_header Host $host;
+    proxy_cache_bypass $http_upgrade;
+}
