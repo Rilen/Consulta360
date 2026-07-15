@@ -57,6 +57,20 @@
         <span id="status-banner-text"></span>
       </div>
 
+      <!-- Barra Discreta de Sincronização Anual -->
+      <div class="w-full bg-blue-50/50 dark:bg-slate-800/50 border-b border-blue-100 dark:border-slate-700 py-2 px-6 flex justify-end items-center gap-3">
+        <span class="text-xs text-slate-500 dark:text-slate-400 font-medium">Ano de Exercício:</span>
+        <select id="sync-ano-select" class="text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded px-2 py-1 outline-none focus:ring-1 focus:ring-blue-500">
+          <option value="2026">2026</option>
+          <option value="2025">2025</option>
+          <option value="2024">2024</option>
+          <option value="2023">2023</option>
+        </select>
+        <button id="btn-sync-ano" class="text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded px-3 py-1.5 transition-colors shadow-sm flex items-center gap-2">
+          <i class="bi bi-arrow-repeat"></i> Sincronizar Ano Inteiro
+        </button>
+      </div>
+
       <!-- Corpo Dinâmico (Router injeta aqui) -->
       <div id="app-body" class="mt-8 p-6 max-w-[1600px] mx-auto space-y-6 flex-grow-1 w-full">
         <!-- Conteúdo será carregado dinamicamente via router.js -->

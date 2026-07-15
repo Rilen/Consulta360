@@ -164,3 +164,89 @@ async function getStatsReplicador(mesAno) {
         return null;
     }
 }
+
+// ----------------------------------------------------
+// Sincronização de Ano Inteiro (UI + Polling)
+// ----------------------------------------------------
+document.addEventListener('DOMContentLoaded', () => {
+    const btnSync = document.getElementById('btn-sync-ano');
+    const selectAno = document.getElementById('sync-ano-select');
+    let pollingInterval = null;
+
+    if (btnSync && selectAno) {
+        btnSync.addEventListener('click', async () => {
+            const ano = selectAno.value;
+            btnSync.disabled = true;
+            btnSync.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Iniciando...`;
+            
+            try {
+                // 1. Dispara o sync no backend
+                await fetch('./api/sync-ano', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ano })
+                });
+
+                // 2. Inicia o Polling
+                pollingInterval = setInterval(async () => {
+                    const statusData = await getStatusReplicador();
+                    if (statusData && statusData.success && statusData.data) {
+                        const s = statusData.data;
+                        if (s.status.startsWith('Sincronizando')) {
+                            btnSync.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> ${s.status}`;
+                        } else if (s.status === 'idle') {
+                            // Backend terminou o sync!
+                            clearInterval(pollingInterval);
+                            btnSync.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Salvando no IndexedDB...`;
+                            
+                            // 3. Baixar os 12 meses pro IndexedDB
+                            await baixarAnoParaIndexedDB(ano);
+                            
+                            btnSync.innerHTML = `<i class="bi bi-check-circle"></i> Ano ${ano} Sincronizado!`;
+                            setTimeout(() => {
+                                btnSync.disabled = false;
+                                btnSync.innerHTML = `<i class="bi bi-arrow-repeat"></i> Sincronizar Ano Inteiro`;
+                            }, 5000);
+                        }
+                    }
+                }, 3000);
+
+            } catch (e) {
+                console.error("Erro ao iniciar sync anual", e);
+                btnSync.disabled = false;
+                btnSync.innerHTML = `<i class="bi bi-x-circle"></i> Falha. Tentar novamente`;
+            }
+        });
+    }
+});
+
+async function baixarAnoParaIndexedDB(ano) {
+    if (typeof setCache !== 'function') {
+        console.warn('setCache não está disponível. O db.js não foi carregado corretamente.');
+        return;
+    }
+
+    for (let i = 1; i <= 12; i++) {
+        const mesStr = i.toString().padStart(2, '0');
+        const mesAno = `${ano}-${mesStr}`;
+        const cacheKey = `FolhaPagamento_PM RIO DAS OSTRAS_${mesAno}`;
+        const metaKey = `meta_folha_PM RIO DAS OSTRAS_${mesAno}`;
+        
+        try {
+            // Busca dados completos para o mês, passando limite alto (ex: 100000) caso não tenha paginação no IndexedDB
+            const res = await fetch(`./api/folha?mes_ano=${mesAno}&limit=100000`);
+            if (res.ok) {
+                const json = await res.json();
+                if (json.success && json.data && json.data.length > 0) {
+                    await setCache(cacheKey, JSON.stringify(json.data));
+                    if (typeof setMetadata === 'function') {
+                        await setMetadata(metaKey, { records: json.data.length, auto: true });
+                    }
+                    console.log(`[IndexedDB] Mês ${mesAno} salvo localmente.`);
+                }
+            }
+        } catch (e) {
+            console.error(`Erro ao salvar mês ${mesAno} no IndexedDB`, e);
+        }
+    }
+}

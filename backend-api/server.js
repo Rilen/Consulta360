@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const db = require('./database');
-const { syncFolha } = require('./sync');
+const { syncFolha, syncAno } = require('./sync');
 
 const app = express();
 const PORT = process.env.PORT || 3006;
@@ -92,6 +92,16 @@ app.post('/api/sync', (req, res) => {
     // Roda em background
     syncFolha(mes_ano).catch(console.error);
     res.json({ success: true, message: `Sync iniciado em background para ${mes_ano}` });
+});
+
+// Sincronização por Ano Inteiro
+app.post('/api/sync-ano', (req, res) => {
+    const { ano, entidade } = req.body;
+    if (!ano) return res.status(400).json({ error: 'ano é obrigatório (ex: 2026)' });
+
+    // Roda em background a varredura completa
+    syncAno(ano, entidade).catch(console.error);
+    res.json({ success: true, message: `Sincronização anual iniciada em background para o ano ${ano}` });
 });
 
 app.listen(PORT, '0.0.0.0', () => {

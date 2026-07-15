@@ -65,7 +65,7 @@ async function fetchPage(endpoint, page) {
     }
 }
 
-async function syncFolha(mesAno, endpoint = 'folha_pagamento') {
+async function syncFolha(mesAno, endpoint = 'folha_pagamento', updateStatus = true) {
     let page = 1;
     let keepGoing = true;
     let recordsSynced = 0;
@@ -80,7 +80,9 @@ async function syncFolha(mesAno, endpoint = 'folha_pagamento') {
             dados_brutos = excluded.dados_brutos
     `);
 
-    db.prepare(`UPDATE sync_status SET status = 'syncing' WHERE id = 1`).run();
+    if (updateStatus) {
+        db.prepare(`UPDATE sync_status SET status = 'Sincronizando ${mesAno}' WHERE id = 1`).run();
+    }
 
     while (keepGoing) {
         const data = await fetchPage(endpoint, page);
@@ -126,25 +128,57 @@ async function syncFolha(mesAno, endpoint = 'folha_pagamento') {
         }
     }
 
-    db.prepare(`
-        UPDATE sync_status 
-        SET last_sync = datetime('now'), status = 'idle', records_synced = records_synced + ? 
-        WHERE id = 1
-    `).run(recordsSynced);
+    if (updateStatus) {
+        db.prepare(`
+            UPDATE sync_status 
+            SET last_sync = datetime('now'), status = 'idle', records_synced = records_synced + ? 
+            WHERE id = 1
+        `).run(recordsSynced);
+    } else {
+        // Apenas incrementa o records_synced se estivermos controlando o status externamente
+        db.prepare(`
+            UPDATE sync_status 
+            SET records_synced = records_synced + ? 
+            WHERE id = 1
+        `).run(recordsSynced);
+    }
 
     console.log(`[SYNC] Sincronização de ${mesAno} concluída com ${recordsSynced} registros.`);
 }
 
-// Permitir chamada via linha de comando: node sync.js 2026-06
+async function syncAno(ano, entidade) {
+    console.log(`[SYNC] Iniciando sincronização do ano ${ano} para a entidade ${entidade || 'N/A'}...`);
+    // Pode haver suporte a entidade nas rotas da API externa, mas por ora iteramos os meses
+    for (let i = 1; i <= 12; i++) {
+        const mesStr = i.toString().padStart(2, '0');
+        const mesAno = `${ano}-${mesStr}`;
+        
+        db.prepare(`UPDATE sync_status SET status = 'Sincronizando ${ano}... Mês ${mesStr}/12' WHERE id = 1`).run();
+        
+        // Passa updateStatus = false para não jogar pra idle
+        await syncFolha(mesAno, 'folha_pagamento', false);
+    }
+
+    db.prepare(`
+        UPDATE sync_status 
+        SET last_sync = datetime('now'), status = 'idle'
+        WHERE id = 1
+    `).run();
+
+    console.log(`[SYNC] Sincronização do ano ${ano} finalizada!`);
+}
+
+// Permitir chamada via linha de comando: node sync.js 2026-06 ou node sync.js ano 2026
 if (require.main === module) {
     const args = process.argv.slice(2);
-    const mesAno = args[0];
-    if (mesAno) {
-        syncFolha(mesAno).then(() => process.exit(0));
+    if (args[0] === 'ano' && args[1]) {
+        syncAno(args[1]).then(() => process.exit(0));
+    } else if (args[0]) {
+        syncFolha(args[0]).then(() => process.exit(0));
     } else {
-        console.log("Forneça o mês/ano no formato YYYY-MM. Ex: node sync.js 2026-06");
+        console.log("Forneça o mês/ano no formato YYYY-MM. Ex: node sync.js 2026-06 ou node sync.js ano 2026");
         process.exit(1);
     }
 }
 
-module.exports = { syncFolha };
+module.exports = { syncFolha, syncAno };
