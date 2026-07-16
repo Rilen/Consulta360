@@ -181,16 +181,34 @@ document.addEventListener('DOMContentLoaded', () => {
             
             try {
                 // 1. Dispara o sync no backend
-                await fetch('./api/sync-ano', {
+                const syncRes = await fetch('./api/sync-ano', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ ano })
                 });
 
+                if (!syncRes.ok) {
+                    throw new Error(`Erro ao iniciar sincronização (HTTP ${syncRes.status})`);
+                }
+
                 // 2. Inicia o Polling
+                let retryCount = 0;
                 pollingInterval = setInterval(async () => {
                     const statusData = await getStatusReplicador();
-                    if (statusData && statusData.success && statusData.data) {
+                    
+                    // Se falhar várias vezes consecutivas, cancela o polling para não travar
+                    if (!statusData) {
+                        retryCount++;
+                        if (retryCount >= 5) {
+                            clearInterval(pollingInterval);
+                            btnSync.disabled = false;
+                            btnSync.innerHTML = `<i class="bi bi-x-circle"></i> Erro de Conexão com a API`;
+                        }
+                        return;
+                    }
+                    retryCount = 0; // Reseta se sucesso
+
+                    if (statusData.success && statusData.data) {
                         const s = statusData.data;
                         if (s.status.startsWith('Sincronizando')) {
                             btnSync.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> ${s.status}`;
@@ -215,6 +233,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error("Erro ao iniciar sync anual", e);
                 btnSync.disabled = false;
                 btnSync.innerHTML = `<i class="bi bi-x-circle"></i> Falha. Tentar novamente`;
+                if (pollingInterval) clearInterval(pollingInterval);
             }
         });
     }
