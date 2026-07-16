@@ -1,11 +1,26 @@
-# Exemplo de configuração a ser adicionada no Nginx que atende a porta 3005 (Frontend)
-# Mapeia /consulta360/api/ para o backend rodando no container (porta 3006)
+# Exemplo de configuração de Proxy Reverso para o Nginx (Docker)
 
+# CENÁRIO 1: Containers na mesma rede Docker (Recomendado / Alta Performance)
+# Use o nome do container da API se o Nginx e a API estiverem na mesma Docker Network.
+# Substitua "consulta360-api" pelo nome exato do seu container backend.
 location /consulta360/api/ {
-    proxy_pass http://10.0.0.88:3006/api/;
+    proxy_pass http://consulta360-api:3006/api/;
     proxy_http_version 1.1;
     proxy_set_header Upgrade $http_upgrade;
     proxy_set_header Connection 'upgrade';
     proxy_set_header Host $host;
     proxy_cache_bypass $http_upgrade;
 }
+
+# --------------------------------------------------------------------------------
+
+# CENÁRIO 2: Containers isolados ou Nginx precisando acessar o Host Físico
+# Caso os containers não estejam na mesma rede e você precise usar a porta exposta do Host.
+# Em ambientes Linux com Docker 20.10+, "host.docker.internal" resolve para o IP do Host.
+# Em versões antigas, pode ser necessário usar o IP padrão da ponte Docker (geralmente 172.17.0.1).
+# 
+# location /consulta360/api/ {
+#     proxy_pass http://host.docker.internal:3006/api/;
+#     proxy_http_version 1.1;
+#     ...
+# }

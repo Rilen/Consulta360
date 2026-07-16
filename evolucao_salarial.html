@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Evolução Salarial - Consulta360</title>
+  
+  <link rel="icon" type="image/x-icon" href="./favicon.ico">
+  <script src="./assets/js/theme.js"></script>
+
+  <!-- Fonte -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <link rel="stylesheet" href="./assets/css/global.css">
+</head>
+
+<body class="text-slate-800 dark:text-white antialiased selection:bg-[#00bcd4]/30 selection:text-[#004b80] bg-slate-50 dark:bg-[#0B0F19]">
+
+  <div class="app-container" id="app-root">
+    <!-- Sidebar Dinâmica -->
+    <div id="sidebar-container"></div>
+
+    <!-- Conteúdo Principal -->
+    <main class="main-content d-flex flex-column min-vh-100 w-100">
+      
+      <!-- Status Banner -->
+      <div id="status-banner" class="hidden text-slate-800 dark:text-white text-xs font-bold uppercase tracking-widest text-center py-2 shadow-inner">
+        <i id="status-banner-icon" class="bi bi-info-circle w-4 h-4 inline-block mr-2 align-text-bottom"></i>
+        <span id="status-banner-text"></span>
+      </div>
+
+      <!-- Barra de Sincronização NPA (Estilo ag-card super discreto) -->
+      <div class="w-full ag-card border-b border-[#004b80]/10 dark:border-slate-700 py-2 px-6 flex justify-end items-center gap-3 bg-white/50 dark:bg-slate-800/50 backdrop-blur-md">
+        <span class="text-xs text-[#004b80] dark:text-slate-300 font-bold uppercase tracking-wider">Ano de Exercício:</span>
+        <select id="sync-ano-select" class="text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded px-2 py-1 outline-none focus:ring-1 focus:ring-[#00bcd4] text-slate-700 dark:text-slate-200">
+          <option value="2026">2026</option>
+          <option value="2025">2025</option>
+          <option value="2024">2024</option>
+          <option value="2023">2023</option>
+          <option value="2022">2022</option>
+          <option value="2021">2021</option>
+          <option value="2020">2020</option>
+        </select>
+        <button id="btn-sync-ano" class="text-xs font-bold bg-[#00bcd4] hover:bg-[#00a3b8] text-white rounded-xl px-4 py-1.5 transition-all shadow-sm active:scale-95 flex items-center gap-2">
+          <i class="bi bi-arrow-repeat"></i> Sincronizar Ano Inteiro
+        </button>
+      </div>
+
+      <!-- Corpo da Página -->
+      <div id="app-body" class="mt-6 p-6 max-w-[1600px] mx-auto space-y-6 flex-grow-1 w-full">
+        
+        <!-- Header da Página -->
+        <div class="flex items-center justify-between mb-8">
+            <div>
+                <h1 class="text-3xl font-bold text-[#004b80] dark:text-white flex items-center gap-3">
+                    <i class="bi bi-graph-up-arrow text-[#00bcd4]"></i>
+                    Inteligência Macroeconômica
+                </h1>
+                <p class="text-slate-500 mt-1">Evolução salarial, poder de compra e análise de impacto inflacionário.</p>
+            </div>
+            
+            <div id="statusCache" class="hidden items-center gap-2 px-3 py-1.5 bg-amber-100 text-amber-800 rounded-full text-xs font-bold uppercase tracking-wider border border-amber-200 shadow-sm">
+                <!-- Preenchido via JS -->
+            </div>
+        </div>
+
+        <!-- KPIs Rápidos -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="ag-card p-6 rounded-2xl border-l-4 border-l-[#00bcd4] relative overflow-hidden group">
+                <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <i class="bi bi-percent text-6xl text-[#004b80]"></i>
+                </div>
+                <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Média de Defasagem</h3>
+                <div id="metric-defasagem" class="text-4xl font-black text-[#004b80] dark:text-white relative z-10">--</div>
+                <p class="text-xs text-slate-400 mt-2">Perda inflacionária média do período</p>
+            </div>
+
+            <div class="ag-card p-6 rounded-2xl border-l-4 border-l-rose-500 relative overflow-hidden group">
+                <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <i class="bi bi-cash-stack text-6xl text-rose-500"></i>
+                </div>
+                <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Custo do Déficit Estimado</h3>
+                <div id="metric-custo" class="text-4xl font-black text-rose-600 dark:text-rose-400 relative z-10">--</div>
+                <p class="text-xs text-slate-400 mt-2">Projeção anual de impacto na folha</p>
+            </div>
+
+            <div class="ag-card p-6 rounded-2xl border-l-4 border-l-emerald-500 relative overflow-hidden group">
+                <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <i class="bi bi-trophy text-6xl text-emerald-500"></i>
+                </div>
+                <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Teto Municipal Real</h3>
+                <div id="metric-teto" class="text-4xl font-black text-emerald-600 dark:text-emerald-400 relative z-10">--</div>
+                <p class="text-xs text-slate-400 mt-2">Maior remuneração (CPF unificado)</p>
+            </div>
+        </div>
+
+        <!-- Gráficos -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Gráfico 1: Poder de Compra -->
+            <div class="ag-card p-6 rounded-2xl flex flex-col h-[450px]">
+                <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4 flex items-center justify-between">
+                    Poder de Compra vs. Salário Mínimo
+                    <i class="bi bi-info-circle text-slate-400" title="Área Ciano = Ganho Real. Área Vermelha = Defasagem."></i>
+                </h3>
+                <div class="flex-grow relative">
+                    <canvas id="chartPoderCompra"></canvas>
+                </div>
+            </div>
+
+            <!-- Gráfico 2: Evolução por Cargos -->
+            <div class="ag-card p-6 rounded-2xl flex flex-col h-[450px]">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider">Evolução por Cargos</h3>
+                    <!-- Permitir selecionar até 3 cargos -->
+                    <div class="flex items-center gap-2">
+                        <select id="cargo-1" class="text-xs border rounded p-1 bg-white dark:bg-slate-800 dark:border-slate-600 outline-none text-slate-700 dark:text-slate-200">
+                            <option value="Professor">Professor</option>
+                            <option value="Administrativo">Administrativo</option>
+                            <option value="Médico">Médico</option>
+                        </select>
+                        <select id="cargo-2" class="text-xs border rounded p-1 bg-white dark:bg-slate-800 dark:border-slate-600 outline-none text-slate-700 dark:text-slate-200">
+                            <option value="Médico">Médico</option>
+                            <option value="Professor">Professor</option>
+                            <option value="Enfermeiro">Enfermeiro</option>
+                        </select>
+                        <select id="cargo-3" class="text-xs border rounded p-1 bg-white dark:bg-slate-800 dark:border-slate-600 outline-none text-slate-700 dark:text-slate-200">
+                            <option value="Guarda Municipal">Guarda Mun.</option>
+                            <option value="Fiscal de Tributos">Fiscal</option>
+                            <option value="Gari">Gari</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex-grow relative">
+                    <canvas id="chartCargos"></canvas>
+                </div>
+            </div>
+        </div>
+
+      </div>
+
+      <!-- Footer Dinâmico -->
+      <footer id="app-footer" class="mt-auto mb-6 max-w-[1600px] mx-auto px-6 w-full"></footer>
+      
+    </main>
+  </div>
+
+  <!-- Componentes (Framework Layer) -->
+  <script src="./components/header/menu.js?v=15"></script>
+  <script src="./components/footer/versao.js?v=15"></script>
+  <script src="./components/footer/npa.js?v=15"></script>
+
+  <!-- Lógica Base -->
+  <script src="./assets/js/db.js"></script>
+  <script src="./assets/js/api.js"></script>
+  
+  <!-- Removemos o router.js daqui pois esta é uma página standalone -->
+  <script src="./assets/js/layout.js?v=15"></script>
+
+  <!-- Lógica Específica Desta Tela -->
+  <script src="./assets/js/evolucao.js?v=16"></script>
+
+</body>
+</html>
