@@ -11,7 +11,7 @@ app.use(cors());
 app.use(express.json());
 
 // Rota de unificação e listagem com filtros
-app.get('/api/folha', (req, res) => {
+app.get(['/api/folha', '/consulta360/api/folha'], (req, res) => {
     const { mes_ano, q, limit = 50, offset = 0 } = req.query;
     let query = `
         SELECT 
@@ -49,7 +49,7 @@ app.get('/api/folha', (req, res) => {
 });
 
 // Métricas agregadas globais
-app.get('/api/stats', (req, res) => {
+app.get(['/api/stats', '/consulta360/api/stats'], (req, res) => {
     const { mes_ano } = req.query;
     let query = `
         SELECT 
@@ -75,7 +75,7 @@ app.get('/api/stats', (req, res) => {
 });
 
 // Status de Sincronização
-app.get('/api/status', (req, res) => {
+app.get(['/api/status', '/consulta360/api/status'], (req, res) => {
     try {
         const status = db.prepare(`SELECT * FROM sync_status WHERE id = 1`).get();
         res.json({ success: true, data: status });
@@ -85,7 +85,7 @@ app.get('/api/status', (req, res) => {
 });
 
 // Rota de gatilho manual para Sync (apenas para admins ou testes)
-app.post('/api/sync', (req, res) => {
+app.post(['/api/sync', '/consulta360/api/sync'], (req, res) => {
     const { mes_ano } = req.body;
     if (!mes_ano) return res.status(400).json({ error: 'mes_ano é obrigatório (ex: 2026-06)' });
 
@@ -95,7 +95,7 @@ app.post('/api/sync', (req, res) => {
 });
 
 // Sincronização por Ano Inteiro
-app.post('/api/sync-ano', (req, res) => {
+app.post(['/api/sync-ano', '/consulta360/api/sync-ano'], (req, res) => {
     const { ano, entidade } = req.body;
     if (!ano) return res.status(400).json({ error: 'ano é obrigatório (ex: 2026)' });
 
